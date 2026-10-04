@@ -40,6 +40,12 @@ class WorkflowTests(unittest.TestCase):
     def test_current_topology(self):
         self.check()
 
+    def test_sanitizer_runner_must_be_linux(self):
+        with self.assertRaises(ValueError):
+            self.check(cross=self.cross.replace(
+                "  linux-sanitizers:\n    runs-on: ubuntu-24.04",
+                "  linux-sanitizers:\n    runs-on: windows-latest"))
+
     def test_equivalent_formatting(self):
         for trigger in (
             '"on": {"push": {"branches": ["main"]}} # comment\n',

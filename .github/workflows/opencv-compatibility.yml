@@ -57,3 +57,4 @@ jobs:
         run: |
           sh scripts/test.sh
           grep -F 'Native_Version := "${{ matrix.opencv }}";' config/opencv_features_install.gpr
+          alr -n exec -- sh scripts/run_sanitizers.sh

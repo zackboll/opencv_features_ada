@@ -11,6 +11,8 @@ constexpr int border = 32; // max(edgeThreshold=31, patch radius, Harris radius)
 
 constexpr bool parameters_fit(std::int32_t maximum_features, std::int32_t tuple,
                               std::int32_t score, std::int32_t threshold) noexcept {
+    // All three reviewed tags reserve nfeaturesPerLevel[0]*2 even for FAST;
+    // Harris also retains 2*featuresNum. See docs/orb-source-review.md.
     return maximum_features > 0 && maximum_features <= native_int_max / 2 &&
            tuple >= 2 && tuple <= 4 && (score == 0 || score == 1) &&
            threshold >= 0 && threshold <= 255;
@@ -21,6 +23,8 @@ constexpr bool parameters_fit(std::int32_t maximum_features, std::int32_t tuple,
 // than the source. Stacking all padded levels vertically bounds the packed
 // buffer height; aligned width bounds its stride. This covers signed native
 // packed-plane offsets and the default fixed-radius row-offset products.
+// It also bounds the sum of eight level pixel counts (FAST candidates),
+// including response ties: the requested feature target is NOT a count bound.
 // int64 arithmetic remains safe for all int32 inputs, including malformed
 // raw ABI inputs. Division avoids multiplying the two large bounds.
 constexpr bool image_layout_fits(std::int32_t rows, std::int32_t columns) noexcept {

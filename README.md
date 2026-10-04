@@ -6,8 +6,8 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 `OpenCV.Features.ORB`.
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
-Initial ORB implementation, 20 registered AUnit cases, build scripts, and CI
-workflows are included. The build/CI tranche now builds and passes all twenty
+Initial ORB implementation, 24 registered AUnit cases, build scripts, and CI
+workflows are included. The qualification tranche now builds and passes all 24
 native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
 still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
@@ -139,9 +139,12 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 20 cases covering extraction, masks, descriptors, ownership,
+contains 24 cases covering extraction, masks, descriptors, ownership,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
-for the native suite; the script propagates failures.
+for the native suite; the script propagates failures. Linux also runs the
+real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
+instruments the actual Features shim for CPU-only ASan/UBSan qualification.
+See `docs/orb-source-review.md` for pinned upstream source-derived bounds.
 
 Cross-platform CI is configured for Linux and macOS on PRs and main.
 Windows/MSYS2 runs only on main pushes in a separate post-merge workflow,

@@ -6,6 +6,116 @@
 Historical ZIP checks below are distinct from actual build/test evidence.
 No native result is implied by the existence of a test or workflow.
 
+## Task 002 — ORB native qualification
+
+Starting fetched `origin/main`: `1feceff04f8323f8d9ec5f01f8875529d4265c45`
+(PR #1 merge), clean worktree. The previously checked-out branch was
+`feature/001-build-and-ci`, HEAD `28412deccaaf09fd80495d000963b41cd2fe51cd`.
+New branch `feature/002-orb-native-qualification` starts at the actual main.
+Core pin and package version are unchanged; no API expansion or matching work.
+
+### Gate 0: corrected-code post-merge Windows
+
+[Run 37172139283](https://github.com/zackboll/opencv_features_ada/actions/runs/37172139283)
+completed **success** at the starting merge SHA (job 111347089731).
+Native OpenCV **5.0.0 / features**, MSYS2 package `mingw-w64-x86_64-opencv 5.0.0-5`.
+Selected driver was MSYS2's `mingw64/bin/g++.exe` under Alire's MSYS2 cache,
+package `mingw-w64-x86_64-gcc 16.2.0-4`, not GNAT's C++ driver.
+Historical suite: **20 registered, 20 executed, 20 successful, 0 failed
+assertions, 0 unexpected errors**. Features DLL and `.dll.a` existence checks
+passed, all three configured native Features/Core/Core-shim import-library
+existence checks passed, and PE imports show `libopencv_features-500.dll`
+and `libopencv_core_shim.dll`. Thus actual Core shim import linkage was verified.
+No rerun/correction was needed; Windows remains exclusively main-push-only.
+This is a PR #1 baseline, not Windows execution of Task 002's new tests.
+
+### Source-derived guarantees versus binding validation
+
+Reviewed official 4.1.0/4.10.0/5.0.0 paths and peeled commits are recorded in
+`orb-source-review.md` and `source-provenance.json`, including content hashes.
+Acceptance bounds remain conservative and unchanged. The review covers both
+doubling expressions, the Harris first-level-target-times-eight reserve,
+image-derived candidate/count bounds despite response ties, and local/global
+pyramid offsets. Existing nonbinary-mask documentation is **confirmed**:
+4.1/4.10 all-1 permits level zero only; 5.0 normalizes inside the called override.
+The expanded mask case checks these version-aware properties and mixed stripes.
+
+Four new AUnit registrations bring the inventory to **24**. Raw tests use real
+Core callback handles for wrong schema/geometry and successful extraction/export.
+Compiler-derived C sizeof/alignment/all offsets are compared with the actual
+Ada C_Keypoint attributes; C writes a record which Ada checks field-by-field.
+The compiled result agrees: size 28, alignment 4, offsets 0/4/8/12/16/20/24.
+No public C types, copied bridge, or fabricated wrapper is introduced.
+
+Linux's additional C++ boundary driver calls Core's authoritative C factories,
+including a real external view to test invalid output rejection. Native result
+lifetime after detector destruction and descriptor lifetime after result destruction
+are exercised. Dedicated test-only macro builds inject invalid_argument,
+cv::Exception, bad_alloc, std::exception and unknown exceptions; publication-stage
+checks verify initialized outputs and cleanup. Production symbol inspection rejects
+fault controls. This is **exception fault injection, not real allocator exhaustion**;
+upstream allocator exhaustion and exhaustive allocation points remain unqualified.
+No deterministic safe ordinary input native-exception trigger was found after preflight.
+
+### Local empirical results
+
+Linux x86_64; native OpenCV **4.10.0 / features2d**; Alire 2.1.1;
+GNAT/GCC selected by Alire **16.1.0**, GPRbuild 26.0.1; host Debian g++ 14.2.0.
+
+| Check | Observed result |
+| --- | --- |
+| repository checker | PASS: 10 ABI declarations/imports, 24 registrations, source ownership/topology |
+| configuration/static Python suite | PASS: 20 executed/successful, 0 failures/errors |
+| C11 header and C++17 profile helper | PASS: two executables; complete offsets, exact feature rejection boundary, compiled maximum-target float distribution |
+| shell syntax / diff whitespace | PASS |
+| `alr -n build`; `alr -n -C tests build` | PASS |
+| explicit native AUnit run; `alr test` | PASS each: 24 registered / 24 executed / 24 successful / 0 failed assertions / 0 unexpected errors |
+| ordinary raw C++ boundary / dedicated fault variant | PASS both, real Core factory/resolver path |
+| example build/run | PASS: 393 points / 393 descriptor rows, HAMMING |
+| `alr -n exec -- sh scripts/run_sanitizers.sh` | PASS production-source and dedicated fault variants; ASan incl. leak detection and UBSan; CPU-only |
+
+ASan/UBSan command uses `-g -O1 -fsanitize=address,undefined
+-fno-omit-frame-pointer -std=c++17 -Wall -Wextra -Wpedantic -Werror` on actual
+`cpp/opencv_features_shim.cpp` plus `tests/cpp/native_boundary.cpp`, linked to
+the resolved Core shim and pkg-config's OpenCV. Run with
+`ASAN_OPTIONS=detect_leaks=1:halt_on_error=1` and
+`UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1`. Neither OpenCV nor the
+entire Core/dependency graph is rebuilt with these flags; no such claim is made.
+
+### Preserved host-runtime finding and minimization
+
+Initial default-OpenCL instrumented production-source run exited 1 with
+LeakSanitizer **9724 bytes / 173 allocations** in AMD HSA/COMGR/LLVM/OpenCL
+initialization. A direct upstream-only reproducer, `tests/cpp/upstream_orb_probe.cpp`,
+compiled inside the same Alire GCC 16.1 environment with the flags above and
+`$(pkg-config --cflags --libs opencv4)`, reproduces exactly the same summary
+without Features or Core bindings. Its textured fixture is required: a blank
+result does not reach the same native runtime initialization. The equivalent
+upstream CPU-only run (`probe cpu`) exits 0; Features CPU-only runs also exit 0.
+Host g++14's initial blank probe did not reproduce; it is not contrary binding evidence.
+Stacks identify `libhsa-runtime64.so.1`, `libamdocl64.so`, `libamd_comgr.so.2`,
+`libLLVM-17.so.1`; the issue is classified as an optional host ICD/runtime finding,
+not a demonstrated binding leak.
+Original full diagnostics were preserved during
+the task; a durable minimized stack/command record is in
+`host-opencl-sanitizer-finding.md`. The sanitizer driver explicitly disables OpenCL **in test main only**,
+with leak detection still enabled. No suppression or production global change.
+GPU/default-ICD cleanliness remains outside this CPU-only qualification.
+
+### Remote qualification gate
+
+Remote conclusions are not implied by the local results above. The Task 002
+PR validation record reports the exact reviewed/pushed SHA, once-dispatched manual
+matrix run ID, per-target registered/executed/successful counts, and PR job results.
+See the [Task 002 branch's Actions runs](https://github.com/zackboll/opencv_features_ada/actions?query=branch%3Afeature%2F002-orb-native-qualification)
+for the immutable logs; this source record deliberately does not predict CI success.
+Manual workflow remains manual-only, now executing
+native AUnit/mask/layout/raw boundary and actual-shim sanitizers for each target.
+Installed/clean-consumer relocation/linkage remains Task 001 work; real allocator
+exhaustion and full dependency/GPU sanitizer coverage are explicit limitations.
+No formal proof, timing bound, navigation/matching accuracy, complete OpenCV safety
+or release readiness is claimed.
+
 ## Task 001 build/CI tranche
 
 Starting repository: `zackboll/opencv_features_ada`, clean `main` and fetched
@@ -108,7 +218,7 @@ but native compile errors, warning-as-error failures, runtime integration
 issues, and platform-specific link problems can still remain. Run Task 001
 before adding matching features or treating this as a tested release.
 
-## Source-review limits
+## Historical bootstrap source-review limits (superseded by Task 002 above)
 
 Selected live files from Core, Imgproc, and Geometry informed the design;
 `source-provenance.json` records their paths and blob IDs. This is not an
@@ -129,7 +239,8 @@ without weakening warnings, execute the twenty AUnit cases and synthetic
 example, add the missing native regression coverage, and verify clean
 consumer/CI behavior. Stop at the review gate; do not automatically publish.
 
-Task 001 is **not complete**. Remaining qualification includes oldest-target
+At the end of Task 001's build/CI tranche, Task 001 was **not complete**.
+The then-remaining qualification included oldest-target
 4.1 source review and cross-version ORB/arithmetic review; real-handle raw C ABI
 negative/fault-injection and C/Ada layout probes; production/native ASan/UBSan;
 nonbinary-mask regression; pinned OpenCV 4.1/4.10/5.0 native matrix; Windows

@@ -14,6 +14,7 @@
 # error "Review Features compatibility before using another OpenCV major version"
 #endif
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <limits>
 #include <memory>
@@ -28,6 +29,14 @@ static_assert(sizeof(int) == 4, "OpenCV native integer contract requires 32-bit 
 static_assert(std::is_standard_layout<opencv_features_keypoint>::value,
               "C keypoint must have a standard layout");
 static_assert(sizeof(opencv_features_keypoint) == 28, "Unexpected C keypoint ABI");
+static_assert(alignof(opencv_features_keypoint) == 4, "Unexpected keypoint alignment");
+static_assert(offsetof(opencv_features_keypoint, x) == 0 &&
+              offsetof(opencv_features_keypoint, y) == 4 &&
+              offsetof(opencv_features_keypoint, size) == 8 &&
+              offsetof(opencv_features_keypoint, angle) == 12 &&
+              offsetof(opencv_features_keypoint, response) == 16 &&
+              offsetof(opencv_features_keypoint, octave) == 20 &&
+              offsetof(opencv_features_keypoint, class_id) == 24, "Unexpected keypoint offsets");
 
 struct opencv_features_orb_handle { cv::Ptr<cv::ORB> detector; };
 struct opencv_features_result_handle {
@@ -37,6 +46,25 @@ struct opencv_features_result_handle {
 
 namespace {
 thread_local char error_text[1024] = "";
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+// Dedicated test builds only. No control symbol exists in the production shim.
+thread_local int failure_stage = 0, failure_kind = 0;
+void checkpoint(int stage) {
+    if (stage != failure_stage) return;
+    const int kind = failure_kind;
+    failure_stage = failure_kind = 0; // one-shot, including after exceptions
+    switch (kind) {
+    case 1: throw std::invalid_argument("injected invalid argument");
+    case 2: throw cv::Exception(cv::Error::StsError, "injected native exception",
+                              "checkpoint", __FILE__, __LINE__);
+    case 3: throw std::bad_alloc();
+    case 4: throw std::runtime_error("injected standard exception");
+    default: throw 0; // exercise the unknown-exception barrier, no memory corruption
+    }
+}
+#else
+void checkpoint(int) noexcept {}
+#endif
 void require(bool condition, const char *message) {
     if (!condition) throw std::invalid_argument(message);
 }
@@ -83,9 +111,11 @@ void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *i
         mask = selection.clone();
     }
     const cv::Mat image = source.clone(); // isolated ROI, no retained input header
+    checkpoint(2);
     auto result = std::make_unique<opencv_features_result_handle>();
     std::vector<cv::KeyPoint> keypoints;
     handle->detector->detectAndCompute(image, mask, keypoints, result->descriptors, false);
+    checkpoint(3);
     require(keypoints.size() <= std::size_t(std::numeric_limits<int32_t>::max()),
             "native keypoint count is not representable");
     if (keypoints.empty()) {
@@ -98,6 +128,7 @@ void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *i
                 "native ORB descriptor/keypoint pairing is inconsistent");
     }
     result->points.reserve(keypoints.size());
+    checkpoint(4);
     for (const cv::KeyPoint &point : keypoints) {
         require(finite_keypoint(point, image), "invalid native ORB keypoint");
         result->points.push_back({point.pt.x, point.pt.y, point.size, point.angle,
@@ -109,6 +140,12 @@ void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *i
 } // namespace
 
 extern "C" {
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+void opencv_features_test_fail(int stage, int kind) {
+    failure_stage = stage;
+    failure_kind = kind;
+}
+#endif
 const char *opencv_features_last_error(void) { return error_text; }
 const char *opencv_features_native_version(void) { return CV_VERSION; }
 const char *opencv_features_native_backend(void) {
@@ -126,6 +163,7 @@ opencv_features_status opencv_features_orb_create(
         require(out_handle != nullptr, "null detector output");
         require(opencv_features_detail::parameters_fit(maximum_features, tuple, score, fast_threshold),
                 "ORB configuration is outside the supported profile");
+        checkpoint(1);
         auto result = std::make_unique<opencv_features_orb_handle>();
         result->detector = cv::ORB::create(maximum_features, 1.2f, 8, 31, 0, tuple,
                             score == 0 ? cv::ORB::HARRIS_SCORE : cv::ORB::FAST_SCORE, 31,
@@ -162,6 +200,7 @@ opencv_features_status opencv_features_result_point(
     return guarded([&] {
         require(handle != nullptr && out_point != nullptr, "null keypoint argument");
         require(index >= 0 && std::size_t(index) < handle->points.size(), "keypoint index out of range");
+        checkpoint(5);
         *out_point = handle->points[std::size_t(index)];
     });
 }
@@ -172,6 +211,7 @@ opencv_features_status opencv_features_result_descriptors(
         cv::Mat *output = nullptr;
         require(opencv_core_module_output_mat(destination, &output) == OPENCV_CORE_OK && output != nullptr,
                 "Core rejected descriptor output (external views are not rebindable)");
+        checkpoint(6);
         *output = handle->descriptors; // retain storage in the actual Core-owned header
     });
 }

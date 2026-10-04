@@ -163,9 +163,9 @@ def check_topology(cross_text, windows_text, compatibility_text):
         else:
             jobs[current].append((level, line.strip()))
     expected = {"repository-checks": "ubuntu-24.04", "linux": "ubuntu-24.04",
-                "macos": "macos-14"}
+                "macos": "macos-14", "linux-sanitizers": "ubuntu-24.04"}
     if set(jobs) != set(expected):
-        raise ValueError("PR workflow must contain only repository-checks, linux, macos")
+        raise ValueError("PR workflow must contain repository-checks, linux, macos, linux-sanitizers only")
     for name, body in jobs.items():
         level = min(indent for indent, _ in body)
         runners = []
