@@ -376,7 +376,7 @@
       "tag": "4.1.0",
       "commit": "371bba8f54560b374fbcd47e7e02f015ac4969ad",
       "module": "features2d",
-      "scope": "CPU Mat single-train BFMatcher match(k=1), Hamming/Hamming2 and cross-check; not exhaustive vendor HAL/GPU review",
+      "scope": "CPU Mat single-train BFMatcher match(k=1)/cross-check and fixed knnMatch(k=2,crossCheck=false), Hamming/Hamming2, BatchDistInvoker insertion/distinct/order and packed train indices; Task 004 re-retrieval hashes verified; not exhaustive vendor HAL/GPU review",
       "files": [
         {
           "path": "modules/core/include/opencv2/core/types.hpp",
@@ -420,7 +420,7 @@
       "tag": "4.10.0",
       "commit": "71d3237a093b60a27601c20e9ee6c3e52154e8b1",
       "module": "features2d",
-      "scope": "CPU Mat single-train BFMatcher match(k=1), Hamming/Hamming2 and cross-check; not exhaustive vendor HAL/GPU review",
+      "scope": "CPU Mat single-train BFMatcher match(k=1)/cross-check and fixed knnMatch(k=2,crossCheck=false), Hamming/Hamming2, BatchDistInvoker insertion/distinct/order and packed train indices; Task 004 re-retrieval hashes verified; not exhaustive vendor HAL/GPU review",
       "files": [
         {
           "path": "modules/core/include/opencv2/core/types.hpp",
@@ -464,7 +464,7 @@
       "tag": "5.0.0",
       "commit": "40738fb16ceddb5fb3fea747585f7ce6abb0605b",
       "module": "features",
-      "scope": "CPU Mat single-train BFMatcher match(k=1), Hamming/Hamming2 and cross-check; not exhaustive vendor HAL/GPU review",
+      "scope": "CPU Mat single-train BFMatcher match(k=1)/cross-check and fixed knnMatch(k=2,crossCheck=false), Hamming/Hamming2, BatchDistInvoker insertion/distinct/order and packed train indices; Task 004 re-retrieval hashes verified; not exhaustive vendor HAL/GPU review",
       "files": [
         {
           "path": "modules/core/include/opencv2/core/types.hpp",

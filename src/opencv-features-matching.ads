@@ -19,11 +19,50 @@ package OpenCV.Features.Matching is
    --  cross-check, with unique query/train indices; it is NOT a ratio test.
    --  Compatible empty inputs return (1 .. 0). Train.Count > 262143 raises
    --  OpenCV_Error (native BFMatcher packs train indices into 18 bits).
-   --  No masks, KNN, ratio filtering, confidence score or geometric verification.
+   --  No masks, confidence score or geometric verification.
    --  Inputs are borrowed, not copied or modified. Concurrent mutation through
    --  implementation interfaces is not supported. Large results allocate an
    --  array function result; normal Ada allocation exceptions remain possible.
    function Brute_Force_Match
      (Query : Feature_Set; Train : Feature_Set;
       Mode : Matching_Mode := Nearest) return Descriptor_Match_Array;
+
+   type Binary_Neighbor is record
+      Train_Index : Positive;
+      Distance    : Binary_Descriptor_Distance;
+   end record;
+   type Two_Nearest_Match is record
+      Query_Index    : Positive;
+      Nearest        : Binary_Neighbor;
+      Second_Nearest : Binary_Neighbor;
+   end record;
+   type Two_Nearest_Match_Array is
+     array (Positive range <>) of Two_Nearest_Match;
+
+   --  Exactly K=2, without cross-check. Norm compatibility is checked before
+   --  empties. Compatible empties return (1 .. 0); a nonempty query with one
+   --  train row raises OpenCV_Error. Train.Count <= 262143; no corresponding
+   --  18-bit Query limit. Otherwise Length = Query.Count, in ascending query
+   --  order. One-based train indices are distinct, nearest distance <= second,
+   --  exact Hamming 0..256 / Hamming2 0..128. Ties have no fixed train ordering.
+   --  Owned Ada values survive all inputs and native staging. Inputs unchanged.
+   function Brute_Force_KNN_2
+     (Query : Feature_Set; Train : Feature_Set)
+      return Two_Nearest_Match_Array;
+
+   --  Pure Ada mechanics, no default application policy. OpenCV_Error unless
+   --  0 < Maximum_Ratio < 1 (also rejects NaN/nonfinite). Strict acceptance:
+   --  nearest < Maximum_Ratio * second, using floating integer conversion.
+   --  Thus 0/0 duplicate descriptors reject. Ratio is not confidence/probability.
+   function Passes_Ratio_Test
+     (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value)
+      return Boolean;
+
+   --  Returns nearest matches only, preserving candidate order. Validates the
+   --  threshold even for empty input; empty/all-rejected returns (1 .. 0).
+   --  No native calls or geometric verification. Normal Ada allocation errors
+   --  remain possible for array function results, as for Brute_Force_Match.
+   function Filter_By_Ratio
+     (Candidates : Two_Nearest_Match_Array;
+      Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array;
 end OpenCV.Features.Matching;

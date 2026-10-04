@@ -18,6 +18,7 @@ typedef struct opencv_core_mat_handle opencv_core_mat_handle;
 typedef struct opencv_features_orb_handle opencv_features_orb_handle;
 typedef struct opencv_features_result_handle opencv_features_result_handle;
 typedef struct opencv_features_match_result_handle opencv_features_match_result_handle;
+typedef struct opencv_features_knn2_result_handle opencv_features_knn2_result_handle;
 typedef int32_t opencv_features_status;
 enum {
     OPENCV_FEATURES_OK = 0,
@@ -34,6 +35,11 @@ typedef struct opencv_features_keypoint {
 typedef struct opencv_features_descriptor_match {
     int32_t query_index, train_index, distance;
 } opencv_features_descriptor_match;
+
+typedef struct opencv_features_knn2_match {
+    int32_t query_index, nearest_train_index, nearest_distance;
+    int32_t second_train_index, second_distance;
+} opencv_features_knn2_match;
 
 /* Private semantic selectors, not OpenCV numeric norm constants. */
 enum { OPENCV_FEATURES_HAMMING = 0, OPENCV_FEATURES_HAMMING2 = 1 };
@@ -80,6 +86,19 @@ OPENCV_FEATURES_API opencv_features_status opencv_features_match_result_get(
     opencv_features_descriptor_match *out_match);
 OPENCV_FEATURES_API void opencv_features_match_result_destroy(
     opencv_features_match_result_handle *handle);
+
+/* Same binary schema/train bound. Fixed K=2, no cross-check or masks.
+ * Nonempty query requires >=2 train rows unless train is empty. Valid empties
+ * publish an owned empty result. Otherwise one ordered pair per query row,
+ * distinct train indices, nondecreasing exact integer distances. */
+OPENCV_FEATURES_API opencv_features_status opencv_features_bf_knn2(
+    const opencv_core_mat_handle *query, const opencv_core_mat_handle *train,
+    int32_t norm, opencv_features_knn2_result_handle **out_result, int32_t *out_count);
+OPENCV_FEATURES_API opencv_features_status opencv_features_knn2_result_get(
+    const opencv_features_knn2_result_handle *handle, int32_t index,
+    opencv_features_knn2_match *out_match);
+OPENCV_FEATURES_API void opencv_features_knn2_result_destroy(
+    opencv_features_knn2_result_handle *handle);
 
 #ifdef __cplusplus
 }

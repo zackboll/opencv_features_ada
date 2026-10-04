@@ -6,6 +6,124 @@
 Historical ZIP checks below are distinct from actual build/test evidence.
 No native result is implied by the existence of a test or workflow.
 
+## Task 004 — fixed two-nearest binary matching and pure-Ada ratio filtering
+
+Starting fetched `origin/main`: **`966df5acd603f3e6ffddde3f13ff78dd54e9e97b`**
+(PR #3 merge), clean worktree. Previously checked out
+`feature/003-binary-bfmatcher`, HEAD `d95797dfe8417e1d971bd02ced066f09c9a421e1`.
+Created `feature/004-knn2-ratio-filter` from fetched main; no intervening work.
+Core pin `7956981a7881ce9121115f8cb65909aeb9edc439` and version `0.1.0-dev`
+unchanged. No amend, force push, merge, tag, release or Windows PR job.
+
+### Gate 0 — PR #3 Windows post-merge
+
+[Run 37176893574](https://github.com/zackboll/opencv_features_ada/actions/runs/37176893574),
+job **111361276654**, completed **success**, 2026-10-04 04:28:35 UTC, on starting
+main SHA above. First Windows execution including binary matcher and 33-case
+suite: **33 registered / 33 executed / 33 passed**, **0 failed assertions / 0
+unexpected errors**. OpenCV **5.0.0 / features**, MSYS2 OpenCV package **5.0.0-5**;
+external MSYS2 MinGW64 `mingw64/bin/g++.exe`, GCC package **16.2.0-4**, not GNAT's
+C++ compiler. Features `.dll` / `.dll.a` existence and static archive absence
+checks PASS; configured Features, Core and Core-shim import libraries present.
+PE imports explicitly **libopencv_features-500.dll** and **libopencv_core_shim.dll**.
+Exact job log retrieved; no baseline correction or rerun required. This is
+Task 003 execution, not Windows coverage of Task 004. Windows stays post-merge only.
+
+### Contract/source/ABI evidence
+
+`Brute_Force_KNN_2` fixes K=2 and automatically uses matching Required_Norm
+semantics: Hamming 0..256 or Hamming2 0..128. Norm mismatch precedes empties.
+Compatible empties return 1..0 without native matching; nonempty query + one-row
+train raises OpenCV_Error in Ada and C. Train<=262143, no corresponding 18-bit
+Query cap. Otherwise result length=Query.Count; ascending one-based query indices,
+distinct one-based train indices, exact integer nearest<=second distances, ties
+permitted with unspecified tied train order. Owned values outlive inputs/detectors/
+matcher/staging. Inputs unchanged. Separate from Mutual_Nearest K=1 cross-check.
+
+Pure Ada `Passes_Ratio_Test` / `Filter_By_Ratio`: explicit threshold, no default;
+OpenCV_Error unless 0<r<1. Negated positive validity rejects NaN/infinities.
+Strict nearest < r*second, including equality and 0/0 rejection. Filter returns
+nearest Descriptor_Match values only, preserving candidate order. Ratio is not
+confidence/probability or geometric verification; .80 in the example is policy,
+not a recommended navigation constant. Numeric invalid thresholds are tested;
+no nonportable NaN representation manufactured.
+
+Official sources re-retrieved/hash-verified at **371bba8f54560b374fbcd47e7e02f015ac4969ad**
+(4.1), **71d3237a093b60a27601c20e9ee6c3e52154e8b1** (4.10), and
+**40738fb16ceddb5fb3fea747585f7ce6abb0605b** (5.0). KNN overload forwarding,
+CPU Mat path, K=min(K,Train.rows), distinct sorted insertion, CV_32S binary
+distances, DMatch construction, empty handling, packed train fields and
+crossCheck K==1 are derived in `bfmatcher-source-review.md`.
+
+C compiler sizeof/_Alignof/offsetof and Ada Size/Alignment/Position plus C-written
+field-by-field interchange PASS: **20 bytes / alignment 4 / offsets 0,4,8,12,16**.
+These are observations, not handwritten layout proof.
+
+### Local qualification
+
+Linux x86_64, OpenCV **4.10.0 / features2d**, GNU g++ **14.2.0** (Debian
+14.2.0-19), Alire **2.1.1**, GNAT **16.1.0**, GPRbuild crate **26.0.1** (banner
+GPRBUILD 26.0.0). Warnings remain errors. Qualified Task 004 implementation
+before its normal commit; immutable final commit/remote/CI SHA evidence is
+recorded in the Task 004 PR qualification body after remote jobs complete.
+
+| Validation | Executed result/count |
+| --- | --- |
+| Repository checker | PASS: **16 ABI exports/imports**, **44 registrations**, manifests/pin/ownership/CI topology |
+| Python discovery | **20 executed / 20 passed**, 0 failures/errors |
+| C/C++ profile/header helpers | **2 executables executed / 2 passed**, not native algorithm coverage |
+| Shell syntax | **6 scripts checked / 6 passed** |
+| Root production build | PASS |
+| Tests build / direct native suite | PASS; **44 registered / 44 executed / 44 passed**, 0 failed assertions, 0 unexpected errors |
+| `alr test` | PASS; separate execution of the same **44** cases, not 88 distinct registrations |
+| Ordinary raw production actual-shim | **1 executed / 1 passed** |
+| Ordinary raw fault-injection actual-shim | **1 executed / 1 passed** |
+| ASan production actual-shim | **1 executed / 1 passed**, leak detection on, no diagnostics |
+| ASan fault-injection actual-shim | **1 executed / 1 passed**, leak detection on, no diagnostics |
+| UBSan | Both variants PASS, halt-on-error enabled, no diagnostics/suppressions |
+| Examples build / orb_synthetic / orb_match_synthetic | PASS / PASS / PASS |
+| `git diff --check` | PASS |
+
+New **11** AUnit registrations separately cover pure ratio mechanics, WTA2/3/4
+KNN2/preservation, mismatch including empties, compatible empties, lifetime,
+translated-scene ratio filtering, KNN2 layout. No hard-coded scene acceptance count.
+Observed example only: Query=406, Train=418, nearest=406, mutual=218, KNN2=406,
+ratio=.80, accepted=121, nearest distances=0..99, accepted distances=0..74.
+These synthetic counts are not portable API guarantees or localization evidence.
+
+Both raw variants and both sanitizer variants execute exact Hamming/Hamming2
+0/1 pair (third row=2), nonzero 1/2 pair, 0x03 Hamming=2/Hamming2=1, equal-distance
+ties with distinct valid indices, all schema/null/selector negatives, one-row
+rejection, compatible owned empties, cleared get outputs, null destroy, ROI and
+input-independent lifetime. Train=262143 has unique best row 262142 and second
+row 262141, both packed indices preserved; Train=262144 rejects. Query=262144,
+Train=2 executes for both norms even in both sanitizer variants (runtime remained
+reasonable). Fault stages 11/12/13/14 cover invalid_argument, cv::Exception,
+bad_alloc, std::exception and unknown exception, atomic null/zero publication,
+empty publication cleanup and getter clearing. Production has no control symbol.
+Driver alone disables OpenCL; production leaves process-wide policy unchanged.
+Core/upstream native libraries are not all sanitizer-instrumented. Injection is
+not evidence of real allocator exhaustion.
+
+Validation corrections: first tests compile exposed missing operator visibility
+clauses, fixed normally. Initial `alr test` and example build were incorrectly
+run concurrently against shared ignored Features object storage; dependency file
+corruption and missing object during archive creation reproduced the scheduling
+conflict, not an algorithm defect. Serial reruns both PASS, without suppressions
+or source/build-policy weakening. Diagnostics were retained during qualification.
+
+### Remote qualification and remaining scope
+
+The final-head PR record supplies actual repository-checks/Linux/macOS/Linux-
+sanitizers conclusions, registered/executed/passed counts and the single stable
+final-head manual 4.1/features2d, 4.10/features2d, 5.0/features matrix run. Matrix
+retains WITH_ADE=OFF. This committed local record does **not** label remote jobs
+passed before execution. Windows Task 004 is deliberately deferred until merge.
+Installed/clean-consumer relocation/linkage Task 001 work remains outstanding.
+No arbitrary K, masks, radius, FLANN, float/SIFT/SURF, persistent matchers, drawing,
+GPU/UMat public API, generators, geometric verification, homography, PnP, DTED,
+optical flow or estimator policy added. No release readiness/formal proof claimed.
+
 ## Task 003 — binary one-best descriptor matching
 
 Starting fetched `origin/main`: **`086e655b4a5d0d02960a3c9eda2452eba0ef6854`**

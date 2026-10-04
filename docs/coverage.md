@@ -2,7 +2,7 @@
 
 This is a handwritten capability inventory, not a generated header census.
 "Implemented draft" means source is present, not fully qualified. The initial
-33-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
+44-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
 `bootstrap-validation.md` for exact evidence and remaining platform/version,
 source-review, sanitizer and ABI robustness gates.
 
@@ -16,7 +16,9 @@ source-review, sanitizer and ABI robustness gates.
 | Separate detect/compute and supplied keypoints | none | Deferred |
 | Arbitrary pyramid/patch parameters and setter APIs | none | Deferred |
 | Binary one-best BF match | `Matching.Brute_Force_Match` | Hamming/Hamming2, nearest/mutual-nearest |
-| KNN, ratio, radius, match masks | none | Deferred; KNN + ratio is next |
+| Binary KNN, fixed K=2 | `Matching.Brute_Force_KNN_2` | Hamming/Hamming2, separate from cross-check |
+| Strict ratio filtering | `Passes_Ratio_Test`, `Filter_By_Ratio` | Pure Ada, explicit threshold, nearest values only |
+| Arbitrary K, radius, match masks | none | Deferred |
 | Other detectors, descriptors and FLANN | none | Deferred |
 | UMat/OpenCL/CUDA wrappers | none | Deferred |
 | Geometry, PnP, DTED, estimator logic | none | Outside Features |
@@ -58,3 +60,21 @@ input-independent result lifetime; and exception/publication cleanup. Both
 variants also execute under ASan+UBSan, without suppressions. These are not
 additional AUnit cases or instrumentation of all upstream libraries.
 See `bfmatcher-source-review.md` and the validation record for exact evidence.
+
+Task 004 adds **11 registrations**, total **44**: three pure-Ada ratio cases
+(strict boundary oracles, invalid thresholds even on empty input, filtering
+fields/order/empty/all-accepted/all-rejected), WTA2/3/4 KNN2 invariants and input
+preservation, norm mismatch including empty sets, compatible empties, owned-value
+lifetime, related-scene ratio acceptance, compiler-derived KNN2 layout/interchange.
+Pure-policy cases do not call native code. Numeric invalid ranges are tested;
+NaN is rejected by explicit positive validity, but no fabricated floating bit
+representation is used in the tests.
+
+Both Linux raw variants add exact KNN2 Hamming/Hamming2 0/1 and nonzero 1/2
+pairs, distinguishing 0x03 cell, ties without exact tied ordering, schema/null/
+selector negatives, one-row rejection, empties, cleared access, ROI/lifetime,
+262143-row train with both best indices near its high end, and 262144-row Query
+against two train rows for both norms. All run in ordinary and ASan+UBSan variants,
+including the large-query case (no runtime-driven omission needed). Fault hooks
+11/12/13/14 exercise all five exception categories, cleanup and atomic publication.
+No production fault-control symbol, suppression, fake handle or double destroy.

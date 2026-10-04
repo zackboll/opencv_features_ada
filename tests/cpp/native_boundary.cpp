@@ -201,6 +201,191 @@ void matching() {
     std::cout << "PASS: matcher Hamming 0/1/2/256; Hamming2 0/1/128; cross-check A/X retained B/X rejected; "
                  "raw negatives, empty, ROI, large query, lifetime/publication\n";
 }
+using KNN2 = std::unique_ptr<opencv_features_knn2_result_handle,
+                             decltype(&opencv_features_knn2_result_destroy)>;
+bool cleared(const opencv_features_knn2_match &item) {
+    return item.query_index == 0 && item.nearest_train_index == 0 && item.nearest_distance == 0 &&
+           item.second_train_index == 0 && item.second_distance == 0;
+}
+void knn2() {
+    auto query = matrix(1,32), train = matrix(3,32);
+    fill(query.get(),false);
+    cv::Mat *t = nullptr;
+    check(opencv_core_module_output_mat(train.get(),&t) == 0, "KNN2 descriptor writer");
+    for (int norm : {0,1}) {
+        fill(train.get(),false);
+        // Separate bits for Hamming, separate 2-bit cells for Hamming2.
+        t->at<unsigned char>(1,0) = 1;
+        t->at<unsigned char>(2,0) = norm == 0 ? 3 : 5;
+        opencv_features_knn2_result_handle *raw = nullptr;
+        int32_t count = -1;
+        check(opencv_features_bf_knn2(query.get(),train.get(),norm,&raw,&count) == 0 &&
+              raw != nullptr && count == 1, "KNN2 exact pair count");
+        KNN2 result(raw,opencv_features_knn2_result_destroy);
+        opencv_features_knn2_match item{};
+        check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.query_index == 0 &&
+              item.nearest_train_index == 0 && item.nearest_distance == 0 &&
+              item.second_train_index == 1 && item.second_distance == 1, "KNN2 exact 0/1 oracle");
+        for (int index : {-1,count}) {
+            item = {7,8,9,10,11};
+            check(opencv_features_knn2_result_get(raw,index,&item) == 1 && cleared(item),
+                  "KNN2 invalid-index clearing");
+        }
+        check(opencv_features_knn2_result_get(raw,0,nullptr) == 1, "KNN2 null output");
+        item = {7,8,9,10,11};
+        check(opencv_features_knn2_result_get(nullptr,0,&item) == 1 && cleared(item),
+              "KNN2 null result clearing");
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+        for (int kind = 1; kind <= 5; ++kind) {
+            const int expected[] = {0,1,2,3,4,4};
+            item = {7,8,9,10,11};
+            opencv_features_test_fail(14,kind);
+            check(opencv_features_knn2_result_get(raw,0,&item) == expected[kind] && cleared(item),
+                  "KNN2 get exception clearing");
+        }
+#endif
+        result.reset();
+        // No exact copy: best=1, second=2. Third row is deliberately farther.
+        t->row(0).setTo(255);
+        raw = nullptr;
+        check(opencv_features_bf_knn2(query.get(),train.get(),norm,&raw,&count) == 0 && count == 1,
+              "KNN2 nonzero pair");
+        KNN2 nonzero(raw,opencv_features_knn2_result_destroy);
+        check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.nearest_train_index == 1 &&
+              item.nearest_distance == 1 && item.second_train_index == 2 && item.second_distance == 2,
+              "KNN2 exact nonzero 1/2 oracle");
+        // Equal best distances: do not freeze tied train ordering.
+        t->at<unsigned char>(2,0) = norm == 0 ? 2 : 4;
+        raw = nullptr;
+        check(opencv_features_bf_knn2(query.get(),train.get(),norm,&raw,&count) == 0 && count == 1,
+              "KNN2 tie pair");
+        KNN2 tie(raw,opencv_features_knn2_result_destroy);
+        check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.nearest_distance == 1 &&
+              item.second_distance == 1 && item.nearest_train_index != item.second_train_index &&
+              item.nearest_train_index >= 1 && item.nearest_train_index <= 2 &&
+              item.second_train_index >= 1 && item.second_train_index <= 2, "KNN2 tie oracle");
+    }
+    // Explicit 0x03 norm distinction on KNN2, with unique ranks.
+    fill(train.get(),false,255);
+    t->row(0).setTo(0); t->row(1).setTo(0); t->at<unsigned char>(1,0) = 3;
+    for (int norm : {0,1}) {
+        opencv_features_knn2_result_handle *raw = nullptr;
+        int32_t count = 0;
+        check(opencv_features_bf_knn2(query.get(),train.get(),norm,&raw,&count) == 0 && count == 1,
+              "KNN2 cell pair");
+        KNN2 result(raw,opencv_features_knn2_result_destroy);
+        opencv_features_knn2_match item{};
+        check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.nearest_distance == 0 &&
+              item.second_distance == (norm == 0 ? 2 : 1), "KNN2 Hamming/Hamming2 cell oracle");
+    }
+    opencv_features_knn2_result_handle *sentinel = nullptr;
+    int32_t count = 0;
+    check(opencv_features_bf_knn2(query.get(),train.get(),0,&sentinel,&count) == 0, "KNN2 sentinel");
+    KNN2 live(sentinel,opencv_features_knn2_result_destroy);
+    auto raw = sentinel;
+    auto fail = [&](int status) {
+        check(status == 1 && raw == nullptr && count == 0, "KNN2 failure atomicity");
+        raw = sentinel; count = -1;
+    };
+    count = -1;
+    check(opencv_features_bf_knn2(query.get(),train.get(),0,nullptr,&count) == 1 && count == 0,
+          "KNN2 null result output");
+    check(opencv_features_bf_knn2(query.get(),train.get(),0,&raw,nullptr) == 1 && raw == nullptr,
+          "KNN2 null count output");
+    raw = sentinel; count = -1;
+    fail(opencv_features_bf_knn2(nullptr,train.get(),0,&raw,&count));
+    fail(opencv_features_bf_knn2(query.get(),nullptr,0,&raw,&count));
+    for (int norm : {-1,2,INT32_MAX})
+        fail(opencv_features_bf_knn2(query.get(),train.get(),norm,&raw,&count));
+    auto wrong = matrix(2,32,OPENCV_CORE_DEPTH_FLOAT32), multi = matrix(2,32,0,2);
+    auto short_row = matrix(2,31), long_row = matrix(2,33), one = matrix(1,32);
+    const int32_t sizes[] = {2,2,32};
+    opencv_core_mat_handle *nd = nullptr;
+    check(opencv_core_mat_create_nd(3,sizes,0,1,&nd) == 0, "KNN2 real N-D factory");
+    Mat dimensional(nd,opencv_core_mat_destroy);
+    for (auto *bad : {wrong.get(),multi.get(),short_row.get(),long_row.get(),dimensional.get()}) {
+        fail(opencv_features_bf_knn2(bad,train.get(),0,&raw,&count));
+        fail(opencv_features_bf_knn2(query.get(),bad,0,&raw,&count));
+    }
+    for (int norm : {0,1})
+        fail(opencv_features_bf_knn2(query.get(),one.get(),norm,&raw,&count));
+    auto too_many = matrix(262144,32), boundary = matrix(262143,32);
+    fail(opencv_features_bf_knn2(query.get(),too_many.get(),0,&raw,&count));
+    fill(boundary.get(),false,255);
+    cv::Mat *b = nullptr;
+    check(opencv_core_module_output_mat(boundary.get(),&b) == 0, "KNN2 train-bound writer");
+    b->row(262142).setTo(0); b->row(262141).setTo(0); b->at<unsigned char>(262141,0) = 1;
+    for (int norm : {0,1}) {
+        raw = nullptr;
+        check(opencv_features_bf_knn2(query.get(),boundary.get(),norm,&raw,&count) == 0 && count == 1,
+              "KNN2 262143 train rows accepted");
+        KNN2 result(raw,opencv_features_knn2_result_destroy);
+        opencv_features_knn2_match item{};
+        check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.nearest_train_index == 262142 &&
+              item.second_train_index == 262141 && item.nearest_distance == 0 && item.second_distance == 1,
+              "KNN2 both high packed train indices preserved");
+        fail(opencv_features_bf_knn2(query.get(),too_many.get(),norm,&raw,&count));
+    }
+    fill(too_many.get(),false);
+    auto two = matrix(2,32); fill(two.get(),false);
+    for (int norm : {0,1}) {
+        raw = nullptr;
+        check(opencv_features_bf_knn2(too_many.get(),two.get(),norm,&raw,&count) == 0 && count == 262144,
+              "KNN2 no 18-bit query limit");
+        KNN2 result(raw,opencv_features_knn2_result_destroy);
+        for (int index : {0,262143}) {
+            opencv_features_knn2_match item{};
+            check(opencv_features_knn2_result_get(raw,index,&item) == 0 && item.query_index == index &&
+                  item.nearest_distance == 0 && item.second_distance == 0 &&
+                  item.nearest_train_index != item.second_train_index &&
+                  item.nearest_train_index >= 0 && item.nearest_train_index < 2 &&
+                  item.second_train_index >= 0 && item.second_train_index < 2, "KNN2 large query indices");
+        }
+    }
+    opencv_core_mat_handle *empty_handle = nullptr;
+    check(opencv_core_mat_create(&empty_handle) == 0, "KNN2 empty Core factory");
+    Mat empty(empty_handle,opencv_core_mat_destroy);
+    for (int norm : {0,1}) for (int combination = 0; combination < 3; ++combination) {
+        raw = nullptr;
+        check(opencv_features_bf_knn2(combination == 1 ? query.get() : empty.get(),
+              combination == 0 ? one.get() : empty.get(),norm,&raw,&count) == 0 && raw && count == 0,
+              "KNN2 owned empty result, including empty query + one train row");
+        KNN2 result(raw,opencv_features_knn2_result_destroy);
+        opencv_features_knn2_match item{7,8,9,10,11};
+        check(opencv_features_knn2_result_get(raw,0,&item) == 1 && cleared(item), "KNN2 empty access");
+    }
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+    for (int stage : {11,12,13}) for (int kind = 1; kind <= 5; ++kind) {
+        const int expected[] = {0,1,2,3,4,4};
+        raw = sentinel; count = -1;
+        opencv_features_test_fail(stage,kind);
+        check(opencv_features_bf_knn2(query.get(),train.get(),0,&raw,&count) == expected[kind] &&
+              raw == nullptr && count == 0, "KNN2 exception/publication atomicity");
+    }
+    raw = sentinel; count = -1;
+    opencv_features_test_fail(13,3);
+    check(opencv_features_bf_knn2(empty.get(),train.get(),0,&raw,&count) == 3 && raw == nullptr && count == 0,
+          "KNN2 empty publication cleanup");
+#endif
+    // Noncontiguous Nx32 snapshot and lifetime independent of both descriptor Mats.
+    auto roi = matrix(3,40); fill(roi.get(),false,255);
+    cv::Mat *r = nullptr;
+    check(opencv_core_module_output_mat(roi.get(),&r) == 0, "KNN2 ROI writer");
+    *r = (*r)(cv::Rect(0,0,32,3));
+    r->row(2).setTo(0); r->row(1).setTo(0); r->at<unsigned char>(1,0) = 1;
+    raw = nullptr;
+    check(opencv_features_bf_knn2(query.get(),roi.get(),0,&raw,&count) == 0 && count == 1,
+          "KNN2 noncontiguous ROI");
+    KNN2 result(raw,opencv_features_knn2_result_destroy);
+    query.reset(); roi.reset(); train.reset();
+    opencv_features_knn2_match item{};
+    check(opencv_features_knn2_result_get(raw,0,&item) == 0 && item.nearest_train_index == 2 &&
+          item.nearest_distance == 0 && item.second_train_index == 1 && item.second_distance == 1,
+          "KNN2 lifetime/ROI oracle");
+    opencv_features_knn2_result_destroy(nullptr);
+    std::cout << "PASS: KNN2 Hamming/Hamming2 exact 0/1, nonzero 1/2, 0x03 cell, tie; "
+                 "raw negatives/empty/one-row; 262143 train high indices; 262144 query; ROI/lifetime/get/publication\n";
+}
 void run() {
     auto image = matrix(256, 256), mask = matrix(256, 256), blank = matrix(256, 256);
     auto wrong = matrix(256, 256, OPENCV_CORE_DEPTH_FLOAT32), small = matrix(128, 128);
@@ -317,6 +502,7 @@ int main() {
         cv::ocl::setUseOpenCL(false);
         run();
         matching();
+        knn2();
         std::cout << "PASS: actual Features shim / Core bridge / ORB boundary on "
                   << opencv_features_native_version() << '\n';
         return 0;

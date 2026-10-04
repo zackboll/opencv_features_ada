@@ -17,6 +17,23 @@ package OpenCV.Features.Internal.C_API is
       Query_Index, Train_Index, Distance : Interfaces.Integer_32;
    end record with Convention => C;
 
+   type C_KNN2_Match is record
+      Query_Index, Nearest_Train_Index, Nearest_Distance,
+      Second_Train_Index, Second_Distance : Interfaces.Integer_32;
+   end record with Convention => C;
+
+   function BF_KNN2
+     (Query, Train : OpenCV.Core.Module_Interop.Input_Mat_Handle;
+      Norm : Interfaces.Integer_32; Result : access System.Address;
+      Count : access Interfaces.Integer_32) return Status
+     with Import, Convention => C, External_Name => "opencv_features_bf_knn2";
+   function KNN2_Result_Get
+     (Handle : System.Address; Index : Interfaces.Integer_32;
+      Item : access C_KNN2_Match) return Status
+     with Import, Convention => C, External_Name => "opencv_features_knn2_result_get";
+   procedure KNN2_Result_Destroy (Handle : System.Address)
+     with Import, Convention => C, External_Name => "opencv_features_knn2_result_destroy";
+
    Hamming_Selector : constant Interfaces.Integer_32 := 0;
    Hamming_2_Selector : constant Interfaces.Integer_32 := 1;
    Nearest_Selector : constant Interfaces.Integer_32 := 0;

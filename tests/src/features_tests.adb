@@ -22,6 +22,8 @@ package body Features_Tests is
    use type OpenCV.Core.Channel_Count;
    use type OpenCV.UInt8_Value;
    use type OpenCV.Float32_Value;
+   use type OpenCV.Float64_Value;
+   use type ORB.Tuple_Size;
    package ABI renames OpenCV.Features.Internal.C_API;
    package Bridge renames OpenCV.Core.Module_Interop;
    use type Interfaces.Integer_32;
@@ -792,6 +794,248 @@ package body Features_Tests is
          "/" & Interfaces.Integer_32'Image (Layout (4)) & "; C-written interchange PASS");
    end Match_Layout;
 
+   procedure Ratio_Oracles (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Pass (First, Second : Matching.Binary_Descriptor_Distance;
+                     Ratio : OpenCV.Float64_Value) return Boolean is
+        (Matching.Passes_Ratio_Test ((1, (1, First), (2, Second)), Ratio));
+   begin
+      Assert (Pass (1, 2, 0.80), "1/2 at .80 must pass");
+      Assert (not Pass (2, 2, 0.80), "tie must reject");
+      Assert (Pass (0, 1, 0.80), "0/1 must pass");
+      Assert (not Pass (0, 0, 0.80), "duplicate exact pair must reject");
+      Assert (not Pass (1, 2, 0.50), "strict equality must reject");
+      Assert (Pass (1, 2, 0.51), "above strict boundary must pass");
+   end Ratio_Oracles;
+
+   procedure Ratio_Invalid (T : in out Fixture) is
+      pragma Unreferenced (T);
+      type Ratios is array (Positive range <>) of OpenCV.Float64_Value;
+      Invalid : constant Ratios := [0.0, -0.1, 1.0, 1.1];
+      Empty : constant Matching.Two_Nearest_Match_Array (1 .. 0) := [others => <>];
+   begin
+      for Ratio of Invalid loop
+         begin
+            Assert (not Matching.Passes_Ratio_Test ((1, (1, 1), (2, 2)), Ratio),
+                    "invalid predicate ratio accepted");
+            Assert (False, "invalid predicate ratio did not raise");
+         exception
+            when OpenCV.OpenCV_Error => null;
+         end;
+         begin
+            declare
+               Result : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Empty, Ratio);
+               pragma Unreferenced (Result);
+            begin
+               Assert (False, "invalid filter ratio accepted on empty input");
+            end;
+         exception
+            when OpenCV.OpenCV_Error => null;
+         end;
+      end loop;
+   end Ratio_Invalid;
+
+   procedure Ratio_Filter (T : in out Fixture) is
+      pragma Unreferenced (T);
+      use type Matching.Descriptor_Match_Array;
+      Candidates : constant Matching.Two_Nearest_Match_Array :=
+        [7 => (11, (5, 1), (6, 2)), 8 => (13, (7, 2), (8, 2)),
+         9 => (17, (9, 0), (10, 1)), 10 => (19, (11, 0), (12, 0))];
+      Empty : constant Matching.Two_Nearest_Match_Array (1 .. 0) := [others => <>];
+      Accepted : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Candidates, 0.80);
+      No_Input : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Empty, 0.80);
+      Rejected : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Candidates (10 .. 10), 0.80);
+      Passing : constant Matching.Two_Nearest_Match_Array := [Candidates (7), Candidates (9)];
+      All_Pass : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Passing, 0.80);
+   begin
+      Assert (Accepted = [1 => (11, 5, 1), 2 => (17, 9, 0)], "filter fields/order differ");
+      Assert (No_Input'First = 1 and then No_Input'Last = 0, "empty filter bounds");
+      Assert (Rejected'First = 1 and then Rejected'Last = 0, "all-rejected bounds");
+      Assert (All_Pass = Accepted, "all-accepted nearest fields/order differ");
+   end Ratio_Filter;
+
+   procedure Check_KNN2 (Tuple : ORB.Tuple_Size) is
+      Source : constant OpenCV.Core.Mat := Image;
+      Related : constant OpenCV.Core.Mat := Translated_Image (Source);
+      Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+      Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Related);
+      Query_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Query);
+      Train_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Train);
+      Query_Points : constant Keypoint_Array := Keypoints (Query);
+      Train_Points : constant Keypoint_Array := Keypoints (Train);
+      Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (Query, Train);
+      Maximum : constant Matching.Binary_Descriptor_Distance :=
+        (if Tuple = ORB.Two_Samples then 256 else 128);
+   begin
+      Assert (Count (Query) > 0 and then Count (Train) >= 2, "KNN2 fixture undersized");
+      Assert (Pairs'Length = Count (Query), "KNN2 count differs from query");
+      for I in Pairs'Range loop
+         Assert (Pairs (I).Query_Index = I and then Pairs (I).Nearest.Train_Index <= Count (Train)
+                 and then Pairs (I).Second_Nearest.Train_Index <= Count (Train)
+                 and then Pairs (I).Nearest.Train_Index /= Pairs (I).Second_Nearest.Train_Index
+                 and then Pairs (I).Nearest.Distance <= Pairs (I).Second_Nearest.Distance
+                 and then Pairs (I).Second_Nearest.Distance <= Maximum, "KNN2 pair invariant");
+      end loop;
+      Assert_Same (Query_Data, Descriptor_Copy (Query));
+      Assert_Same (Train_Data, Descriptor_Copy (Train));
+      Assert (Query_Points = Keypoints (Query) and then Train_Points = Keypoints (Train),
+              "KNN2 modified keypoints");
+   end Check_KNN2;
+
+   procedure KNN2_WTA2 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_KNN2 (ORB.Two_Samples);
+   end KNN2_WTA2;
+   procedure KNN2_WTA3 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_KNN2 (ORB.Three_Samples);
+   end KNN2_WTA3;
+   procedure KNN2_WTA4 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_KNN2 (ORB.Four_Samples);
+   end KNN2_WTA4;
+
+   procedure KNN2_Norm_Mismatch (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Blank : constant OpenCV.Core.Mat := Image (Textured => False);
+      Detector : constant ORB.Detector := ORB.Create;
+      WTA2 : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Empty_WTA2 : constant Feature_Set := ORB.Detect_And_Compute (Detector, Blank);
+      procedure Reject (A, B : Feature_Set) is
+      begin
+         declare
+            Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (A, B);
+            pragma Unreferenced (Pairs);
+         begin
+            Assert (False, "KNN2 norm mismatch accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end Reject;
+   begin
+      for Tuple in ORB.Three_Samples .. ORB.Four_Samples loop
+         declare
+            Other : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            WTA : constant Feature_Set := ORB.Detect_And_Compute (Other, Source);
+            Empty_WTA : constant Feature_Set := ORB.Detect_And_Compute (Other, Blank);
+         begin
+            Reject (WTA2, WTA); Reject (WTA, WTA2);
+            Reject (Empty_WTA2, WTA); Reject (WTA, Empty_WTA2);
+            Reject (WTA2, Empty_WTA); Reject (Empty_WTA, WTA2);
+            Reject (Empty_WTA2, Empty_WTA); Reject (Empty_WTA, Empty_WTA2);
+         end;
+      end loop;
+   end KNN2_Norm_Mismatch;
+
+   procedure KNN2_Empty (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Blank : constant OpenCV.Core.Mat := Image (Textured => False);
+      Default_Set : Feature_Set;
+      procedure Check (A, B : Feature_Set) is
+         Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (A, B);
+      begin
+         Assert (Pairs'First = 1 and then Pairs'Last = 0, "KNN2 empty bounds differ");
+      end Check;
+   begin
+      Check (Default_Set, Default_Set);
+      for Tuple in ORB.Tuple_Size loop
+         declare
+            Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            Full : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+            Empty_Set : constant Feature_Set := ORB.Detect_And_Compute (Detector, Blank);
+         begin
+            Check (Empty_Set, Full); Check (Full, Empty_Set); Check (Empty_Set, Empty_Set);
+         end;
+      end loop;
+   end KNN2_Empty;
+
+   procedure KNN2_Lifetime (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Local_Pairs return Matching.Two_Nearest_Match_Array is
+         Source : constant OpenCV.Core.Mat := Image;
+         Detector : ORB.Detector := ORB.Create;
+         Features : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      begin
+         ORB.Close (Detector);
+         return Matching.Brute_Force_KNN_2 (Features, Features);
+      end Local_Pairs;
+      Pairs : constant Matching.Two_Nearest_Match_Array := Local_Pairs;
+   begin
+      Assert (Pairs'Length >= 2, "KNN2 lifetime fixture empty");
+      for I in Pairs'Range loop
+         Assert (Pairs (I).Query_Index = I and then Pairs (I).Nearest.Distance = 0
+                 and then Pairs (I).Nearest.Train_Index <= Pairs'Length
+                 and then Pairs (I).Second_Nearest.Train_Index <= Pairs'Length
+                 and then Pairs (I).Nearest.Train_Index /= Pairs (I).Second_Nearest.Train_Index,
+                 "KNN2 lost owned values after finalization");
+      end loop;
+   end KNN2_Lifetime;
+
+   procedure KNN2_Related_Ratio (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Related : constant OpenCV.Core.Mat := Translated_Image (Source);
+      Detector : constant ORB.Detector := ORB.Create;
+      Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Related);
+      Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (Query, Train);
+      Accepted : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Pairs, 0.80);
+      Previous : Natural := 0;
+   begin
+      Assert (Pairs'Length = Count (Query) and then Accepted'Length <= Pairs'Length
+              and then Accepted'Length > 0, "related scene ratio count invariant");
+      for Item of Accepted loop
+         declare
+            Pair : constant Matching.Two_Nearest_Match := Pairs (Item.Query_Index);
+         begin
+            Assert (Item.Query_Index > Previous and then Item.Train_Index = Pair.Nearest.Train_Index
+                    and then Item.Distance = Pair.Nearest.Distance
+                    and then Matching.Passes_Ratio_Test (Pair, 0.80)
+                    and then OpenCV.Float64_Value (Pair.Nearest.Distance) <
+                      0.80 * OpenCV.Float64_Value (Pair.Second_Nearest.Distance),
+                    "accepted item differs from strictly passing nearest");
+            Previous := Item.Query_Index;
+         end;
+      end loop;
+   end KNN2_Related_Ratio;
+
+   procedure KNN2_Layout (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Layout (Field : Interfaces.Integer_32) return Interfaces.Integer_32
+        with Import, Convention => C, External_Name => "features_test_knn2_layout";
+      procedure Fill (Item : access ABI.C_KNN2_Match)
+        with Import, Convention => C, External_Name => "features_test_knn2";
+      Item : aliased ABI.C_KNN2_Match;
+      type Positions is array (Natural range <>) of Natural;
+      Offsets : constant Positions :=
+        [Item.Query_Index'Position, Item.Nearest_Train_Index'Position, Item.Nearest_Distance'Position,
+         Item.Second_Train_Index'Position, Item.Second_Distance'Position];
+   begin
+      Assert (ABI.C_KNN2_Match'Size = Natural (Layout (0)) * System.Storage_Unit, "KNN2 size mismatch");
+      Assert (ABI.C_KNN2_Match'Alignment = Natural (Layout (1)), "KNN2 alignment mismatch");
+      for I in Offsets'Range loop
+         Assert (Offsets (I) = Natural (Layout (Interfaces.Integer_32 (I + 2))), "KNN2 field offset mismatch");
+      end loop;
+      Assert (Item.Query_Index'First_Bit = 0 and then Item.Nearest_Train_Index'First_Bit = 0
+              and then Item.Nearest_Distance'First_Bit = 0 and then Item.Second_Train_Index'First_Bit = 0
+              and then Item.Second_Distance'First_Bit = 0, "KNN2 field byte alignment");
+      Fill (Item'Access);
+      Assert (Item.Query_Index = 17 and then Item.Nearest_Train_Index = 23 and then Item.Nearest_Distance = 128
+              and then Item.Second_Train_Index = 29 and then Item.Second_Distance = 256, "KNN2 C-written interchange");
+      Ada.Text_IO.Put ("KNN2 C/Ada layout: size" & Interfaces.Integer_32'Image (Layout (0)) &
+                       ", alignment" & Interfaces.Integer_32'Image (Layout (1)) & ", offsets");
+      for I in 2 .. 6 loop
+         Ada.Text_IO.Put (Interfaces.Integer_32'Image (Layout (Interfaces.Integer_32 (I))));
+      end loop;
+      Ada.Text_IO.Put_Line ("; C-written interchange PASS");
+   end KNN2_Layout;
+
    package Caller is new AUnit.Test_Caller (Fixture);
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
@@ -870,6 +1114,17 @@ package body Features_Tests is
       Result.Add_Test (Caller.Create ("Matching preserves descriptors and keypoints", Match_Preservation'Access));
       Result.Add_Test (Caller.Create ("Matching values survive input/detector finalization", Match_Lifetime'Access));
       Result.Add_Test (Caller.Create ("Compiler-derived C/Ada match layout and interchange", Match_Layout'Access));
+      Result.Add_Test (Caller.Create ("Pure Ada strict ratio boundary oracles", Ratio_Oracles'Access));
+      Result.Add_Test (Caller.Create ("Pure Ada ratio invalid thresholds including empty filter", Ratio_Invalid'Access));
+      Result.Add_Test (Caller.Create ("Pure Ada ratio filter fields/order/empty/all accepted/rejected", Ratio_Filter'Access));
+      Result.Add_Test (Caller.Create ("KNN2 WTA2 Hamming invariants and preservation", KNN2_WTA2'Access));
+      Result.Add_Test (Caller.Create ("KNN2 WTA3 Hamming2 invariants and preservation", KNN2_WTA3'Access));
+      Result.Add_Test (Caller.Create ("KNN2 WTA4 Hamming2 invariants and preservation", KNN2_WTA4'Access));
+      Result.Add_Test (Caller.Create ("KNN2 norm mismatch before empties", KNN2_Norm_Mismatch'Access));
+      Result.Add_Test (Caller.Create ("KNN2 compatible empty inputs", KNN2_Empty'Access));
+      Result.Add_Test (Caller.Create ("KNN2 owned values survive inputs/detector", KNN2_Lifetime'Access));
+      Result.Add_Test (Caller.Create ("KNN2 translated scene strict ratio filter", KNN2_Related_Ratio'Access));
+      Result.Add_Test (Caller.Create ("Compiler-derived C/Ada KNN2 layout/interchange", KNN2_Layout'Access));
       return Result;
    end Suite;
 end Features_Tests;
