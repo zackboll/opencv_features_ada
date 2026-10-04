@@ -7,7 +7,7 @@ maintainers-logins = ["zackboll"]
 licenses = "Apache-2.0"
 
 project-files = ["opencv_features_examples.gpr"]
-executables = ["orb_synthetic"]
+executables = ["orb_synthetic", "orb_match_synthetic"]
 
 [[depends-on]]
 opencv_features = "*"

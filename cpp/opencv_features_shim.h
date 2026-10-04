@@ -17,6 +17,7 @@ extern "C" {
 typedef struct opencv_core_mat_handle opencv_core_mat_handle;
 typedef struct opencv_features_orb_handle opencv_features_orb_handle;
 typedef struct opencv_features_result_handle opencv_features_result_handle;
+typedef struct opencv_features_match_result_handle opencv_features_match_result_handle;
 typedef int32_t opencv_features_status;
 enum {
     OPENCV_FEATURES_OK = 0,
@@ -29,6 +30,14 @@ typedef struct opencv_features_keypoint {
     float x, y, size, angle, response;
     int32_t octave, class_id;
 } opencv_features_keypoint;
+
+typedef struct opencv_features_descriptor_match {
+    int32_t query_index, train_index, distance;
+} opencv_features_descriptor_match;
+
+/* Private semantic selectors, not OpenCV numeric norm constants. */
+enum { OPENCV_FEATURES_HAMMING = 0, OPENCV_FEATURES_HAMMING2 = 1 };
+enum { OPENCV_FEATURES_NEAREST = 0, OPENCV_FEATURES_MUTUAL_NEAREST = 1 };
 
 /* Error text is thread-local, borrowed, and replaced by the next fallible
  * Features call on that thread. Destructor and metadata calls leave it alone.
@@ -58,6 +67,19 @@ OPENCV_FEATURES_API opencv_features_status opencv_features_result_point(
 OPENCV_FEATURES_API opencv_features_status opencv_features_result_descriptors(
     const opencv_features_result_handle *handle, opencv_core_mat_handle *destination);
 OPENCV_FEATURES_API void opencv_features_result_destroy(opencv_features_result_handle *handle);
+
+/* Borrowed ORB descriptor Mats: nonempty inputs must be 2-D UInt8 C1 Nx32.
+ * Train rows < 2^18. Empty inputs succeed. Outputs initialize to null/zero.
+ * Results own plain values, ascending by zero-based query_index. */
+OPENCV_FEATURES_API opencv_features_status opencv_features_bf_match(
+    const opencv_core_mat_handle *query, const opencv_core_mat_handle *train,
+    int32_t norm, int32_t mode,
+    opencv_features_match_result_handle **out_result, int32_t *out_count);
+OPENCV_FEATURES_API opencv_features_status opencv_features_match_result_get(
+    const opencv_features_match_result_handle *handle, int32_t index,
+    opencv_features_descriptor_match *out_match);
+OPENCV_FEATURES_API void opencv_features_match_result_destroy(
+    opencv_features_match_result_handle *handle);
 
 #ifdef __cplusplus
 }

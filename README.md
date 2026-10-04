@@ -1,13 +1,13 @@
 # OpenCV Features for Ada
 
-Handwritten, thick Ada binding to feature detection and description, using
+Handwritten, thick Ada binding to feature detection, description and binary matching, using
 `OpenCV.Core.Mat` from `opencv_core`. Repository: `opencv_features_ada`;
 Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
-`OpenCV.Features.ORB`.
+`OpenCV.Features.ORB` and `OpenCV.Features.Matching`.
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
-Initial ORB implementation, 24 registered AUnit cases, build scripts, and CI
-workflows are included. The qualification tranche now builds and passes all 24
+ORB and one-best binary BF matching, 33 registered AUnit cases, build scripts, and CI
+workflows are included. The qualification tranche now builds and passes all 33
 native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
 still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
@@ -25,6 +25,7 @@ alr -n build
 alr test
 alr -n -C examples build
 alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic
+alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_match_synthetic
 ```
 
 On Debian/Ubuntu, native prerequisites can be installed with:
@@ -42,7 +43,8 @@ Alire roots. Review/remove the development pin when preparing an Alire
 index release. [Dependency and platform notes](docs/build-and-platforms.md).
 
 The first agent task is [Task 001: validate the bootstrap](docs/tasks/001-validate-bootstrap.md).
-Do not start BF matching until the initial native build/test gate is real.
+Its installed/clean-consumer qualification remains outstanding; the native
+ORB build/test baseline has been established in Task 002.
 
 ## Included API
 
@@ -84,9 +86,47 @@ A `Feature_Set` is limited and private. Keypoints are owned Ada values in a
 private heap-backed vector; descriptors live in a Core-owned Mat. Keypoint
 index 1 maps to descriptor row 0. `Descriptor_Copy` explicitly returns a
 deep copy, so caller edits cannot corrupt the stored correspondence.
-WTA_K 2 records `Hamming`; WTA_K 3/4 record `Hamming_2` for the future matcher.
+WTA_K 2 records `Hamming`; WTA_K 3/4 record `Hamming_2` for matching.
 Blank/masked-out images return an empty result, not an error. A default
 `Feature_Set` is also empty. No arbitrary fixed feature count is assumed.
+
+### Binary one-best matching
+
+```ada
+with OpenCV.Features.Matching;
+
+-- Query and Train are ORB Feature_Sets; no Descriptor_Copy is needed.
+declare
+   Matches : constant OpenCV.Features.Matching.Descriptor_Match_Array :=
+     OpenCV.Features.Matching.Brute_Force_Match
+       (Query, Train, OpenCV.Features.Matching.Mutual_Nearest);
+begin
+   for Item of Matches loop
+      -- Item.Query_Index / Train_Index are one-based keypoint indices.
+      -- Item.Distance is an exact integer, not probability/confidence.
+      null;
+   end loop;
+end;
+```
+
+`Nearest` (default) returns one match per query when both sets are nonempty;
+train indices may repeat. `Mutual_Nearest` retains native cross-check pairs,
+with unique query and train indices; it is **not a ratio test**. Results are
+ordinary Ada values in ascending Query_Index order, independent of input and
+detector lifetime. Equal minimum-distance ties do not promise an exact train index.
+
+Norm selection is automatic: Hamming for WTA2 (**0..256** differing bits),
+Hamming2 for WTA3/4 (**0..128** differing 2-bit cells). Different required norms
+raise `OpenCV_Error`, even with empty inputs. Compatible empty inputs succeed
+with bounds **1..0**. Train.Count must be **<=262143**, because native CPU
+BFMatcher packs train indices in 18 bits; no corresponding query cap is imposed.
+Descriptors are borrowed immutably through Core's scoped bridge, not deep-copied.
+See [the immutable source review](docs/bfmatcher-source-review.md).
+
+The translated synthetic example prints counts and distance extrema for both
+modes. It demonstrates descriptor correspondence, not geometric registration
+or navigation accuracy. No match masks, KNN, ratio filtering or geometric
+verification are provided. KNN plus explicit ratio filtering is the next slice.
 
 Images and masks are independently snapshotted for ORB. A noncontiguous
 Region is processed as an isolated image, and coordinates are Region-local.
@@ -139,7 +179,7 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 24 cases covering extraction, masks, descriptors, ownership,
+contains 33 cases covering extraction, masks, descriptors, ownership, matching,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures. Linux also runs the
 real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
@@ -163,8 +203,8 @@ terrain-aware pose estimation using a separate elevation/geospatial layer.
 DTED is terrain data, not camera texture; direct visible/IR-to-elevation
 matching is not promised. Test the actual camera/reference modalities early.
 
-Next: BF Hamming/Hamming_2 matching, then KNN result handling and explicit
-application filtering. No matcher, homography, PnP, DTED reader, camera
+Next: KNN result handling and explicit ratio filtering.
+No homography, PnP, DTED reader, camera
 calibration, image loading, optical flow, GPU path, or navigation estimator
 is implemented here. [Roadmap](docs/roadmap.md).
 

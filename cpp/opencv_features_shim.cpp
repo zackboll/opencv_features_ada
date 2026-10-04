@@ -13,6 +13,7 @@
 #else
 # error "Review Features compatibility before using another OpenCV major version"
 #endif
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -43,6 +44,11 @@ struct opencv_features_result_handle {
     std::vector<opencv_features_keypoint> points;
     cv::Mat descriptors; // private temporary, never an application-owned wrapper
 };
+struct opencv_features_match_result_handle {
+    std::vector<opencv_features_descriptor_match> matches;
+};
+static_assert(std::is_standard_layout<opencv_features_descriptor_match>::value,
+              "C descriptor match must have a standard layout");
 
 namespace {
 thread_local char error_text[1024] = "";
@@ -88,6 +94,15 @@ const cv::Mat &input(const opencv_core_mat_handle *handle) {
             "Core rejected the input handle");
     require(!mat->empty() && mat->dims == 2 && mat->type() == CV_8UC1,
             "ORB requires a nonempty two-dimensional UInt8 C1 image");
+    return *mat;
+}
+const cv::Mat &descriptors(const opencv_core_mat_handle *handle) {
+    require(handle != nullptr, "null descriptor Core input handle");
+    const cv::Mat *mat = nullptr;
+    require(opencv_core_module_input_mat(handle, &mat) == OPENCV_CORE_OK && mat != nullptr,
+            "Core rejected descriptor input handle");
+    require(mat->empty() || (mat->dims == 2 && mat->type() == CV_8UC1 &&
+            mat->cols == 32 && mat->rows > 0), "expected 2-D UInt8 C1 Nx32 ORB descriptors");
     return *mat;
 }
 bool finite_keypoint(const cv::KeyPoint &p, const cv::Mat &image) noexcept {
@@ -216,6 +231,79 @@ opencv_features_status opencv_features_result_descriptors(
     });
 }
 void opencv_features_result_destroy(opencv_features_result_handle *handle) {
+    try { delete handle; } catch (...) {}
+}
+opencv_features_status opencv_features_bf_match(
+    const opencv_core_mat_handle *query_handle, const opencv_core_mat_handle *train_handle,
+    int32_t norm, int32_t mode,
+    opencv_features_match_result_handle **out_result, int32_t *out_count) {
+    if (out_result != nullptr) *out_result = nullptr;
+    if (out_count != nullptr) *out_count = 0;
+    return guarded([&] {
+        require(out_result != nullptr && out_count != nullptr, "null match output");
+        require(norm == OPENCV_FEATURES_HAMMING || norm == OPENCV_FEATURES_HAMMING2,
+                "invalid binary descriptor norm selector");
+        require(mode == OPENCV_FEATURES_NEAREST || mode == OPENCV_FEATURES_MUTUAL_NEAREST,
+                "invalid matching mode selector");
+        const cv::Mat &query = descriptors(query_handle), &train = descriptors(train_handle);
+        // BFMatcher packs train rows in 18 bits; reverse batchDistance does not.
+        require(train.empty() || train.rows < (1 << 18), "train descriptor rows must be <= 262143");
+        checkpoint(7);
+        auto result = std::make_unique<opencv_features_match_result_handle>();
+        std::vector<cv::DMatch> native;
+        if (!query.empty() && !train.empty()) {
+            auto matcher = cv::BFMatcher::create(norm == OPENCV_FEATURES_HAMMING ?
+                            cv::NORM_HAMMING : cv::NORM_HAMMING2,
+                            mode == OPENCV_FEATURES_MUTUAL_NEAREST);
+            require(!matcher.empty(), "native matcher factory returned no matcher");
+            matcher->match(query, train, native);
+        }
+        checkpoint(8);
+        require(native.size() <= std::size_t(std::numeric_limits<int32_t>::max()),
+                "native match count is not representable");
+        const auto expected = query.empty() || train.empty() ? std::size_t(0) : std::size_t(query.rows);
+        require(mode == OPENCV_FEATURES_NEAREST ? native.size() == expected : native.size() <= expected,
+                "invalid native match count");
+        std::sort(native.begin(), native.end(), [](const cv::DMatch &a, const cv::DMatch &b) {
+            return a.queryIdx < b.queryIdx;
+        });
+        const int maximum = norm == OPENCV_FEATURES_HAMMING ? 256 : 128;
+        int previous = -1;
+        // Cross-check guarantees train uniqueness as well as query uniqueness.
+        std::vector<unsigned char> seen(mode == OPENCV_FEATURES_MUTUAL_NEAREST && !train.empty() ?
+                                       std::size_t(train.rows) : 0, 0);
+        for (const auto &match : native) {
+            require(match.imgIdx == 0 && match.queryIdx >= 0 && match.queryIdx < query.rows &&
+                    match.trainIdx >= 0 && match.trainIdx < train.rows &&
+                    match.queryIdx > previous && std::isfinite(match.distance) &&
+                    match.distance >= 0 && match.distance <= maximum &&
+                    std::trunc(match.distance) == match.distance, "invalid native binary match");
+            previous = match.queryIdx;
+            if (!seen.empty()) {
+                require(!seen[std::size_t(match.trainIdx)], "duplicate mutual-nearest train index");
+                seen[std::size_t(match.trainIdx)] = 1;
+            }
+        }
+        result->matches.reserve(native.size());
+        for (const auto &match : native)
+            result->matches.push_back({match.queryIdx, match.trainIdx, static_cast<int32_t>(match.distance)});
+        checkpoint(9); // RAII cleans validated storage if publication fails
+        *out_count = static_cast<int32_t>(result->matches.size());
+        *out_result = result.release();
+    });
+}
+opencv_features_status opencv_features_match_result_get(
+    const opencv_features_match_result_handle *handle, int32_t index,
+    opencv_features_descriptor_match *out_match) {
+    if (out_match != nullptr) *out_match = {};
+    return guarded([&] {
+        require(handle != nullptr && out_match != nullptr, "null match result argument");
+        require(index >= 0 && std::size_t(index) < handle->matches.size(), "match index out of range");
+        checkpoint(10);
+        *out_match = handle->matches[std::size_t(index)];
+    });
+}
+void opencv_features_match_result_destroy(opencv_features_match_result_handle *handle) {
     try { delete handle; } catch (...) {}
 }
 } // extern C

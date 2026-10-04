@@ -1,10 +1,12 @@
 with AUnit.Assertions;
 with AUnit.Test_Caller;
 with AUnit.Test_Fixtures;
+with Ada.Text_IO;
 with OpenCV.Core.UInt8_Access;
 with OpenCV.Core.Module_Interop;
 with OpenCV.Features.Internal.C_API;
 with OpenCV.Features.ORB;
+with OpenCV.Features.Matching;
 with Interfaces;
 with Interfaces.C;
 with System;
@@ -13,6 +15,8 @@ package body Features_Tests is
    use AUnit.Assertions;
    use OpenCV.Features;
    package ORB renames OpenCV.Features.ORB;
+   package Matching renames OpenCV.Features.Matching;
+   use type Matching.Binary_Descriptor_Distance;
    package Bytes renames OpenCV.Core.UInt8_Access;
    use type OpenCV.Core.Depth_Type;
    use type OpenCV.Core.Channel_Count;
@@ -563,6 +567,231 @@ package body Features_Tests is
       Assert (Output.Rows = Natural (Count), "Core output lost result storage");
    end ABI_Extraction;
 
+   procedure Check_Self_Match (Tuple : ORB.Tuple_Size) is
+      Source : constant OpenCV.Core.Mat := Image;
+      Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+      Features : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (Features, Features);
+   begin
+      Assert (Count (Features) > 0, "self-match fixture has no features");
+      Assert (Matches'Length = Count (Features), "nearest count differs from query count");
+      for I in Matches'Range loop
+         Assert (Matches (I).Query_Index = I, "query coverage/order is not complete");
+         Assert (Matches (I).Train_Index <= Count (Features), "train index outside feature set");
+         Assert (Matches (I).Distance = 0, "self-match distance is not zero");
+      end loop;
+   end Check_Self_Match;
+
+   procedure Match_WTA2 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_Self_Match (ORB.Two_Samples);
+   end Match_WTA2;
+
+   procedure Match_WTA3 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_Self_Match (ORB.Three_Samples);
+   end Match_WTA3;
+
+   procedure Match_WTA4 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Check_Self_Match (ORB.Four_Samples);
+   end Match_WTA4;
+
+   procedure Match_Norm_Mismatch (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Blank : constant OpenCV.Core.Mat := Image (Textured => False);
+      Detector : constant ORB.Detector := ORB.Create;
+      WTA2 : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Empty_WTA2 : constant Feature_Set := ORB.Detect_And_Compute (Detector, Blank);
+      procedure Reject (A, B : Feature_Set) is
+      begin
+         declare
+            Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (A, B);
+            pragma Unreferenced (Matches);
+         begin
+            Assert (False, "norm mismatch accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end Reject;
+   begin
+      for Tuple in ORB.Three_Samples .. ORB.Four_Samples loop
+         declare
+            Other : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            WTA : constant Feature_Set := ORB.Detect_And_Compute (Other, Source);
+            Empty_WTA : constant Feature_Set := ORB.Detect_And_Compute (Other, Blank);
+         begin
+            Reject (WTA2, WTA);
+            Reject (WTA, WTA2);
+            Reject (Empty_WTA2, WTA);
+            Reject (WTA2, Empty_WTA);
+            Reject (Empty_WTA2, Empty_WTA);
+         end;
+      end loop;
+   end Match_Norm_Mismatch;
+
+   procedure Match_Empty (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Blank : constant OpenCV.Core.Mat := Image (Textured => False);
+      Default_Set : Feature_Set;
+      procedure Check (A, B : Feature_Set) is
+      begin
+         for Mode in Matching.Matching_Mode loop
+            declare
+               Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (A, B, Mode);
+            begin
+               Assert (Matches'Length = 0 and then Matches'First = 1 and then Matches'Last = 0,
+                       "empty result bounds are not 1..0");
+            end;
+         end loop;
+      end Check;
+   begin
+      Check (Default_Set, Default_Set);
+      for Tuple in ORB.Tuple_Size loop
+         declare
+            Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            Full : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+            Empty_Set : constant Feature_Set := ORB.Detect_And_Compute (Detector, Blank);
+         begin
+            Assert (Count (Full) > 0 and then Is_Empty (Empty_Set), "empty matching fixture");
+            Check (Empty_Set, Full);
+            Check (Full, Empty_Set);
+            Check (Empty_Set, Empty_Set);
+         end;
+      end loop;
+   end Match_Empty;
+
+   function Translated_Image (Source : OpenCV.Core.Mat) return OpenCV.Core.Mat is
+      Result : OpenCV.Core.Mat := Image (Textured => False);
+   begin
+      for R in 0 .. 247 loop
+         for C in 0 .. 250 loop
+            Bytes.Set (Result, R + 8, C + 5, Bytes.Get (Source, R, C));
+         end loop;
+      end loop;
+      return Result;
+   end Translated_Image;
+
+   procedure Match_Mutual (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Related : constant OpenCV.Core.Mat := Translated_Image (Source);
+   begin
+      for Tuple in ORB.Tuple_Size loop
+         declare
+            Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+            Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Related);
+            Nearest : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (Query, Train);
+            Mutual : constant Matching.Descriptor_Match_Array :=
+              Matching.Brute_Force_Match (Query, Train, Matching.Mutual_Nearest);
+            Maximum : constant Matching.Binary_Descriptor_Distance :=
+              (if Required_Norm (Query) = Hamming then 256 else 128);
+            Previous : Natural := 0;
+         begin
+            Assert (Count (Query) > 0 and then Count (Train) > 0, "related scene fixture is empty");
+            Assert (Nearest'Length = Count (Query), "related nearest count");
+            Assert (Mutual'Length > 0 and then Mutual'Length <= Nearest'Length, "mutual count contract");
+            for Item of Mutual loop
+               Assert (Item.Query_Index > Previous and then Item.Query_Index <= Count (Query),
+                       "mutual query order/bounds");
+               Assert (Item.Train_Index <= Count (Train) and then Item.Distance <= Maximum,
+                       "mutual train/distance bounds");
+               Assert (Nearest (Item.Query_Index).Distance = Item.Distance,
+                       "mutual pair does not have forward-nearest distance");
+               Previous := Item.Query_Index;
+            end loop;
+            for I in Mutual'Range loop
+               for J in Mutual'First .. I - 1 loop
+                  Assert (Mutual (I).Train_Index /= Mutual (J).Train_Index, "mutual train index reused");
+               end loop;
+            end loop;
+         end;
+      end loop;
+   end Match_Mutual;
+
+   procedure Match_Preservation (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Related : constant OpenCV.Core.Mat := Translated_Image (Source);
+   begin
+      for Tuple in ORB.Tuple_Size loop
+         declare
+            Detector : constant ORB.Detector := ORB.Create ((Tuple => Tuple, others => <>));
+            Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+            Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Related);
+            Query_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Query);
+            Train_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Train);
+            Query_Points : constant Keypoint_Array := Keypoints (Query);
+            Train_Points : constant Keypoint_Array := Keypoints (Train);
+         begin
+            for Mode in Matching.Matching_Mode loop
+               declare
+                  Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (Query, Train, Mode);
+               begin
+                  Assert (Matches'Length > 0, "preservation fixture empty");
+                  Assert_Same (Query_Data, Descriptor_Copy (Query));
+                  Assert_Same (Train_Data, Descriptor_Copy (Train));
+                  Assert (Query_Points = Keypoints (Query) and then Train_Points = Keypoints (Train),
+                          "matching modified keypoints");
+               end;
+            end loop;
+         end;
+      end loop;
+   end Match_Preservation;
+
+   procedure Match_Lifetime (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Local_Matches return Matching.Descriptor_Match_Array is
+         Source : constant OpenCV.Core.Mat := Image;
+         Detector : ORB.Detector := ORB.Create;
+         Features : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      begin
+         ORB.Close (Detector);
+         return Matching.Brute_Force_Match (Features, Features);
+      end Local_Matches;
+      Matches : constant Matching.Descriptor_Match_Array := Local_Matches;
+   begin
+      Assert (Matches'Length > 0, "lifetime fixture empty");
+      for I in Matches'Range loop
+         Assert (Matches (I).Query_Index = I and then Matches (I).Train_Index <= Matches'Length
+                 and then Matches (I).Distance = 0, "match values lost with inputs/detector");
+      end loop;
+   end Match_Lifetime;
+
+   procedure Match_Layout (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Layout (Field : Interfaces.Integer_32) return Interfaces.Integer_32
+        with Import, Convention => C, External_Name => "features_test_match_layout";
+      procedure Fill (Item : access ABI.C_Descriptor_Match)
+        with Import, Convention => C, External_Name => "features_test_match";
+      Item : aliased ABI.C_Descriptor_Match;
+      type Positions is array (Natural range <>) of Natural;
+      Offsets : constant Positions := [Item.Query_Index'Position, Item.Train_Index'Position, Item.Distance'Position];
+      use type ABI.C_Descriptor_Match;
+   begin
+      Assert (ABI.C_Descriptor_Match'Size = Natural (Layout (0)) * System.Storage_Unit, "match size mismatch");
+      Assert (ABI.C_Descriptor_Match'Alignment = Natural (Layout (1)), "match alignment mismatch");
+      for I in Offsets'Range loop
+         Assert (Offsets (I) = Natural (Layout (Interfaces.Integer_32 (I + 2))), "match field offset mismatch");
+      end loop;
+      Assert (Item.Query_Index'First_Bit = 0 and then Item.Train_Index'First_Bit = 0
+              and then Item.Distance'First_Bit = 0, "match field is not byte-aligned");
+      Fill (Item'Access);
+      Assert (Item = (17, 23, 256), "C-written match interchange mismatch");
+      Ada.Text_IO.Put_Line
+        ("Match C/Ada layout: size" & Interfaces.Integer_32'Image (Layout (0)) &
+         ", alignment" & Interfaces.Integer_32'Image (Layout (1)) &
+         ", offsets" & Interfaces.Integer_32'Image (Layout (2)) &
+         "/" & Interfaces.Integer_32'Image (Layout (3)) &
+         "/" & Interfaces.Integer_32'Image (Layout (4)) & "; C-written interchange PASS");
+   end Match_Layout;
+
    package Caller is new AUnit.Test_Caller (Fixture);
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
@@ -632,6 +861,15 @@ package body Features_Tests is
       Result.Add_Test (Caller.Create ("Compiler-derived C/Ada keypoint layout", ABI_Layout'Access));
       Result.Add_Test (Caller.Create ("Raw C ABI detector creation", ABI_Creation'Access));
       Result.Add_Test (Caller.Create ("Raw C ABI extraction/results with real Core handles", ABI_Extraction'Access));
+      Result.Add_Test (Caller.Create ("Matching WTA2 Hamming self-match", Match_WTA2'Access));
+      Result.Add_Test (Caller.Create ("Matching WTA3 Hamming2 self-match", Match_WTA3'Access));
+      Result.Add_Test (Caller.Create ("Matching WTA4 Hamming2 self-match", Match_WTA4'Access));
+      Result.Add_Test (Caller.Create ("Matching rejects different norms including empty sets", Match_Norm_Mismatch'Access));
+      Result.Add_Test (Caller.Create ("Matching compatible empty sets in both modes", Match_Empty'Access));
+      Result.Add_Test (Caller.Create ("Matching mutual-nearest translated scene", Match_Mutual'Access));
+      Result.Add_Test (Caller.Create ("Matching preserves descriptors and keypoints", Match_Preservation'Access));
+      Result.Add_Test (Caller.Create ("Matching values survive input/detector finalization", Match_Lifetime'Access));
+      Result.Add_Test (Caller.Create ("Compiler-derived C/Ada match layout and interchange", Match_Layout'Access));
       return Result;
    end Suite;
 end Features_Tests;
