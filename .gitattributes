@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.adb text eol=lf
+*.ads text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.h text eol=lf
+*.sh text eol=lf

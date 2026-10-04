@@ -1,0 +1,104 @@
+name: Cross-platform Features
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  repository-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repository and configuration tests (no OpenCV required)
+        run: |
+          python3 scripts/check_repository.py
+          python3 -m unittest discover -s tests/configuration -v
+          sh scripts/run_profile_tests.sh
+          for script in scripts/*.sh; do sh -n "$script"; done
+          git diff --check
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ pkg-config libopencv-dev
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+      - name: Select Ada toolchain
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Build and run native AUnit suite
+        run: sh scripts/test.sh
+      - name: Build and run example
+        run: |
+          alr -n -C examples build
+          alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: brew install opencv pkg-config
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+      - name: Select Ada toolchain
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Build and run native AUnit suite
+        run: sh scripts/test.sh
+      - name: Verify C++ runtime boundary
+        run: |
+          set -eu
+          dylib=$(find lib -name '*opencv_features_shim*.dylib' -print -quit)
+          test -n "$dylib"
+          otool -L "$dylib" | tee /tmp/features-linkage.txt
+          grep -E 'libopencv_features(2d)?\.' /tmp/features-linkage.txt
+          grep -E 'libopencv_core_shim' /tmp/features-linkage.txt
+          grep -E 'libc\+\+' /tmp/features-linkage.txt
+          if grep -E 'libstdc\+\+' /tmp/features-linkage.txt; then exit 1; fi
+  windows:
+    # Follow the existing repositories: no Windows job on pull requests.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+          msys2: true
+      - name: Select Ada toolchain
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Update MSYS2 and install native dependencies
+        run: |
+          alr exec -- pacman -Syu --noconfirm
+          alr exec -- pacman -S --noconfirm --needed \
+            mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc
+      - name: Build and run with isolated native runtime
+        run: sh scripts/test.sh
+      - name: Inspect external Features DLL
+        run: |
+          set -eu
+          test -f lib/libopencv_features_shim.dll
+          test -f lib/libopencv_features_shim.dll.a
+          test ! -f lib/libopencv_features_shim.a
+          driver=$(sed -n 's/^[ ]*Cxx_Driver := "\(.*\)";/\1/p' config/opencv_features_install.gpr)
+          case "$driver" in *gnat_native*) exit 1 ;; esac
+          test -n "$driver"
+          "$(dirname "$driver")/objdump.exe" -p lib/libopencv_features_shim.dll > features-pe.log
+          grep -i 'DLL Name.*opencv_features' features-pe.log
+          grep -i 'DLL Name.*opencv_core_shim' features-pe.log

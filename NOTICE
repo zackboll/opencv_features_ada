@@ -1,0 +1,10 @@
+OpenCV Features for Ada bootstrap
+Copyright 2026 Zack Boll
+
+This project is licensed under the Apache License, Version 2.0.
+Architecture and build configuration are adapted from Zack Boll's
+opencv_core_ada, opencv_imgproc_ada and opencv_geometry_ada repositories.
+See docs/source-provenance.json for the reviewed source identities.
+
+OpenCV and Alire are separate dependencies with their own licensing.
+Their implementations and binary distributions are not included in this ZIP.

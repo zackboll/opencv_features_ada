@@ -1,0 +1,21 @@
+name = "opencv_features_examples"
+description = "Examples for the OpenCV Features Ada binding"
+version = "0.1.0-dev"
+authors = ["Zack Boll"]
+maintainers = ["Zack Boll <zackboll@gmail.com>"]
+maintainers-logins = ["zackboll"]
+licenses = "Apache-2.0"
+
+project-files = ["opencv_features_examples.gpr"]
+executables = ["orb_synthetic"]
+
+[[depends-on]]
+opencv_features = "*"
+
+[[pins]]
+opencv_features = { path = ".." }
+opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "7956981a7881ce9121115f8cb65909aeb9edc439" }
+
+[build-switches."*"]
+ada_version = "Ada2022"
+style_checks = "No"

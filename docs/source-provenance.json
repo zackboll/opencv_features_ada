@@ -1,0 +1,144 @@
+{
+  "prepared_for": "zackboll/opencv_features_ada",
+  "prepared_date_user_timezone": "2026-10-03 America/New_York",
+  "method": "Reviewed selected live GitHub files; blob IDs below identify the retrieved content. Not an exhaustive repository snapshot.",
+  "core_pin": {
+    "repo": "zackboll/opencv_core_ada",
+    "commit": "7956981a7881ce9121115f8cb65909aeb9edc439",
+    "manifest_version": "0.4.0"
+  },
+  "references": [
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "src/opencv-core-module_interop.ads",
+      "blob": "d678a33f599adf3d0234cbcf1afb76d7ba902738",
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/src/opencv-core-module_interop.ads",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/d678a33f599adf3d0234cbcf1afb76d7ba902738"
+    },
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "cpp/opencv_core_module_bridge.hpp",
+      "blob": "a49cdc08d9b8bbbe33a77c7efd51dc57c6a273a9",
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/cpp/opencv_core_module_bridge.hpp",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/a49cdc08d9b8bbbe33a77c7efd51dc57c6a273a9"
+    },
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "opencv_core.gpr",
+      "blob": "c7e30865fa45bc08e935a21423dcabe71d5ba93f",
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/opencv_core.gpr",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/c7e30865fa45bc08e935a21423dcabe71d5ba93f"
+    },
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "alire.toml",
+      "blob": "cac9ecfaa9c5f70642d531bc9cedea9ea9aaa0bf",
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/alire.toml",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/cac9ecfaa9c5f70642d531bc9cedea9ea9aaa0bf"
+    },
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "src/opencv.ads",
+      "blob": "cc79be21f0cba110569fd8b8b484f321458ed98c",
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/src/opencv.ads",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/cc79be21f0cba110569fd8b8b484f321458ed98c"
+    },
+    {
+      "repo": "zackboll/opencv_core_ada",
+      "path": "src/opencv-core.ads",
+      "blob": "cf64e9a0895e64ff8dce553db3fb7cb9a46176f8",
+      "reviewed_ranges": [
+        "1-240",
+        "330-500"
+      ],
+      "url": "https://github.com/zackboll/opencv_core_ada/blob/main/src/opencv-core.ads",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_core_ada/git/blobs/cf64e9a0895e64ff8dce553db3fb7cb9a46176f8"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "opencv_imgproc.gpr",
+      "blob": "c8933ee98b3d7a0861c508913c19583b99f08273",
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/opencv_imgproc.gpr",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/c8933ee98b3d7a0861c508913c19583b99f08273"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "opencv_imgproc_shim.gpr",
+      "blob": "6931cbcc03daf0c468f6a878569c5627b6f655e4",
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/opencv_imgproc_shim.gpr",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/6931cbcc03daf0c468f6a878569c5627b6f655e4"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "scripts/configure_opencv.sh",
+      "blob": "1df1cc7b1199321264c6bd4235bc114a7c68d07f",
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/scripts/configure_opencv.sh",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/1df1cc7b1199321264c6bd4235bc114a7c68d07f"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "scripts/build_opencv_shim.sh",
+      "blob": "35fef1ad84e712c4eb9a74cd08980638729b9a4a",
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/scripts/build_opencv_shim.sh",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/35fef1ad84e712c4eb9a74cd08980638729b9a4a"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "src/opencv-image_processing.adb",
+      "blob": "77ce8986616b9e906c0f8efea6a82daaa80e5b6e",
+      "reviewed_ranges": [
+        "1-190"
+      ],
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/src/opencv-image_processing.adb",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/77ce8986616b9e906c0f8efea6a82daaa80e5b6e"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": "tests/alire.toml",
+      "blob": "7d3a1b73772e0bd6f0efe6718f2dc4401a37d9f6",
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/tests/alire.toml",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/7d3a1b73772e0bd6f0efe6718f2dc4401a37d9f6"
+    },
+    {
+      "repo": "zackboll/opencv_imgproc_ada",
+      "path": ".github/workflows/cross-platform.yml",
+      "blob": "223bb42f8450303fb4ee096fa530a780b238f928",
+      "reviewed_ranges": [
+        "230-550"
+      ],
+      "url": "https://github.com/zackboll/opencv_imgproc_ada/blob/main/.github/workflows/cross-platform.yml",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_imgproc_ada/git/blobs/223bb42f8450303fb4ee096fa530a780b238f928"
+    },
+    {
+      "repo": "zackboll/opencv_geometry_ada",
+      "path": ".clinerules/01-architecture.md",
+      "blob": "45b5b05426d6d4ea8546e3ad681c077ef28de023",
+      "reviewed_ranges": [
+        "1-145"
+      ],
+      "url": "https://github.com/zackboll/opencv_geometry_ada/blob/main/.clinerules/01-architecture.md",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_geometry_ada/git/blobs/45b5b05426d6d4ea8546e3ad681c077ef28de023"
+    },
+    {
+      "repo": "zackboll/opencv_geometry_ada",
+      "path": "alire.toml",
+      "blob": "5a20199981768eae4cdb8964ebae84be931c6e1a",
+      "url": "https://github.com/zackboll/opencv_geometry_ada/blob/main/alire.toml",
+      "immutable_blob_api": "https://api.github.com/repos/zackboll/opencv_geometry_ada/git/blobs/5a20199981768eae4cdb8964ebae84be931c6e1a"
+    }
+  ],
+  "upstream": [
+    "https://raw.githubusercontent.com/opencv/opencv/4.10.0/modules/features2d/include/opencv2/features2d.hpp",
+    "https://raw.githubusercontent.com/opencv/opencv/4.10.0/modules/features2d/src/orb.cpp",
+    "https://raw.githubusercontent.com/opencv/opencv/5.0.0/modules/features/include/opencv2/features.hpp",
+    "https://raw.githubusercontent.com/opencv/opencv/5.0.0/modules/features/src/orb.cpp"
+  ],
+  "not_verified": [
+    "OpenCV 4.1.0 ORB source retrieval",
+    "Ada compilation",
+    "native OpenCV build",
+    "AUnit execution",
+    "macOS/Windows execution",
+    "installed-consumer linkage"
+  ]
+}

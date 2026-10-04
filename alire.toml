@@ -1,0 +1,39 @@
+name = "opencv_features"
+description = "Thick Ada binding to OpenCV feature detection and description"
+version = "0.1.0-dev"
+authors = ["Zack Boll"]
+maintainers = ["Zack Boll <zackboll@gmail.com>"]
+maintainers-logins = ["zackboll"]
+licenses = "Apache-2.0"
+
+website = "https://github.com/zackboll/opencv_features_ada"
+tags = ["opencv", "computer-vision", "binding", "ada"]
+project-files = ["opencv_features.gpr"]
+
+[[depends-on]]
+opencv_core = "~0.4.0"
+opencv = "*"
+pkg_config = "*"
+
+# Bootstrap source pin, not a vendored copy. Review/remove for publication.
+# Pins are repeated in tests/examples because each is its own Alire root.
+[[pins]]
+opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "7956981a7881ce9121115f8cb65909aeb9edc439" }
+
+[depends-on.'case(os)'.windows]
+mingw_w64_gcc = "*"
+
+[environment.'case(distribution)']
+msys2 = { PATH.prepend = "${CRATE_ROOT}/lib" }
+
+[build-switches."*"]
+ada_version = "Ada2022"
+style_checks = "No"
+
+[[actions]]
+type = "pre-build"
+command = ["sh", "scripts/configure_opencv.sh"]
+
+[[actions]]
+type = "test"
+command = ["sh", "scripts/test.sh"]
