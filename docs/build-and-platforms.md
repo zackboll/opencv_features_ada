@@ -73,13 +73,32 @@ only in the child that runs the test executable. `alr test` uses that launcher.
 For examples, use the documented `alr exec -- sh ../scripts/run_native.sh ...`
 form, not an unqualified executable launched from a random shell.
 
-Windows CI is main/manual only, following the existing review policy. The
-native CI has not run for this bootstrap; MSYS2 provider updates may require
-reviewed maintenance rather than weakening compiler/runtime checks.
+Windows CI is post-merge only: `windows-post-merge.yml` triggers exclusively
+on pushes to `main`, with neither PR nor manual dispatch triggers. Corrected
+code Windows qualification is deliberately deferred until it lands on main.
+MSYS2 provider updates may require reviewed maintenance rather than weakening
+compiler/runtime checks. Installation uses `pacman -Sy --noconfirm --needed`,
+not an unnecessary full system upgrade.
+
+## CI routing
+
+PR CI (`cross-platform.yml`):
+- repository checks;
+- Linux production build, native AUnit suite, and synthetic example;
+- macOS production build, native AUnit suite, and Apple-clang/libc++ linkage check.
+
+The same cross-platform workflow runs on main pushes and manual dispatch.
+Post-merge main CI (`windows-post-merge.yml`): **Windows only**. No Windows job
+or runner matrix is present in the PR workflow, including a skipped job.
+The repository checker validates trigger/job structure without a PyYAML
+dependency; unsupported routing syntax fails closed and needs checker review.
+Regression fixtures cover quoted keys, comments, flow/block formatting, forbidden
+events, missing main routing, Windows runners/jobs/matrices, and dependency caches.
 
 ## Qualification targets
 
-The default workflow exercises runner-installed Linux/macOS/Windows OpenCV.
+The PR workflow exercises runner-installed Linux/macOS OpenCV; the separate
+post-merge workflow exercises MSYS2 Windows OpenCV.
 The manual workflow source-builds 4.1.0, 4.10.0 and 5.0.0 on Linux with CPU
 paths and explicit pkg-config/runtime prefixes. The distro development package
 is also installed to satisfy Alire's external-package discovery; its native

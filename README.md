@@ -7,8 +7,9 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
 Initial ORB implementation, 20 registered AUnit cases, build scripts, and CI
-workflows are included. Ada/native OpenCV compilation and the AUnit suite
-have **not** been executed in the artifact-creation environment. See
+workflows are included. The build/CI tranche now builds and passes all twenty
+native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
+still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
 binding as operational. No CI badges imply success.
 
@@ -143,7 +144,8 @@ noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures.
 
 Cross-platform CI is configured for Linux and macOS on PRs and main.
-Windows/MSYS2 runs only on main pushes or manual dispatch. A separate manual
+Windows/MSYS2 runs only on main pushes in a separate post-merge workflow,
+never on PRs or manual dispatch. A separate manual
 workflow builds native OpenCV 4.1.0, 4.10.0, and 5.0.0. These are intended
 qualification targets, not successful runs claimed by this bootstrap.
 The setup-alire action currently follows its `latest` ref, matching the

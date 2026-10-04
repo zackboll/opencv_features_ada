@@ -1,7 +1,10 @@
 # Features binding coverage
 
 This is a handwritten capability inventory, not a generated header census.
-"Implemented draft" means source is present; native validation is outstanding.
+"Implemented draft" means source is present, not fully qualified. The initial
+20-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
+`bootstrap-validation.md` for exact evidence and remaining platform/version,
+source-review, sanitizer and ABI robustness gates.
 
 | Native capability | Ada API | Status |
 | --- | --- | --- |
