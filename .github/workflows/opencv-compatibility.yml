@@ -39,7 +39,7 @@ jobs:
             -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF \
             -DBUILD_opencv_apps=OFF -DBUILD_JAVA=OFF \
             -DBUILD_opencv_python2=OFF -DBUILD_opencv_python3=OFF \
-            -DWITH_OPENCL=OFF -DWITH_IPP=OFF -DWITH_TBB=OFF \
+            -DWITH_OPENCL=OFF -DWITH_IPP=OFF -DWITH_TBB=OFF -DWITH_ADE=OFF \
             -DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DWITH_GTK=OFF
           cmake --build opencv-build --parallel 2
           cmake --install opencv-build

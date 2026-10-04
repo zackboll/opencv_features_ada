@@ -108,6 +108,9 @@ the configured native version after the test run.
 It also runs the actual-shim sanitizer driver for each manual matrix target.
 The driver disables OpenCL only in its test process, with leak detection enabled;
 no production library global setting changes or sanitizer suppressions are added.
+WITH_ADE is explicitly OFF: OpenCV 4.1's G-API initialization otherwise adds
+an unused ADE target before whitelist exclusion, failing with modern GCC's
+missing transitive `<cstdint>` include. G-API is not part of this ORB profile.
 
 Before release, test `alr build`, `alr test`, examples, all target backends,
 compiler/runtime dependencies, `gprinstall`/clean consumer linkage, and source

@@ -116,6 +116,58 @@ exhaustion and full dependency/GPU sanitizer coverage are explicit limitations.
 No formal proof, timing bound, navigation/matching accuracy, complete OpenCV safety
 or release readiness is claimed.
 
+### First pinned matrix conclusion and deterministic correction
+
+The manual matrix was dispatched **once**,
+[run 37173672098](https://github.com/zackboll/opencv_features_ada/actions/runs/37173672098),
+at implementation head `9968fdbcfcfc204cf9517bc2b6f140abb5e7d5b8`.
+
+| Target | Module | Build / native AUnit | Mask / raw ABI / C-Ada layout | ASan / UBSan |
+| --- | --- | --- | --- | --- |
+| 4.1.0 | features2d | FAIL in unrelated upstream ADE before Features; 24 registered in source, 0 executed / 0 passed | NOT EXECUTED | NOT EXECUTED |
+| 4.10.0 | features2d | PASS; 24 registered / 24 executed / 24 successful; 0 failed assertions / 0 unexpected errors | PASS | PASS both actual-source variants |
+| 5.0.0 | features | PASS; 24 registered / 24 executed / 24 successful; 0 failed assertions / 0 unexpected errors | PASS | PASS both actual-source variants |
+
+Failed job `111351710612` log: `ade-0.1.1d/.../typed_graph.hpp:101:10:
+error: 'uintptr_t' in namespace 'std' does not name a type`, compiling unused
+`topological_sort.cpp`. Native GCC 13.3.0. OpenCV 4.1.0
+`modules/gapi/cmake/init.cmake` defaults WITH_ADE=ON, downloading/adding the
+ADE target before G-API's whitelist disablement. Thus even BUILD_LIST limited
+to core/imgproc/features2d still builds this unrelated target. Local GCC 14.2.0
+reproduces the exact failure by configuring the same tag with WITH_ADE=ON and
+building target `ade`; not transient and not an ORB/test defect.
+Correction: set **WITH_ADE=OFF** in the manual workflow, using upstream's
+supported option. No upstream source patch, ORB module change, compiler-warning
+suppression or weakened test. No unchanged rerun or second full-matrix dispatch.
+Local corrected oldest-target validation is reported separately below; it does
+not convert the original failed remote matrix cell into success.
+
+Ordinary PR run
+[37173674726](https://github.com/zackboll/opencv_features_ada/actions/runs/37173674726)
+at that implementation head passed all four jobs. Linux/OpenCV 4.6.0 and
+macOS/OpenCV 5.0.0 each executed/passed 24 AUnit cases, with zero assertions/errors;
+Linux raw boundary and linux-sanitizers passed both variants; macOS verified actual
+Features/Core-shim/libc++ linkage. Repository checks passed 20 Python tests.
+
+Corrected **local** OpenCV 4.1.0 source build (official tag above, host GCC 14.2.0,
+WITH_ADE=OFF, only core/imgproc/features2d) completed successfully. With its
+pkg-config and loader prefix selected explicitly, `sh scripts/test.sh` and
+`alr -n exec -- sh scripts/run_sanitizers.sh` passed: **24 registered / 24 executed /
+24 successful / 0 failed assertions / 0 unexpected errors**, mask/raw ABI/layout
+PASS, ordinary and ASan/UBSan production-source/fault variants all PASS.
+The actual binding implementation is identical to the matrix's implementation
+head; the correction changes only manual native-build configuration and evidence.
+The failed remote 4.1 cell remains an explicit limitation of that single matrix
+run, not a claimed passing corrected CI run. No second full matrix was dispatched.
+All three reviewed native tags now have functional local/remote evidence, but
+the **remote corrected 4.1 matrix cell at the final branch SHA remains outstanding**.
+
+Task 001's source, masks, raw ABI/layout, CPU production-shim sanitizer and first
+corrected Windows gates are covered. Installed/clean-consumer relocation/linkage
+and corrected remote oldest-target matrix qualification remain outstanding;
+Task 001 is not declared entirely complete. Real allocator exhaustion and full
+dependency/GPU sanitizer qualification remain separately documented limitations.
+
 ## Task 001 build/CI tranche
 
 Starting repository: `zackboll/opencv_features_ada`, clean `main` and fetched

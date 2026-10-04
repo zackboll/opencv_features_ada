@@ -84,6 +84,7 @@ class WorkflowTests(unittest.TestCase):
             self.check(cross=self.cross.replace("  linux:\n", "  linux:\n    strategy:\n      matrix:\n        os: [ubuntu-24.04, windows-latest]\n"))
 
     def test_manual_compatibility_only(self):
+        self.assertIn("-DWITH_ADE=OFF", self.compatibility)
         with self.assertRaises(ValueError):
             self.check(compatibility=self.compatibility.replace("  workflow_dispatch:", "  pull_request:"))
 

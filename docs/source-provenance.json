@@ -136,7 +136,8 @@
   "not_verified": [
     "installed-consumer relocation/linkage",
     "real allocator exhaustion and exhaustive OpenCV allocation failures",
-    "complete dependency sanitizer coverage"
+    "complete dependency sanitizer coverage",
+    "corrected remote OpenCV 4.1.0 matrix at final corrective head"
   ],
   "task_002_starting_main": "1feceff04f8323f8d9ec5f01f8875529d4265c45",
   "orb_fixed_profile_review": [
@@ -343,6 +344,31 @@
           "git_blob": "7588d90808c21f878e9f786cb2993fc2b994d851"
         }
       ]
+    }
+  ],
+  "task_002_qualification": {
+    "implementation_head": "9968fdbcfcfc204cf9517bc2b6f140abb5e7d5b8",
+    "manual_matrix_run": 37173672098,
+    "dispatch_count": 1,
+    "targets": {
+      "4.1.0": "remote native build failed in unused ADE; local WITH_ADE=OFF build, AUnit 24/24, raw/layout/masks, ASan/UBSan passed",
+      "4.10.0": "remote build and AUnit 24/24, raw/layout/masks, ASan/UBSan passed",
+      "5.0.0": "remote build and AUnit 24/24, raw/layout/masks, ASan/UBSan passed"
+    },
+    "workflow_correction": "WITH_ADE=OFF; no production implementation changes"
+  },
+  "qualification_build_review": [
+    {
+      "tag": "4.1.0",
+      "path": "modules/gapi/cmake/DownloadADE.cmake",
+      "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/gapi/cmake/DownloadADE.cmake",
+      "sha256": "9f8d0d226654aa8b8e1401cc290d40b36717639fd77d96f29ac63f26ecb3b9d8"
+    },
+    {
+      "tag": "4.1.0",
+      "path": "modules/gapi/cmake/init.cmake",
+      "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/gapi/cmake/init.cmake",
+      "sha256": "44d1bd10d6a0a3ddcfd9e3df04f31dd83e97e930e1745588cfe1401c5e24af2f"
     }
   ]
 }
