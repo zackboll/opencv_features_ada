@@ -34,8 +34,8 @@ begin
       Train : constant Features.Feature_Set := ORB.Detect_And_Compute (Detector, Train_Image);
    begin
       Ada.Text_IO.Put_Line ("OpenCV " & Features.Native_Version & " / " & Features.Native_Backend);
-      Ada.Text_IO.Put_Line ("Query keypoints:" & Natural'Image (Features.Count (Query)));
-      Ada.Text_IO.Put_Line ("Train keypoints:" & Natural'Image (Features.Count (Train)));
+       Ada.Text_IO.Put_Line ("Query features:" & Natural'Image (Features.Count (Query)));
+       Ada.Text_IO.Put_Line ("Train features:" & Natural'Image (Features.Count (Train)));
       for Mode in Matching.Matching_Mode loop
          declare
             Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Match (Query, Train, Mode);
@@ -44,7 +44,7 @@ begin
             Zero_Count : Natural := 0;
          begin
             Ada.Text_IO.Put_Line ("Matching mode: " & Matching.Matching_Mode'Image (Mode));
-            Ada.Text_IO.Put_Line ("Match count:" & Natural'Image (Matches'Length));
+             Ada.Text_IO.Put_Line (Matching.Matching_Mode'Image (Mode) & " match count:" & Natural'Image (Matches'Length));
             for Item of Matches loop
                Minimum := Matching.Binary_Descriptor_Distance'Min (Minimum, Item.Distance);
                Maximum := Matching.Binary_Descriptor_Distance'Max (Maximum, Item.Distance);
@@ -54,11 +54,32 @@ begin
             end loop;
             if Matches'Length > 0 then
                Ada.Text_IO.Put_Line ("Zero-distance matches:" & Natural'Image (Zero_Count));
-               Ada.Text_IO.Put_Line ("Min/max distance:" & Matching.Binary_Descriptor_Distance'Image (Minimum)
+                Ada.Text_IO.Put_Line (Matching.Matching_Mode'Image (Mode) & " distance min/max:" & Matching.Binary_Descriptor_Distance'Image (Minimum)
                                      & " /" & Matching.Binary_Descriptor_Distance'Image (Maximum));
             end if;
          end;
       end loop;
+      declare
+         --  Example application policy only, not a library default or
+         --  recommended navigation constant.
+         Ratio : constant OpenCV.Float64_Value := 0.80;
+         Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (Query, Train);
+         Accepted : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Pairs, Ratio);
+         Minimum : Matching.Binary_Descriptor_Distance := 256;
+         Maximum : Matching.Binary_Descriptor_Distance := 0;
+      begin
+         Ada.Text_IO.Put_Line ("KNN2 candidate count:" & Natural'Image (Pairs'Length));
+         Ada.Text_IO.Put_Line ("Ratio threshold (example policy, no library default):" & OpenCV.Float64_Value'Image (Ratio));
+         Ada.Text_IO.Put_Line ("Ratio-accepted count:" & Natural'Image (Accepted'Length));
+         for Item of Accepted loop
+            Minimum := Matching.Binary_Descriptor_Distance'Min (Minimum, Item.Distance);
+            Maximum := Matching.Binary_Descriptor_Distance'Max (Maximum, Item.Distance);
+         end loop;
+         if Accepted'Length > 0 then
+            Ada.Text_IO.Put_Line ("Accepted-distance min/max:" & Matching.Binary_Descriptor_Distance'Image (Minimum)
+                                  & " /" & Matching.Binary_Descriptor_Distance'Image (Maximum));
+         end if;
+      end;
       Ada.Text_IO.Put_Line ("Descriptor correspondence only: no geometric registration or navigation accuracy claim.");
    end;
 end ORB_Match_Synthetic;

@@ -6,8 +6,8 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 `OpenCV.Features.ORB` and `OpenCV.Features.Matching`.
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
-ORB and one-best binary BF matching, 33 registered AUnit cases, build scripts, and CI
-workflows are included. The qualification tranche now builds and passes all 33
+ORB, binary BF one-best/KNN2 matching and pure-Ada ratio filtering, 44 registered
+AUnit cases, build scripts, and CI workflows are included. Local qualification passes all 44
 native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
 still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
@@ -123,10 +123,41 @@ BFMatcher packs train indices in 18 bits; no corresponding query cap is imposed.
 Descriptors are borrowed immutably through Core's scoped bridge, not deep-copied.
 See [the immutable source review](docs/bfmatcher-source-review.md).
 
-The translated synthetic example prints counts and distance extrema for both
-modes. It demonstrates descriptor correspondence, not geometric registration
-or navigation accuracy. No match masks, KNN, ratio filtering or geometric
-verification are provided. KNN plus explicit ratio filtering is the next slice.
+### Two-nearest matching and explicit ratio filtering
+
+```ada
+declare
+   Pairs : constant OpenCV.Features.Matching.Two_Nearest_Match_Array :=
+     OpenCV.Features.Matching.Brute_Force_KNN_2 (Query, Train);
+   Accepted : constant OpenCV.Features.Matching.Descriptor_Match_Array :=
+     OpenCV.Features.Matching.Filter_By_Ratio (Pairs, 0.80);
+begin
+   null;
+end;
+```
+
+K is fixed at **2**, with no masks or cross-check. `Mutual_Nearest` remains a
+separate K=1 alternative: native cross-check requires K=1, not K=2. Norm selection,
+one-based indices, exact integer distance ranges, train bound and owned-value
+lifetime are as above. Each nonempty query has exactly one pair when Train has
+at least two rows; the train indices are distinct and nearest distance **<=**
+second-nearest distance. Ties are permitted, with no guaranteed tied index order.
+Compatible empty Query/Train returns **1..0** without entering BFMatcher.
+Nonempty Query with one Train row raises `OpenCV_Error`. Norm mismatch is checked
+before empties. There is no corresponding 18-bit Query limit.
+
+`Passes_Ratio_Test` and `Filter_By_Ratio` are **pure Ada** mechanics. The application
+must supply a threshold; there is **no default**. `OpenCV_Error` is raised unless
+**0 < r < 1**, including NaN/nonfinite values and on empty filter input. Acceptance
+is strictly `nearest.distance < r * second.distance`; equality rejects. In
+particular **0/0 duplicates reject**. The filter returns nearest `Descriptor_Match`
+values only and preserves candidate order; empty/all-rejected results have bounds
+1..0. Ratio is not probability or confidence.
+
+The translated synthetic example retains nearest/mutual output and adds KNN2,
+an explicit **0.80 example policy**, and accepted distance extrema. This is not a
+library default or a recommended navigation constant. It demonstrates descriptor
+correspondence only, with no geometric verification, registration or localization.
 
 Images and masks are independently snapshotted for ORB. A noncontiguous
 Region is processed as an isolated image, and coordinates are Region-local.
@@ -179,7 +210,7 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 33 cases covering extraction, masks, descriptors, ownership, matching,
+contains 44 cases covering extraction, masks, descriptors, ownership, matching, ratio,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures. Linux also runs the
 real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
@@ -203,7 +234,7 @@ terrain-aware pose estimation using a separate elevation/geospatial layer.
 DTED is terrain data, not camera texture; direct visible/IR-to-elevation
 matching is not promised. Test the actual camera/reference modalities early.
 
-Next: KNN result handling and explicit ratio filtering.
+KNN2 and explicit strict ratio filtering are included; broader matching is deferred.
 No homography, PnP, DTED reader, camera
 calibration, image loading, optical flow, GPU path, or navigation estimator
 is implemented here. [Roadmap](docs/roadmap.md).

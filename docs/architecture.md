@@ -51,6 +51,23 @@ an additional unbounded stack scratch array. See `bfmatcher-source-review.md`.
 
 ## Boundary and lifecycle
 
+KNN2 has its own five-int32 C record, opaque staging handle, getter and destructor,
+not an overloaded one-best result or persistent matcher. Both languages use RAII
+to release staging on conversion/publication failure. The shim verifies outer
+count = Query rows, each bucket length = 2, imgIdx=0, expected ascending query row,
+distinct bounded train indices, finite integral norm-bounded distances and nearest
+<= second. Ada repeats pair/count/order checks before one-based conversion.
+Train <=262143 derives from packed train indexing; Query has no 18-bit cap.
+Compatible empties bypass native matching, after norm compatibility validation;
+one-row Train with nonempty Query rejects. K=2 never combines with cross-check,
+whose native implementation requires K=1.
+
+Ratio policy stays entirely in Ada value operations. There is no default threshold:
+0 < r < 1 is validated positively (NaN/nonfinite cannot establish validity), even
+for empty input. Strict nearest < r*second rejects ties and 0/0 duplicates. The
+filter copies nearest matches only, preserving input order, with empty bounds
+1..0. Ratio is not confidence/probability; no geometric verification is implied.
+
 `OpenCV.Features.Internal` and `.Internal.C_API` are ordinary child packages
 under `src/internal`, matching Imgproc's implementation organization. Ada
 private-child visibility would prevent the Features and ORB bodies from

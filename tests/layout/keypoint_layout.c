@@ -34,3 +34,21 @@ void features_test_match(opencv_features_descriptor_match *match)
 {
     *match = (opencv_features_descriptor_match){17, 23, 256};
 }
+
+int32_t features_test_knn2_layout(int32_t field)
+{
+    const size_t layout[] = {
+        sizeof(opencv_features_knn2_match), _Alignof(opencv_features_knn2_match),
+        offsetof(opencv_features_knn2_match, query_index),
+        offsetof(opencv_features_knn2_match, nearest_train_index),
+        offsetof(opencv_features_knn2_match, nearest_distance),
+        offsetof(opencv_features_knn2_match, second_train_index),
+        offsetof(opencv_features_knn2_match, second_distance)
+    };
+    return field >= 0 && field < 7 ? (int32_t)layout[field] : -1;
+}
+
+void features_test_knn2(opencv_features_knn2_match *match)
+{
+    *match = (opencv_features_knn2_match){17, 23, 128, 29, 256};
+}

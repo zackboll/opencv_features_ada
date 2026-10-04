@@ -1,4 +1,4 @@
-# Binary one-best BFMatcher source review
+# Binary one-best and fixed KNN2 BFMatcher source review
 
 ## Immutable source scope
 
@@ -126,5 +126,78 @@ This is exception injection, not real allocator exhaustion. No invented pointer,
 double-destruction, suppression or production fault-control symbol is used.
 System Core/OpenCV libraries are not fully sanitizer-instrumented by this probe.
 
-No masks, KNN, ratio, radius, float matching, FLANN, persistent matcher,
+No masks, arbitrary K, radius, float matching, FLANN, persistent matcher,
 geometric verification or navigation estimator is implemented in this slice.
+
+## Task 004: K=2 derivation
+
+Re-retrieved all files at the same peeled revisions above and verified every
+SHA-256 against the provenance inventory. The reviewed CPU Mat paths in all
+three revisions establish the following (not a future-version/vendor-HAL proof):
+
+* Pairwise `DescriptorMatcher::knnMatch(query,train,...,knn)` clones an empty
+  matcher, adds the one train Mat and forwards the same knn to its collection
+  overload. No supplied mask yields an empty Mat entry; compactResult defaults
+  false. The collection overload checks masks, trains and calls `knnMatchImpl`.
+* `BFMatcher::knnMatchImpl` requires `_queryDescriptors.isUMat()` for its OpenCL
+  branch (also CV_32FC1 in these revisions). Our UInt8 **Mat** inputs do not
+  select it. K=2 proceeds through CPU `getMat`, one collection, update=0 and
+  `batchDistance(...,knn,...,crossCheck=false)`. Production OpenCL state unchanged.
+* `modules/core/src/batch_distance.cpp`: `K = std::min(K,src2.rows)`. Distance
+  and index outputs have src1.rows rows and K columns. Requiring Train.rows>=2
+  leaves **two columns**. Both norms use CV_32S, initialized INT_MAX, with -1
+  indices. Empty mask means every row is eligible; every exact binary distance
+  <=256 is below the sentinel. At least two eligible rows fill both columns.
+* `BatchDistInvoker::operator()`: each query visits each train row j exactly
+  once. It inserts if `d < distptr[K-1]`, shifts entries while `distptr[k] > d`,
+  and writes `nidxptr[k+1] = j+update`. Insertion preserves nondecreasing distance
+  order. A new train row is inserted once, so retained indices are distinct.
+  Equal distances can occupy both columns; current visit order is not a stable
+  exact-index public guarantee. No particular tied train ordering is promised.
+* Same `IMGIDX_SHIFT=18`, `IMGIDX_ONE=1<<18`, and Train.rows<IMGIDX_ONE assertion
+  applies **before** this K=2 `batchDistance` call. Thus Train<=262143. Query is
+  the output row/qIdx, not masked/shifted: no K=2-specific 18-bit Query restriction.
+  The ordinary native signed-int/count and allocation constraints still apply.
+* Hamming uses `batchDistHamming` / `hal::normHamming`; Hamming2 uses
+  `batchDistHamming2` with cellSize=2. Norm/stat files and DMatch four-argument
+  constructor reviewed again: CV_32S distances convert exactly to CV_32F over
+  0..256/0..128. DMatch receives qIdx, packed train low bits, image high bits,
+  and rank distance. One collection means imgIdx=0. qIdx loop appends one bucket
+  per ascending query row, with two entries from nidx.cols for valid inputs.
+* `batchDistance` crosscheck branch asserts **K==1**, update==0, mask.empty().
+  KNN2 deliberately constructs BFMatcher(norm,**false**), with no cross-check
+  selector. Mutual_Nearest is the distinct K=1 alternative, not ratio filtering.
+* Collection empty/query early returns do not imply empty-train-schema safety.
+  Binding schema/selector/train checks precede legitimate empty publication;
+  public compatible empties bypass C entirely. Norm mismatch precedes empties.
+  Nonempty Query + one-row Train rejects before BFMatcher rather than accepting
+  native K=min(2,1)=1. Valid raw empties own an empty staging result.
+
+Reference anchors in `matchers.cpp` (line numbers in immutable files): pairwise /
+collection knnMatch / BF knnMatchImpl are 589/642/752 (4.1), 589/647/757 (4.10),
+593/651/901 (5.0). In all three `batch_distance.cpp`, insertion is around 235-246,
+K clamp at 284, crosscheck assertion at 303, norm dispatch around 364-367.
+Paths, hashes and revisions remain in `source-provenance.json`; no copied sources.
+
+Shim independently validates outer count=Query.rows, two elements per bucket,
+imgIdx=0, expected qIdx, both train bounds, finite/integral/norm-bounded distances,
+distinct train rows and nearest<=second before publishing integer records. Ada
+rechecks count and ascending qIdx=position before one-based conversion. Staging
+owns values and no input headers, so results survive descriptors and matchers.
+
+Compiler-derived C sizeof/_Alignof/offsetof compared to Ada Size/Alignment/Position
+and a C-written five-field record establish layout/interchange. Local observation:
+size 20, alignment 4, offsets 0/4/8/12/16; handwritten constants are not the proof.
+
+Raw oracles: Hamming and Hamming2 unique 0/1 pairs with a third distance-2 row;
+nonzero 1/2 pairs; explicit 0x03 Hamming=2 versus Hamming2=1; equal-distance ties
+with distinct valid indices, no exact tie order. Both norms test Train=262143,
+unique best row 262142 and second row 262141, and rejection at 262144. Query=262144
+against Train=2 executes in ordinary and both sanitizer variants for both norms.
+
+Ratio helpers are pure Ada: explicit threshold 0<r<1 (negated positive validity
+rejects NaN/infinities); strict nearest < r*second. Numeric 0, negative, 1 and >1
+invalid thresholds tested; no undefined NaN representation fabricated. Exact
+1/2 at .50 rejects and .51 passes; ties and 0/0 reject. Filter preserves candidate
+order and returns only nearest Descriptor_Match values. No default policy,
+confidence/probability, or geometric verification; .80 is example policy only.

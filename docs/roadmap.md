@@ -32,11 +32,16 @@ the native train-index bound. No geometric accuracy follows from this slice.
 
 ## 004 — KNN matching and explicit filtering
 
-Represent per-query results without assuming every query has exactly K
-neighbors. Define missing/empty neighbor semantics and grouping. Preserve
-query indexing. Keep a ratio threshold and other application filters explicit;
-never bake an unexplained ratio constant into the binding. Do not combine
-native k=1 cross-check semantics blindly with k=2 matching.
+Implemented fixed **K=2** for binary ORB descriptors, automatic Hamming/Hamming2,
+owned nearest/second records and pure-Ada strict ratio filtering. Nonempty query
+requires two actual train candidates: one-row train rejects, compatible empties
+return 1..0. Train <=262143; no corresponding Query cap. One-based ordered query
+pairs have distinct train rows and nearest <= second; tied index order unspecified.
+Threshold has no default and must satisfy 0 < r < 1. Strict nearest < r*second
+rejects 0/0 duplicates; filtering returns nearest matches only, in candidate order.
+Ratio is not confidence/probability, geometric verification or localization.
+K=1 mutual cross-check remains a separate alternative, never combined with K=2.
+Arbitrary K, radius, masks, float descriptors and persistent matchers remain deferred.
 
 ## Later — expand only after evidence
 

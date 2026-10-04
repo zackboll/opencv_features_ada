@@ -47,6 +47,11 @@ struct opencv_features_result_handle {
 struct opencv_features_match_result_handle {
     std::vector<opencv_features_descriptor_match> matches;
 };
+struct opencv_features_knn2_result_handle {
+    std::vector<opencv_features_knn2_match> matches;
+};
+static_assert(std::is_standard_layout<opencv_features_knn2_match>::value,
+              "C KNN2 match must have a standard layout");
 static_assert(std::is_standard_layout<opencv_features_descriptor_match>::value,
               "C descriptor match must have a standard layout");
 
@@ -304,6 +309,68 @@ opencv_features_status opencv_features_match_result_get(
     });
 }
 void opencv_features_match_result_destroy(opencv_features_match_result_handle *handle) {
+    try { delete handle; } catch (...) {}
+}
+opencv_features_status opencv_features_bf_knn2(
+    const opencv_core_mat_handle *query_handle, const opencv_core_mat_handle *train_handle,
+    int32_t norm, opencv_features_knn2_result_handle **out_result, int32_t *out_count) {
+    if (out_result != nullptr) *out_result = nullptr;
+    if (out_count != nullptr) *out_count = 0;
+    return guarded([&] {
+        require(out_result != nullptr && out_count != nullptr, "null KNN2 output");
+        require(norm == OPENCV_FEATURES_HAMMING || norm == OPENCV_FEATURES_HAMMING2,
+                "invalid binary descriptor norm selector");
+        const cv::Mat &query = descriptors(query_handle), &train = descriptors(train_handle);
+        require(train.empty() || train.rows < (1 << 18), "train descriptor rows must be <= 262143");
+        require(query.empty() || train.empty() || train.rows >= 2, "KNN2 requires two train rows");
+        checkpoint(11); // before matcher construction, including owned empty allocation
+        auto result = std::make_unique<opencv_features_knn2_result_handle>();
+        std::vector<std::vector<cv::DMatch>> native;
+        if (!query.empty() && !train.empty()) {
+            auto matcher = cv::BFMatcher::create(norm == OPENCV_FEATURES_HAMMING ?
+                            cv::NORM_HAMMING : cv::NORM_HAMMING2, false);
+            require(!matcher.empty(), "native matcher factory returned no matcher");
+            matcher->knnMatch(query, train, native, 2);
+        }
+        checkpoint(12);
+        const auto expected = query.empty() || train.empty() ? std::size_t(0) : std::size_t(query.rows);
+        require(native.size() == expected && native.size() <= std::size_t(INT32_MAX),
+                "invalid native KNN2 count");
+        const int maximum = norm == OPENCV_FEATURES_HAMMING ? 256 : 128;
+        result->matches.reserve(native.size());
+        for (std::size_t i = 0; i < native.size(); ++i) {
+            const auto &pair = native[i];
+            require(pair.size() == 2, "native KNN2 bucket must contain two neighbors");
+            for (const auto &match : pair) {
+                require(match.imgIdx == 0 && match.queryIdx == static_cast<int>(i) &&
+                        match.trainIdx >= 0 && match.trainIdx < train.rows &&
+                        std::isfinite(match.distance) && match.distance >= 0 &&
+                        match.distance <= maximum && std::trunc(match.distance) == match.distance,
+                        "invalid native KNN2 neighbor");
+            }
+            require(pair[0].trainIdx != pair[1].trainIdx && pair[0].distance <= pair[1].distance,
+                    "invalid native KNN2 pair ordering or uniqueness");
+            result->matches.push_back({static_cast<int32_t>(i), pair[0].trainIdx,
+                static_cast<int32_t>(pair[0].distance), pair[1].trainIdx,
+                static_cast<int32_t>(pair[1].distance)});
+        }
+        checkpoint(13); // no outputs published until all validation/allocation succeeds
+        *out_count = static_cast<int32_t>(result->matches.size());
+        *out_result = result.release();
+    });
+}
+opencv_features_status opencv_features_knn2_result_get(
+    const opencv_features_knn2_result_handle *handle, int32_t index,
+    opencv_features_knn2_match *out_match) {
+    if (out_match != nullptr) *out_match = {};
+    return guarded([&] {
+        require(handle != nullptr && out_match != nullptr, "null KNN2 result argument");
+        require(index >= 0 && std::size_t(index) < handle->matches.size(), "KNN2 index out of range");
+        checkpoint(14);
+        *out_match = handle->matches[std::size_t(index)];
+    });
+}
+void opencv_features_knn2_result_destroy(opencv_features_knn2_result_handle *handle) {
     try { delete handle; } catch (...) {}
 }
 } // extern C
