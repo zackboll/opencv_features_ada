@@ -51,7 +51,20 @@ macOS/Windows retain their explicit non-GNAT native compiler selection.
 PR CI: repository-checks, Linux, macOS. Post-merge Windows is in
 `windows-post-merge.yml`, triggered only by pushes to main. The separate
 OpenCV compatibility workflow remains manual-only and was not dispatched.
-At this local-validation checkpoint, corrected-code PR CI has not yet run.
+Corrected-code PR run [`37171617629`](https://github.com/zackboll/opencv_features_ada/actions/runs/37171617629)
+on commit `1dedf5f16353dc65cdfa6bd6bdbff90f4fad6bd0` completed successfully:
+
+| PR job | Actual result |
+| --- | --- |
+| repository-checks | PASS: checker, 19 Python tests, C/C++ profile tests, shell syntax, whitespace |
+| linux (Ubuntu 24.04) | PASS: production build, AUnit 20 registered / 20 executed / 20 passed, synthetic example 393 paired rows; OpenCV 4.6.0 / features2d |
+| macos (macOS 14 arm64) | PASS: production build, AUnit 20 registered / 20 executed / 20 passed; OpenCV 5.0.0 / features; Apple-clang/libc++ linkage validation passed, direct native Features and Core shim found, no libstdc++ |
+
+Only those three jobs existed in the PR run; Windows did not run. No corrective
+CI rerun or warning/test weakening was needed. This records the tested source
+commit; subsequent evidence-documentation commits are checked again by PR CI.
+The runner-installed 5.0.0 success is real evidence for that environment, not
+qualification of the unrun pinned 4.1/4.10/5.0 compatibility matrix.
 Windows is intentionally not a PR check; its corrected-code native qualification
 must occur on main after merge, not by a development dispatch.
 
