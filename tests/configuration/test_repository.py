@@ -40,6 +40,12 @@ class WorkflowTests(unittest.TestCase):
     def test_current_topology(self):
         self.check()
 
+    def test_sanitizer_runner_must_be_linux(self):
+        with self.assertRaises(ValueError):
+            self.check(cross=self.cross.replace(
+                "  linux-sanitizers:\n    runs-on: ubuntu-24.04",
+                "  linux-sanitizers:\n    runs-on: windows-latest"))
+
     def test_equivalent_formatting(self):
         for trigger in (
             '"on": {"push": {"branches": ["main"]}} # comment\n',
@@ -78,6 +84,7 @@ class WorkflowTests(unittest.TestCase):
             self.check(cross=self.cross.replace("  linux:\n", "  linux:\n    strategy:\n      matrix:\n        os: [ubuntu-24.04, windows-latest]\n"))
 
     def test_manual_compatibility_only(self):
+        self.assertIn("-DWITH_ADE=OFF", self.compatibility)
         with self.assertRaises(ValueError):
             self.check(compatibility=self.compatibility.replace("  workflow_dispatch:", "  pull_request:"))
 

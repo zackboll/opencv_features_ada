@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <cmath>
 using namespace opencv_features_detail;
 static_assert(sizeof(opencv_features_keypoint) == 28, "C keypoint ABI size");
 static_assert(offsetof(opencv_features_keypoint, octave) == 20, "C keypoint ABI offset");
@@ -19,6 +20,20 @@ int main() {
     assert(parameters_fit(hi / 2, 4, 1, 255));
     assert(!parameters_fit(0, 2, 0, 20));
     assert(!parameters_fit(hi, 2, 0, 20));
+    assert(!parameters_fit(hi / 2 + 1, 2, 0, 20));
+    // Mirror the reviewed float distribution at the maximum accepted target.
+    // This is empirical compiler evidence in addition to the review bounds.
+    const float factor = float(1.0 / double(1.2f));
+    float desired = (hi / 2)*(1-factor)/(1-float(std::pow(double(factor),8.0)));
+    std::int64_t sum = 0;
+    for (int level = 0; level < levels - 1; ++level) {
+        const auto count = std::int64_t(std::lrint(desired));
+        assert(count > 0 && count * 2 <= hi);
+        if (level == 0) assert(count * levels <= hi);
+        sum += count;
+        desired *= factor;
+    }
+    assert(sum < hi / 2 && (hi / 2 - sum) * 2 <= hi);
     assert(!parameters_fit(500, 1, 0, 20));
     assert(!parameters_fit(500, 5, 0, 20));
     assert(!parameters_fit(500, 2, 2, 20));

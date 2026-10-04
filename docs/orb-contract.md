@@ -21,12 +21,15 @@ featureless valid images are empty successful results.
 
 Inputs and masks are cloned separately. Use **0/255 binary masks** for the
 portable baseline. Other UInt8 mask values are accepted and forwarded
-unchanged, not silently normalized by the binding. In the reviewed OpenCV
-4.10.0 source, resized masks are thresholded at 254 on later pyramid levels;
-in OpenCV 5.0.0, the incoming mask is first thresholded to 0/255. Consequently,
-a mask filled with 1 is not promised to produce equivalent results across
-these versions. This behavior still needs a native regression fixture in
-Task 001. The oldest 4.1 target has not been source-qualified here.
+unchanged, not silently normalized by the binding. In reviewed OpenCV
+4.1.0 and 4.10.0, level zero preserves nonbinary values, while later resized
+masks are thresholded at 254 with THRESH_TOZERO: only 255 survives. OpenCV
+5.0.0 first thresholds the incoming mask to 0/255 **inside the called
+ORB_Impl::detectAndCompute override**, then uses the same pyramid policy.
+Thus an all-1 mask permits only octave-zero detections on these 4.x tags;
+on 5.0 it is equivalent to all-255. Native regression fixtures cover all-1
+and spatial 0/1/254/255 stripes alongside existing zero/full masks. They
+assert eligibility, octave behavior and preservation, not cross-release counts.
 
 A mask governs detection eligibility, not whether every sample in a
 feature's descriptor patch came from inside the mask. Region coordinates
@@ -68,19 +71,28 @@ probability and does not perform descriptor matching.
 
 ## Source-review status
 
-The following official upstream files informed the draft boundary:
+The fixed profile has now been reviewed against official tags **4.1.0,
+4.10.0 and 5.0.0**. See [the expression/type/range derivation](orb-source-review.md)
+and `source-provenance.json` for immutable revisions, paths, and hashes.
+The conservative acceptance bounds are unchanged. The feature cap also
+covers the reachable `firstLevelTarget*8` Harris reserve, not just doubling.
+Image-derived candidate bounds account for retainBest response ties before
+native size-to-int conversions and descriptor row allocation.
+This is not exhaustive OpenCV/vendor-HAL review or a guarantee for other tags.
 
-- OpenCV 4.10.0 `modules/features2d/include/opencv2/features2d.hpp`
-- OpenCV 4.10.0 `modules/features2d/src/orb.cpp`
-- OpenCV 5.0.0 `modules/features/include/opencv2/features.hpp`
-- OpenCV 5.0.0 `modules/features/src/orb.cpp`
+## Boundary qualification
 
-Canonical URLs are recorded in `source-provenance.json`. This is **not** an
-exhaustive review of all reachable native code or all supported 4.x tags.
-The 4.1.0 source was not successfully retrieved during preparation. Task 001
-must review the oldest target, confirm the structural assumptions across
-versions, and execute native tests before claiming compatibility. The
-manual CI matrix makes that missing qualification visible.
+The native AUnit inventory is 24 cases, including direct C exports driven
+through scoped Core callbacks and compiler-derived C/Ada size/alignment/all
+field offsets plus C-written record interchange. Linux additionally runs
+Core's actual C factories through the production shim and a dedicated
+test-hook build. No wrapper layout is duplicated or fake pointer dereferenced.
+ASan/UBSan compile the actual Features source with warnings as errors;
+CPU-only policy is confined to the test driver. System OpenCV/Core libraries
+are not thereby fully instrumented or declared sanitizer-clean.
+Test hooks inject exception categories and publication-stage failures but
+do not exhaust a real allocator or every upstream allocation. See the
+validation record for empirical runs and the isolated host AMD ICD finding.
 
 No timing bound, real-time behavior, crash-proof guarantee, image-matching
 accuracy, or geographic position accuracy is established by this starter.

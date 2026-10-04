@@ -2,7 +2,12 @@ with AUnit.Assertions;
 with AUnit.Test_Caller;
 with AUnit.Test_Fixtures;
 with OpenCV.Core.UInt8_Access;
+with OpenCV.Core.Module_Interop;
+with OpenCV.Features.Internal.C_API;
 with OpenCV.Features.ORB;
+with Interfaces;
+with Interfaces.C;
+with System;
 
 package body Features_Tests is
    use AUnit.Assertions;
@@ -13,6 +18,12 @@ package body Features_Tests is
    use type OpenCV.Core.Channel_Count;
    use type OpenCV.UInt8_Value;
    use type OpenCV.Float32_Value;
+   package ABI renames OpenCV.Features.Internal.C_API;
+   package Bridge renames OpenCV.Core.Module_Interop;
+   use type Interfaces.Integer_32;
+   use type Interfaces.C.C_float;
+   use type System.Address;
+   use type ABI.C_Keypoint;
 
    type Fixture is new AUnit.Test_Fixtures.Test_Fixture with null record;
 
@@ -355,6 +366,203 @@ package body Features_Tests is
       when OpenCV.OpenCV_Error => null;
    end Config_Rejection;
 
+   procedure Nonbinary_Masks (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : constant ORB.Detector := ORB.Create;
+      Source : constant OpenCV.Core.Mat := Image;
+      Mask : OpenCV.Core.Mat := Image (Textured => False);
+   begin
+      Mask.Set_To (OpenCV.Make_Scalar (1.0));
+      declare
+         Before : constant OpenCV.Core.Mat := Mask.Clone;
+         Ones : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
+      begin
+         Assert (Count (Ones) > 0, "all-1 mask lost level-zero features");
+         Assert_Same (Mask, Before);
+         Mask.Set_To (OpenCV.Make_Scalar (255.0));
+         declare
+            Full : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
+         begin
+            if Native_Version (Native_Version'First) = '5' then
+               Assert (Count (Ones) = Count (Full), "5.0 incoming normalization differs");
+               for I in 1 .. Count (Ones) loop
+                  Assert (Point (Ones, I) = Point (Full, I), "5.0 normalized keypoint differs");
+               end loop;
+               Assert_Same (Descriptor_Copy (Ones), Descriptor_Copy (Full));
+            else
+               for I in 1 .. Count (Ones) loop
+                  Assert (Point (Ones, I).Octave = 0, "4.x all-1 mask survives resized level");
+               end loop;
+            end if;
+         end;
+      end;
+      -- Vertical stripes: 0 / 1 / 254 / 255. Level-zero FAST uses != 0.
+      for R in 0 .. 255 loop
+         for C in 0 .. 255 loop
+            Bytes.Set (Mask, R, C,
+                       (case C / 64 is when 0 => 0, when 1 => 1,
+                        when 2 => 254, when others => 255));
+         end loop;
+      end loop;
+      declare
+         Before : constant OpenCV.Core.Mat := Mask.Clone;
+         Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
+      begin
+         Assert (Count (Result) > 0, "mixed mask yielded no features");
+         for I in 1 .. Count (Result) loop
+            declare
+               P : constant Keypoint := Point (Result, I);
+            begin
+               if P.Octave = 0 then
+                  Assert (Bytes.Get (Mask, Natural (P.Position.Y), Natural (P.Position.X)) /= 0,
+                          "level-zero point outside nonzero mask");
+               end if;
+            end;
+         end loop;
+         Assert_Same (Mask, Before);
+      end;
+   end Nonbinary_Masks;
+
+   procedure ABI_Layout (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Layout (Field : Interfaces.Integer_32) return Interfaces.Integer_32
+        with Import, Convention => C, External_Name => "features_test_layout";
+      procedure Fill (Point : access ABI.C_Keypoint)
+        with Import, Convention => C, External_Name => "features_test_keypoint";
+      P : aliased ABI.C_Keypoint;
+      type Positions is array (Natural range <>) of Natural;
+      Offsets : constant Positions :=
+        [P.X'Position, P.Y'Position, P.Size'Position, P.Angle'Position,
+         P.Response'Position, P.Octave'Position, P.Class_Id'Position];
+   begin
+      Assert (ABI.C_Keypoint'Size = Natural (Layout (0)) * System.Storage_Unit,
+              "C/Ada keypoint size mismatch");
+      Assert (ABI.C_Keypoint'Alignment = Natural (Layout (1)), "C/Ada alignment mismatch");
+      for I in Offsets'Range loop
+         Assert (Offsets (I) = Natural (Layout (Interfaces.Integer_32 (I + 2))),
+                 "C/Ada field offset mismatch");
+      end loop;
+      Assert (P.X'First_Bit = 0 and then P.Y'First_Bit = 0
+              and then P.Size'First_Bit = 0 and then P.Angle'First_Bit = 0
+              and then P.Response'First_Bit = 0 and then P.Octave'First_Bit = 0
+              and then P.Class_Id'First_Bit = 0, "non-byte-aligned field");
+      Fill (P'Access);
+      Assert (P = (1.25, -2.5, 31.0, 90.0, 0.125, 7, -1), "C/Ada interchange mismatch");
+   end ABI_Layout;
+
+   procedure ABI_Creation (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : aliased System.Address := System.Null_Address;
+      Live : aliased System.Address := System.Null_Address;
+      procedure Invalid (Maximum, Tuple, Score, Threshold : Interfaces.Integer_32) is
+      begin
+         Detector := Live; -- a live sentinel, never dereferenced on failed creation
+         Assert (ABI.ORB_Create (Maximum, Tuple, Score, Threshold, Detector'Access) = 1,
+                 "malformed raw configuration accepted");
+         Assert (Detector = System.Null_Address, "failed creation did not clear output");
+      end Invalid;
+   begin
+      Assert (ABI.ORB_Create (500, 2, 0, 20, null) = 1, "null creation output accepted");
+      Assert (ABI.ORB_Create (500, 2, 0, 20, Live'Access) = 0, "valid raw creation failed");
+      Invalid (0, 2, 0, 20);
+      Invalid (Interfaces.Integer_32'Last / 2 + 1, 2, 0, 20);
+      Invalid (500, 1, 0, 20);
+      Invalid (500, 5, 0, 20);
+      Invalid (500, 2, -1, 20);
+      Invalid (500, 2, 2, 20);
+      Invalid (500, 2, 0, -1);
+      Invalid (500, 2, 0, 256);
+      ABI.ORB_Destroy (Live);
+      ABI.ORB_Destroy (System.Null_Address);
+   end ABI_Creation;
+
+   procedure ABI_Extraction (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : aliased System.Address := System.Null_Address;
+      Result : aliased System.Address := System.Null_Address;
+      Count : aliased Interfaces.Integer_32 := -1;
+      P : aliased ABI.C_Keypoint := (0.0, 0.0, 0.0, 0.0, 0.0, 0, 0);
+      Zero : constant ABI.C_Keypoint := (0.0, 0.0, 0.0, 0.0, 0.0, 0, 0);
+      Source : constant OpenCV.Core.Mat := Image;
+      Wrong : constant OpenCV.Core.Mat := OpenCV.Core.Create
+        (256, 256, (Depth => OpenCV.Core.Float32, Channels => 1));
+      Small : constant OpenCV.Core.Mat := Image (Rows => 128, Columns => 128);
+      Output : OpenCV.Core.Mat;
+      -- Null is expressed at the raw test boundary; no invented non-null handles.
+      function Null_Image
+        (Handle, Image : System.Address; Result : access System.Address;
+         Count : access Interfaces.Integer_32) return ABI.Status
+        with Import, Convention => C, External_Name => "opencv_features_orb_extract";
+      function Null_Mask
+        (Handle : System.Address; Image : Bridge.Input_Mat_Handle; Mask : System.Address;
+         Result : access System.Address; Count : access Interfaces.Integer_32) return ABI.Status
+        with Import, Convention => C, External_Name => "opencv_features_orb_extract_masked";
+      function Null_Destination (Handle, Destination : System.Address) return ABI.Status
+        with Import, Convention => C, External_Name => "opencv_features_result_descriptors";
+      procedure Failed (Code : ABI.Status) is
+      begin
+         Assert (Code = 1, "raw extraction error status differs");
+         Assert (Result = System.Null_Address and then Count = 0, "failure outputs not cleared");
+         Count := -1;
+      end Failed;
+      procedure Extract (H : Bridge.Input_Mat_Handle) is
+         procedure Bad_Mask (M : Bridge.Input_Mat_Handle) is
+         begin
+            Failed (ABI.ORB_Extract_Masked (Detector, H, M, Result'Access, Count'Access));
+         end Bad_Mask;
+      begin
+         Failed (ABI.ORB_Extract (System.Null_Address, H, Result'Access, Count'Access));
+         Failed (Null_Mask (Detector, H, System.Null_Address, Result'Access, Count'Access));
+         Assert (ABI.ORB_Extract (Detector, H, null, Count'Access) = 1 and then Count = 0,
+                 "null result output not handled");
+         Assert (ABI.ORB_Extract (Detector, H, Result'Access, null) = 1
+                 and then Result = System.Null_Address, "null count output not handled");
+         Bridge.With_Input_Handle (Wrong, Bad_Mask'Access);
+         Bridge.With_Input_Handle (Small, Bad_Mask'Access);
+         Assert (ABI.ORB_Extract (Detector, H, Result'Access, Count'Access) = 0 and then Count > 0,
+                 "raw extraction failed");
+      end Extract;
+      procedure Bad_Image (H : Bridge.Input_Mat_Handle) is
+      begin
+         Failed (ABI.ORB_Extract (Detector, H, Result'Access, Count'Access));
+      end Bad_Image;
+      procedure Export (H : Bridge.Output_Mat_Handle) is
+      begin
+         Assert (ABI.Result_Descriptors (Result, H) = 0, "real Core descriptor export failed");
+      end Export;
+   begin
+      Assert (ABI.ORB_Create (500, 2, 0, 20, Detector'Access) = 0, "creation failed");
+      Failed (Null_Image (Detector, System.Null_Address, Result'Access, Count'Access));
+      Bridge.With_Input_Handle (Wrong, Bad_Image'Access);
+      Bridge.With_Input_Handle (Source, Extract'Access);
+      ABI.ORB_Destroy (Detector);
+      Detector := System.Null_Address;
+      -- Native result owns its data independently of the destroyed detector.
+      for Index in 0 .. Count - 1 loop
+         if Index = 0 or else Index = Count - 1 then
+            Assert (ABI.Result_Point (Result, Index, P'Access) = 0 and then P.Size > 0.0,
+                    "first/last point or result lifetime failed");
+         end if;
+      end loop;
+      Assert (ABI.Result_Point (Result, -1, P'Access) = 1 and then P = Zero,
+              "negative index/output clearing failed");
+      P := (1.0, 1.0, 1.0, 1.0, 1.0, 1, 1);
+      Assert (ABI.Result_Point (Result, Count, P'Access) = 1 and then P = Zero,
+              "end index/output clearing failed");
+      Assert (ABI.Result_Point (Result, 0, null) = 1, "null point output accepted");
+      Assert (ABI.Result_Point (System.Null_Address, 0, P'Access) = 1 and then P = Zero,
+              "null result point accepted");
+      Assert (Null_Destination (System.Null_Address, System.Null_Address) = 1,
+              "null descriptor result accepted");
+      Assert (Null_Destination (Result, System.Null_Address) = 1, "null destination accepted");
+      Bridge.With_Output_Handle (Output, Export'Access);
+      Assert (Output.Rows = Natural (Count) and then Output.Columns = 32
+              and then Output.Depth = OpenCV.Core.UInt8 and then Output.Channels = 1,
+              "raw descriptor schema differs");
+      ABI.Result_Destroy (Result);
+      Assert (Output.Rows = Natural (Count), "Core output lost result storage");
+   end ABI_Extraction;
+
    package Caller is new AUnit.Test_Caller (Fixture);
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
@@ -420,6 +628,10 @@ package body Features_Tests is
       Result.Add_Test
         (Caller.Create ("Reject a FAST threshold outside the public profile",
                         Config_Rejection'Access));
+      Result.Add_Test (Caller.Create ("Nonbinary mask native semantics", Nonbinary_Masks'Access));
+      Result.Add_Test (Caller.Create ("Compiler-derived C/Ada keypoint layout", ABI_Layout'Access));
+      Result.Add_Test (Caller.Create ("Raw C ABI detector creation", ABI_Creation'Access));
+      Result.Add_Test (Caller.Create ("Raw C ABI extraction/results with real Core handles", ABI_Extraction'Access));
       return Result;
    end Suite;
 end Features_Tests;

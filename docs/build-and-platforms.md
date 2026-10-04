@@ -86,6 +86,7 @@ PR CI (`cross-platform.yml`):
 - repository checks;
 - Linux production build, native AUnit suite, and synthetic example;
 - macOS production build, native AUnit suite, and Apple-clang/libc++ linkage check.
+- Linux-only isolated production-shim ASan/UBSan boundary job (`linux-sanitizers`).
 
 The same cross-platform workflow runs on main pushes and manual dispatch.
 Post-merge main CI (`windows-post-merge.yml`): **Windows only**. No Windows job
@@ -104,6 +105,12 @@ paths and explicit pkg-config/runtime prefixes. The distro development package
 is also installed to satisfy Alire's external-package discovery; its native
 library must not shadow the requested source build. The workflow verifies
 the configured native version after the test run.
+It also runs the actual-shim sanitizer driver for each manual matrix target.
+The driver disables OpenCL only in its test process, with leak detection enabled;
+no production library global setting changes or sanitizer suppressions are added.
+WITH_ADE is explicitly OFF: OpenCV 4.1's G-API initialization otherwise adds
+an unused ADE target before whitelist exclusion, failing with modern GCC's
+missing transitive `<cstdint>` include. G-API is not part of this ORB profile.
 
 Before release, test `alr build`, `alr test`, examples, all target backends,
 compiler/runtime dependencies, `gprinstall`/clean consumer linkage, and source

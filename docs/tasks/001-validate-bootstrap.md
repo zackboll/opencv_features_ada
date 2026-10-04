@@ -67,7 +67,8 @@ Stop at review. No automatic commit, push, PR, merge, release or version bump.
 
 ## Version-sensitive mask regression
 
-Add a nonbinary mask fixture (for example, all bytes equal to 1) alongside
-0/255 masks. Record the native OpenCV 4.10 versus 5.0 normalization
-difference described in `docs/orb-contract.md`; do not force cross-version
-result equality or silently alter native semantics. Review 4.1 separately.
+Task 002 supplies all-1 and 0/1/254/255 fixtures alongside 0/255 masks.
+Source review confirms 4.1 and 4.10 preserve input level-zero values and
+zero sub-255 resized levels, while 5.0 normalizes the incoming mask inside
+the called ORB override. See `docs/orb-source-review.md`; no cross-version
+count equality or binding-side normalization is introduced.

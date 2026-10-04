@@ -48,6 +48,25 @@ jobs:
         run: |
           alr -n -C examples build
           alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic
+  linux-sanitizers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ pkg-config libopencv-dev
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+      - name: Select Ada toolchain
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Instrument actual Features shim and exercise native boundary
+        run: |
+          alr -n build
+          alr -n exec -- g++ --version
+          alr -n exec -- sh scripts/run_sanitizers.sh
   macos:
     runs-on: macos-14
     steps:
