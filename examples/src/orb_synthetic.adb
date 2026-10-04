@@ -18,7 +18,7 @@ begin
       end loop;
    end loop;
    declare
-      Result : Features.Feature_Set := ORB.Detect_And_Compute (Detector, Image);
+      Result : constant Features.Feature_Set := ORB.Detect_And_Compute (Detector, Image);
       Descriptors : constant OpenCV.Core.Mat := Features.Descriptor_Copy (Result);
    begin
       Ada.Text_IO.Put_Line

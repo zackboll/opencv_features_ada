@@ -18,6 +18,7 @@ package body Features_Tests is
 
    function Image (Rows : Positive := 256; Columns : Positive := 256;
                    Textured : Boolean := True) return OpenCV.Core.Mat is
+      Checker_Parity_Modulus : constant Positive := 2;
       Result : OpenCV.Core.Mat := OpenCV.Core.Create
         (Rows, Columns, (Depth => OpenCV.Core.UInt8, Channels => 1));
    begin
@@ -28,7 +29,8 @@ package body Features_Tests is
                Bytes.Set
                  (Result, R, C,
                   OpenCV.UInt8_Value
-                    ((R * 37 + C * 17 + ((R / 16 + C / 16) mod 2) * 83
+                     ((R * 37 + C * 17
+                       + ((R / 16 + C / 16) mod Checker_Parity_Modulus) * 83
                       + ((R * C) mod 251)) mod 256));
             end loop;
          end loop;
@@ -51,7 +53,7 @@ package body Features_Tests is
    end Assert_Same;
 
    procedure Expect_Invalid_Image (Source : OpenCV.Core.Mat) is
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
    begin
       declare
          Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
@@ -94,7 +96,7 @@ package body Features_Tests is
       Config : constant ORB.Configuration :=
         (Maximum_Features => 300, Tuple => ORB.Four_Samples,
          Score => ORB.FAST_Score, FAST_Threshold => 7);
-      Detector : ORB.Detector := ORB.Create (Config);
+      Detector : constant ORB.Detector := ORB.Create (Config);
       use type ORB.Configuration;
    begin
       Assert (ORB.Parameters (Detector) = Config, "configuration changed");
@@ -103,9 +105,9 @@ package body Features_Tests is
    procedure Blank_Image (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image (Textured => False);
-      Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
       Descriptors : constant OpenCV.Core.Mat := Descriptor_Copy (Result);
       Points : constant Keypoint_Array := Keypoints (Result);
    begin
@@ -116,10 +118,10 @@ package body Features_Tests is
    procedure Paired_Result (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
       Before : constant OpenCV.Core.Mat := Source.Clone;
-      Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
       Descriptors : constant OpenCV.Core.Mat := Descriptor_Copy (Result);
    begin
       Assert (Count (Result) > 0, "synthetic texture yielded no features");
@@ -144,10 +146,10 @@ package body Features_Tests is
    procedure Zero_Mask (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
       Mask : constant OpenCV.Core.Mat := Image (Textured => False);
-      Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
+      Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
    begin
       Assert (Count (Result) = 0, "zero mask did not exclude keypoints");
    end Zero_Mask;
@@ -155,14 +157,14 @@ package body Features_Tests is
    procedure Full_Mask (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
       Mask : OpenCV.Core.Mat := Image (Textured => False);
    begin
       Mask.Set_To (OpenCV.Make_Scalar (255.0));
       declare
          Before : constant OpenCV.Core.Mat := Mask.Clone;
-         Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
+         Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source, Mask);
       begin
          Assert (Count (Result) > 0, "full mask unexpectedly excluded all features");
          Assert_Same (Mask, Before);
@@ -206,7 +208,7 @@ package body Features_Tests is
    procedure Mask_Shape (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
       Mask : constant OpenCV.Core.Mat := Image (Rows => 128);
    begin
@@ -223,7 +225,7 @@ package body Features_Tests is
    procedure Mask_Depth (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
       Mask : constant OpenCV.Core.Mat := OpenCV.Core.Create
         (256, 256, (Depth => OpenCV.Core.Float32, Channels => 1));
@@ -259,7 +261,7 @@ package body Features_Tests is
 
       Detector : ORB.Detector := ORB.Create;
       Source : OpenCV.Core.Mat := Image;
-      Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
       Before : constant OpenCV.Core.Mat := Descriptor_Copy (Result);
    begin
       Assert (Count (Result) > 0, "no result to test");
@@ -275,9 +277,9 @@ package body Features_Tests is
    procedure Descriptor_Isolation (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Source : constant OpenCV.Core.Mat := Image;
-      Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
       Copy : OpenCV.Core.Mat := Descriptor_Copy (Result);
       Original : constant OpenCV.UInt8_Value := Bytes.Get (Copy, 0, 0);
    begin
@@ -292,13 +294,13 @@ package body Features_Tests is
    procedure Region_Isolation (T : in out Fixture) is
       pragma Unreferenced (T);
 
-      Detector : ORB.Detector := ORB.Create;
+      Detector : constant ORB.Detector := ORB.Create;
       Parent : constant OpenCV.Core.Mat := Image (Rows => 320, Columns => 320);
       Region : constant OpenCV.Core.Mat :=
         Parent.Region (OpenCV.Rect'(X => 32, Y => 32, Width => 256, Height => 256));
       Packed : constant OpenCV.Core.Mat := Region.Clone;
-      First : Feature_Set := ORB.Detect_And_Compute (Detector, Region);
-      Second : Feature_Set := ORB.Detect_And_Compute (Detector, Packed);
+      First : constant Feature_Set := ORB.Detect_And_Compute (Detector, Region);
+      Second : constant Feature_Set := ORB.Detect_And_Compute (Detector, Packed);
       A : constant OpenCV.Core.Mat := Descriptor_Copy (First);
       B : constant OpenCV.Core.Mat := Descriptor_Copy (Second);
    begin
@@ -329,9 +331,9 @@ package body Features_Tests is
    begin
       for Tuple in ORB.Three_Samples .. ORB.Four_Samples loop
          declare
-            Detector : ORB.Detector := ORB.Create
+            Detector : constant ORB.Detector := ORB.Create
               ((Tuple => Tuple, others => <>));
-            Result : Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+            Result : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
          begin
             Assert (Count (Result) > 0, "no features for tuple test");
             Assert (Required_Norm (Result) = Hamming_2, "tuple norm mismatch");

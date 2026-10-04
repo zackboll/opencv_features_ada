@@ -44,6 +44,12 @@ exposing a writable raw descriptor view to applications.
 
 ## Boundary and lifecycle
 
+`OpenCV.Features.Internal` and `.Internal.C_API` are ordinary child packages
+under `src/internal`, matching Imgproc's implementation organization. Ada
+private-child visibility would prevent the Features and ORB bodies from
+with-ing the nested C API. Implementation use remains in bodies; no C ABI
+types or raw pointers are added to the normal public Features API.
+
 1. Ada validates image semantics and the public configuration.
 2. The private interop calls a fixed-width C ABI. No C++ ABI types cross it.
 3. The shim independently validates ABI selectors, Core handles, image/mask

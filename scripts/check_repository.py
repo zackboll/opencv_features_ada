@@ -5,11 +5,22 @@ import re
 import sys
 import tomllib
 
+from workflow_topology import check_workflows
+
 ROOT = Path(__file__).resolve().parent.parent
 
 def check(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+def check_bridge_ownership(root: Path) -> None:
+    # Alire fetches the authoritative bridge into ignored dependency caches.
+    # Prune those directories, but reject copies anywhere in repository source.
+    import os
+    for directory, children, files in os.walk(root):
+        children[:] = [name for name in children if name not in {".git", "alire"}]
+        check("opencv_core_module_bridge.hpp" not in files,
+              "do not vendor Core's bridge")
 
 def main() -> None:
     manifests = [tomllib.loads((ROOT / p).read_text()) for p in
@@ -29,7 +40,8 @@ def main() -> None:
     imported = set(re.findall(r'External_Name\s*=>\s*"(opencv_features_\w+)"', ada))
     check(declared == imported, f"C/Ada import mismatch: {declared ^ imported}")
     check(all(re.search(r"\b" + n + r"\s*\(", cpp) for n in declared), "missing C++ export")
-    check(not list(ROOT.rglob("opencv_core_module_bridge.hpp")), "do not vendor Core's bridge")
+    check_bridge_ownership(ROOT)
+    check_workflows(ROOT / ".github/workflows")
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()
     registrations = re.findall(r"Result\.Add_Test\s*\(Caller\.Create", tests)
@@ -37,7 +49,7 @@ def main() -> None:
     for path in list((ROOT / "src").rglob("*.ads")) + list((ROOT / "src").rglob("*.adb")):
         check("pragma Import" not in path.read_text() or "/internal/" in path.as_posix(),
               f"C import leaked into public Ada: {path}")
-    print(f"PASS: manifests, shared Core pin, {len(declared)} ABI declarations/imports, ownership layout, 20 AUnit registrations")
+    print(f"PASS: manifests, shared Core pin, {len(declared)} ABI declarations/imports, ownership layout, 20 AUnit registrations, CI topology")
 
 if __name__ == "__main__":
     try:

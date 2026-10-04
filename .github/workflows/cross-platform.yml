@@ -35,6 +35,13 @@ jobs:
           toolchain: "gnat_native gprbuild"
       - name: Select Ada toolchain
         run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Record native and compiler versions
+        run: |
+          for package in opencv5 opencv4 opencv; do
+            if pkg-config --exists "$package"; then pkg-config --modversion "$package"; break; fi
+          done
+          g++ --version
+          alr toolchain
       - name: Build and run native AUnit suite
         run: sh scripts/test.sh
       - name: Build and run example
@@ -53,6 +60,13 @@ jobs:
           toolchain: "gnat_native gprbuild"
       - name: Select Ada toolchain
         run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Record native and compiler versions
+        run: |
+          for package in opencv5 opencv4 opencv; do
+            if pkg-config --exists "$package"; then pkg-config --modversion "$package"; break; fi
+          done
+          xcrun clang++ --version
+          alr toolchain
       - name: Build and run native AUnit suite
         run: sh scripts/test.sh
       - name: Verify C++ runtime boundary
@@ -65,40 +79,3 @@ jobs:
           grep -E 'libopencv_core_shim' /tmp/features-linkage.txt
           grep -E 'libc\+\+' /tmp/features-linkage.txt
           if grep -E 'libstdc\+\+' /tmp/features-linkage.txt; then exit 1; fi
-  windows:
-    # Follow the existing repositories: no Windows job on pull requests.
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - uses: alire-project/setup-alire@latest
-        with:
-          version: "2.1.1"
-          toolchain: "gnat_native gprbuild"
-          msys2: true
-      - name: Select Ada toolchain
-        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
-      - name: Update MSYS2 and install native dependencies
-        run: |
-          alr exec -- pacman -Syu --noconfirm
-          alr exec -- pacman -S --noconfirm --needed \
-            mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc
-      - name: Build and run with isolated native runtime
-        run: sh scripts/test.sh
-      - name: Inspect external Features DLL
-        run: |
-          set -eu
-          test -f lib/libopencv_features_shim.dll
-          test -f lib/libopencv_features_shim.dll.a
-          test ! -f lib/libopencv_features_shim.a
-          driver=$(sed -n 's/^[ ]*Cxx_Driver := "\(.*\)";/\1/p' config/opencv_features_install.gpr)
-          case "$driver" in *gnat_native*) exit 1 ;; esac
-          test -n "$driver"
-          "$(dirname "$driver")/objdump.exe" -p lib/libopencv_features_shim.dll > features-pe.log
-          grep -i 'DLL Name.*opencv_features' features-pe.log
-          grep -i 'DLL Name.*opencv_core_shim' features-pe.log

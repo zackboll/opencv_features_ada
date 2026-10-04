@@ -4,7 +4,7 @@ with Interfaces.C.Strings;
 with OpenCV.Core.Module_Interop;
 with System;
 
-private package OpenCV.Features.Internal.C_API is
+package OpenCV.Features.Internal.C_API is
    subtype Status is Interfaces.Integer_32;
    Success : constant Status := 0;
 
