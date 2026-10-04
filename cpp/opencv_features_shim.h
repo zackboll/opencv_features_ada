@@ -81,6 +81,16 @@ OPENCV_FEATURES_API opencv_features_status opencv_features_bf_match(
     const opencv_core_mat_handle *query, const opencv_core_mat_handle *train,
     int32_t norm, int32_t mode,
     opencv_features_match_result_handle **out_result, int32_t *out_count);
+/* CPU Mat radiusMatch, no cross-check/masks. Same descriptor schema, but NO
+ * packed 18-bit train limit. Integer maximum_distance: 1..256 Hamming,
+ * 1..128 Hamming2, validated even for empties. Inclusive distance <= radius.
+ * Flat owned results: query ascending, distance nondecreasing within query;
+ * ties have unspecified train order. Count must fit int32_t/allocation sizes.
+ * Every failure clears each supplied output to null/zero. */
+OPENCV_FEATURES_API opencv_features_status opencv_features_bf_radius_match(
+    const opencv_core_mat_handle *query, const opencv_core_mat_handle *train,
+    int32_t norm, int32_t maximum_distance,
+    opencv_features_match_result_handle **out_result, int32_t *out_count);
 OPENCV_FEATURES_API opencv_features_status opencv_features_match_result_get(
     const opencv_features_match_result_handle *handle, int32_t index,
     opencv_features_descriptor_match *out_match);

@@ -31,6 +31,29 @@ package OpenCV.Features.Matching is
       Train_Index : Positive;
       Distance    : Binary_Descriptor_Distance;
    end record;
+
+   --  Absolute inclusive radius, not KNN/ratio filtering or cross-check.
+   --  Norms must agree, even for empty inputs; automatic Hamming for WTA2,
+   --  Hamming2 for WTA3/4. OpenCV_Error unless Maximum_Distance is 1..256
+   --  (Hamming) or 1..128 (Hamming2), including empty inputs. Zero is rejected;
+   --  exact-zero radius matching is deferred, not mapped to another radius.
+   --  Compatible empties return (1 .. 0); one-row Train is valid.
+   --  All qualifying matches, flat and Ada-owned: ascending Query_Index,
+   --  nondecreasing Distance within each query, unspecified tied train order.
+   --  Query/train indices are one-based and bounded by the input counts;
+   --  each train row occurs at most once per query, not once globally.
+   --  Queries can contribute zero, one, or many matches; length need not equal
+   --  Query.Count. Distances are exact integers, <= Maximum_Distance.
+   --  No KNN 18-bit train bound: native rows/indices are signed 32-bit; flat
+   --  count must fit signed 32-bit and Ada Natural/allocation representation.
+   --  Inputs unchanged; owned values survive inputs, detector and native staging.
+   --  CPU Mats only; no masks, persistent matcher or geometric policy. Native
+   --  full distance matrices/results may be large; allocation can fail.
+   function Brute_Force_Radius_Match
+     (Query : Feature_Set; Train : Feature_Set;
+      Maximum_Distance : Binary_Descriptor_Distance)
+      return Descriptor_Match_Array;
+
    type Two_Nearest_Match is record
       Query_Index    : Positive;
       Nearest        : Binary_Neighbor;

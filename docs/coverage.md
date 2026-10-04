@@ -2,7 +2,7 @@
 
 This is a handwritten capability inventory, not a generated header census.
 "Implemented draft" means source is present, not fully qualified. The initial
-44-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
+53-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
 `bootstrap-validation.md` for exact evidence and remaining platform/version,
 source-review, sanitizer and ABI robustness gates.
 
@@ -18,7 +18,8 @@ source-review, sanitizer and ABI robustness gates.
 | Binary one-best BF match | `Matching.Brute_Force_Match` | Hamming/Hamming2, nearest/mutual-nearest |
 | Binary KNN, fixed K=2 | `Matching.Brute_Force_KNN_2` | Hamming/Hamming2, separate from cross-check |
 | Strict ratio filtering | `Passes_Ratio_Test`, `Filter_By_Ratio` | Pure Ada, explicit threshold, nearest values only |
-| Arbitrary K, radius, match masks | none | Deferred |
+| Binary absolute radius | `Matching.Brute_Force_Radius_Match` | Inclusive CPU Hamming/Hamming2, flat owned values |
+| Arbitrary K, match masks | none | Deferred |
 | Other detectors, descriptors and FLANN | none | Deferred |
 | UMat/OpenCL/CUDA wrappers | none | Deferred |
 | Geometry, PnP, DTED, estimator logic | none | Outside Features |
@@ -50,7 +51,7 @@ mutual nearest, descriptor/keypoint preservation, result lifetime, and compiler-
 derived C/Ada match-record layout/interchange. Total: **33 registered**.
 One-based indices, sorted query order, exact integer distances and automatic
 norm selection are public contracts; ties do not promise a specific train index.
-Train rows are limited to 262143 by native packed indexing; Query is not.
+One-best/KNN2 Train rows are limited to 262143 by native packed indexing; Query is not.
 
 Linux's two raw driver variants add manually controlled binary oracles:
 Hamming 0/1/2/256; Hamming2 0/1/128; cross-check A/X retained and B/X rejected;
@@ -78,3 +79,20 @@ against two train rows for both norms. All run in ordinary and ASan+UBSan varian
 including the large-query case (no runtime-driven omission needed). Fault hooks
 11/12/13/14 exercise all five exception categories, cleanup and atomic publication.
 No production fault-control symbol, suppression, fake handle or double destroy.
+
+Task 005 adds **9 registrations**, total **53**, preserving the existing 44:
+WTA2/3/4 exact fixtures plus exhaustive independent ORB bit/cell distance oracles,
+boundaries/ties/zero-one-many buckets and mapping, compatible empties, incompatible
+norms including all empty combinations, invalid thresholds even for empties with
+preserved inputs, one-row train/empty flattened/norm maximum, lifetime, and
+returned Ada train index **262145** for both norms. The fixture child exists only
+in the test crate, preserving pairing; it is not a production descriptor generator.
+
+Raw actual-shim variants additionally exercise radius null outputs/inputs,
+selectors/schema/N-D/threshold negatives, cleared getter outputs, owned empties,
+ROI/lifetime, both maximum distances and direct high train indices. Checkpoints
+15/16/17/18 cover five exception categories, private staging/atomic publication
+and empty cleanup. Checked production count/layout helpers exercise overflow
+without manufacturing invalid handles or allocating INT32_MAX matches: this is
+helper evidence, **not** a billions-of-results native execution. Sanitizer
+qualification remains separate from AUnit registrations; see validation record.

@@ -71,13 +71,17 @@ Distance is neither probability nor confidence.
 
 ## Packed train limit and reverse cross-check
 
-All reviewed BFMatcher implementations define `IMGIDX_SHIFT=18` and
+All reviewed BFMatcher **knnMatchImpl** implementations define `IMGIDX_SHIFT=18` and
 `IMGIDX_ONE=1 << 18`. Before each `batchDistance` call they assert
 `trainDescCollection[iIdx].rows < IMGIDX_ONE`. The single train collection
 has imgCount=1; the additional `imgCount*IMGIDX_ONE < INT_MAX` check is trivially
 satisfied. Thus **Train.Count <= 262143**, with no silent truncation. Both Ada
 and C preflight this native limit before execution. It is a native indexing
 restriction, not a feature target or heuristic resource budget.
+
+This restriction applies to one-best/KNN2, **not radiusMatchImpl**, which uses
+direct train indices. See `radius-matcher-source-review.md` for Task 005's
+separate source review and returned-high-train-index regression.
 
 `batchDistance(crosscheck=true)` requires K=1, update=0, no mask and a nonempty
 index result. It runs reverse `batchDistance(src2,src1,...,false)` and forward

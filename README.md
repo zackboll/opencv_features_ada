@@ -6,8 +6,8 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 `OpenCV.Features.ORB` and `OpenCV.Features.Matching`.
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
-ORB, binary BF one-best/KNN2 matching and pure-Ada ratio filtering, 44 registered
-AUnit cases, build scripts, and CI workflows are included. Local qualification passes all 44
+ORB, binary BF one-best/KNN2/radius matching and pure-Ada ratio filtering, 53 registered
+AUnit cases, build scripts, and CI workflows are included. Local qualification passes all 53
 native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
 still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
@@ -118,8 +118,8 @@ detector lifetime. Equal minimum-distance ties do not promise an exact train ind
 Norm selection is automatic: Hamming for WTA2 (**0..256** differing bits),
 Hamming2 for WTA3/4 (**0..128** differing 2-bit cells). Different required norms
 raise `OpenCV_Error`, even with empty inputs. Compatible empty inputs succeed
-with bounds **1..0**. Train.Count must be **<=262143**, because native CPU
-BFMatcher packs train indices in 18 bits; no corresponding query cap is imposed.
+with bounds **1..0**. For one-best/KNN2, Train.Count must be **<=262143**, because
+native CPU knnMatchImpl packs train indices in 18 bits; no corresponding query cap is imposed.
 Descriptors are borrowed immutably through Core's scoped bridge, not deep-copied.
 See [the immutable source review](docs/bfmatcher-source-review.md).
 
@@ -158,6 +158,41 @@ The translated synthetic example retains nearest/mutual output and adds KNN2,
 an explicit **0.80 example policy**, and accepted distance extrema. This is not a
 library default or a recommended navigation constant. It demonstrates descriptor
 correspondence only, with no geometric verification, registration or localization.
+
+### Absolute binary distance radius matching
+
+```ada
+Radius_Matches := OpenCV.Features.Matching.Brute_Force_Radius_Match
+  (Query, Train, Maximum_Distance => 32);
+```
+
+The application supplies an **absolute distance**, with no library default.
+The value 32 above is example application policy, not a recommended navigation
+threshold. This is OpenCV's CPU `BFMatcher::radiusMatch`, **not** Lowe ratio
+filtering, KNN2 truncation, or cross-check. Automatic norm selection remains
+Hamming for WTA2 and Hamming2 for WTA3/4; incompatible norms raise `OpenCV_Error`,
+including empty inputs. Thresholds must be **1..256 for Hamming**, **1..128 for
+Hamming2**, even for empty inputs. Zero and Hamming2 thresholds above 128 raise
+`OpenCV_Error`; exact-zero radius matching is deferred, not silently remapped.
+
+The boundary is **inclusive: distance <= Maximum_Distance** in all three pinned
+sources. Results are flat Ada-owned `Descriptor_Match_Array` values, ascending
+by one-based Query_Index and nondecreasing Distance within each query. Equal
+distances have unspecified train ordering. Each train row appears at most once
+per query, but may match different queries. A query may contribute zero, one,
+or many results; the total need not equal Query.Count. Compatible empty Query,
+empty Train, or both return **1..0**. A one-row Train is valid.
+
+Unlike one-best/KNN2, radius uses direct train indices, **not the 18-bit packed
+representation**: no 262143-row radius cap is imposed. Native dimensions and
+indices are signed 32-bit; flattened count must fit int32/Ada representation
+and allocation sizes. Native full distance matrices and potentially large
+results may fail allocation. The shim checks arithmetic and actual result
+counts, and never reserves the theoretical Cartesian product for flat staging.
+Inputs are unchanged; results survive inputs, detectors and native staging.
+No masks, persistent matcher, UMat/GPU, arbitrary descriptor types, probability,
+confidence or geometric verification are exposed. See
+[immutable radius source review](docs/radius-matcher-source-review.md).
 
 Images and masks are independently snapshotted for ORB. A noncontiguous
 Region is processed as an isolated image, and coordinates are Region-local.
@@ -210,7 +245,7 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 44 cases covering extraction, masks, descriptors, ownership, matching, ratio,
+contains 53 cases covering extraction, masks, descriptors, ownership, matching, ratio, radius,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures. Linux also runs the
 real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
@@ -234,7 +269,8 @@ terrain-aware pose estimation using a separate elevation/geospatial layer.
 DTED is terrain data, not camera texture; direct visible/IR-to-elevation
 matching is not promised. Test the actual camera/reference modalities early.
 
-KNN2 and explicit strict ratio filtering are included; broader matching is deferred.
+KNN2, explicit strict ratio filtering and absolute radius matching are included;
+broader matching is deferred.
 No homography, PnP, DTED reader, camera
 calibration, image loading, optical flow, GPU path, or navigation estimator
 is implemented here. [Roadmap](docs/roadmap.md).

@@ -41,7 +41,27 @@ Threshold has no default and must satisfy 0 < r < 1. Strict nearest < r*second
 rejects 0/0 duplicates; filtering returns nearest matches only, in candidate order.
 Ratio is not confidence/probability, geometric verification or localization.
 K=1 mutual cross-check remains a separate alternative, never combined with K=2.
-Arbitrary K, radius, masks, float descriptors and persistent matchers remain deferred.
+Arbitrary K, masks, float descriptors and persistent matchers remain deferred.
+
+## 005 — bounded radius-based binary matching
+
+Implemented `Matching.Brute_Force_Radius_Match`: explicit absolute integer radius,
+inclusive boundary, automatic Hamming/Hamming2 for ORB, no cross-check or masks.
+Threshold validity is 1..256 / 1..128 respectively; zero is explicitly rejected,
+including empties. Norm compatibility precedes empty results (1..0); one train
+row is valid. Flat Ada-owned values sort by query then nondecreasing distance;
+tied train order is unspecified. Zero/one/many matches per query, never K=2 or
+ratio filtering. All values survive input/detector/native staging destruction.
+
+Source-derived direct radius train indices do not inherit KNN's 18-bit bound;
+signed 32-bit native rows/indices and checked flat count/allocation arithmetic
+remain. Exact high-index regression returns Ada Train_Index=262145 for both
+norms. Exact Hamming/Hamming2 boundaries, missing-query gaps and ties are tested
+in native raw/sanitizer and public AUnit paths. See `radius-matcher-source-review.md`
+and the validation record for actual executed qualification, not release readiness.
+No Calib3D dependency or geometric verification was added. Exact-zero radius,
+arbitrary K, matcher databases, persistent matchers, masks, float descriptors,
+FLANN, GPU and broader feature/geometry policy remain deferred.
 
 ## Later — expand only after evidence
 

@@ -6,6 +6,141 @@
 Historical ZIP checks below are distinct from actual build/test evidence.
 No native result is implied by the existence of a test or workflow.
 
+## Task 005 — absolute binary distance radius matching
+
+Starting fetched `origin/main`: **`c545f00d3aaff18af1a5385fccb800800deb23dc`**,
+exactly the expected PR #4 merge. Clean tracked worktree, previously on
+`feature/004-knn2-ratio-filter` at `ad529998c8d5b5f2a64e19df355c30f88a6be5db`.
+Created **`feature/005-radius-binary-matching`** directly from fetched main.
+Core pin remains `7956981a7881ce9121115f8cb65909aeb9edc439`; version remains
+**0.1.0-dev**. No unrelated changes discarded; no dependency/version bump,
+amend, force push, merge, auto-merge, tag or release.
+
+### Gate 0 — exact Task 004 Windows post-merge execution
+
+[Run 37206302598](https://github.com/zackboll/opencv_features_ada/actions/runs/37206302598),
+job **111448089162**, workflow **Windows post-merge Features**, completed
+**success**, 2026-10-04 13:44:09 UTC, exact head
+**`c545f00d3aaff18af1a5385fccb800800deb23dc`**. Retrieved workflow/job metadata,
+the **actual job log** via `gh api .../actions/jobs/111448089162/logs`, and the
+run's log ZIP. `gh run view --log` unexpectedly returned empty output; direct
+job API retrieval supplied **129232 bytes**, SHA-256
+**`beba315b4a3424e137f43b54e04f5536b37e68c6ef00e240e0c8dfb31b917a80`**.
+No inference from the badge or empty CLI output was used.
+
+Exact checkout SHA appears in log. Native **OpenCV 5.0.0 / features (opencv5)**,
+MSYS2 **mingw-w64-x86_64-opencv 5.0.0-5**, external
+**msys64/mingw64/bin/g++.exe**, GCC **16.2.0-4** package (Alire external 16.2.0).
+All **44 named AUnit registrations** appear as OK: **44 executed / 44 passed**,
+**0 failed assertions / 0 unexpected errors**. Includes three pure-Ada ratio
+tests, WTA2/3/4 KNN2, mismatch/empties/lifetime/translated ratio, and compiler-
+derived KNN2 layout/interchange. Existing keypoint and match layout tests pass;
+match size/alignment/offsets **12/4/0,4,8**, KNN2 **20/4/0,4,8,12,16**, with
+C-written interchange PASS. This independently establishes the expected
+**44 registered / 44 executed / 44 passed** baseline before source edits.
+
+Successful inspection step checks Features `.dll` and `.dll.a` exist, `.a`
+does not; configured Features, Core and Core-shim import libraries exist, and
+compiler is external MinGW64 (not GNAT's C++ driver). Actual PE output imports
+**libopencv_features-500.dll** and **libopencv_core_shim.dll**. Build/link and
+native execution succeed with the configured Core link. Topology remains valid;
+no corrective baseline commit/rerun needed. Task 005 Windows execution remains
+post-merge only and is **not** claimed by this Task 004 log.
+
+### Source, contract and test evidence
+
+Before implementation, re-retrieved/hash-verified the official peeled commits
+for **4.1.0 / 4.10.0 / 5.0.0**, including actual 5.0 `modules/features` paths.
+`radius-matcher-source-review.md` records immutable commits, source paths,
+hashes, anchors and the exact radius chain conclusions. Supporting file hashes
+remain in `source-provenance.json`; no vendored upstream files.
+
+`Brute_Force_Radius_Match` returns flat owned Descriptor_Match values. Automatic
+Hamming/Hamming2, **inclusive distance <= Maximum_Distance**, explicit threshold
+**1..256 / 1..128** respectively; zero and above-128 Hamming2 reject even on
+empty inputs. Norm mismatch checked before empty success. Compatible query/train/
+both empty returns **1..0**; one-row train valid. Query ascending, distances
+nondecreasing per query, ties with unspecified train order. No per-query duplicate
+train rows; no global train uniqueness. No cross-check, ratio semantics, masks,
+persistent matcher, arbitrary descriptors, GPU or geometry/Calib3D dependency.
+
+All three CPU radius implementations use direct train k in DMatch, not KNN's
+IMGIDX_SHIFT=18. **No radius 262143-row cap**; signed-32-bit native dimensions/
+indices and checked flattened INT32_MAX/vector/Ada/allocation representation
+remain. High-index tests actually return native row **262144**, Ada index
+**262145**, with Train.Count=262145 for both norms. Existing one-best/KNN packed
+overflow rejection is unchanged. Distance matrices use native full Cartesian
+storage; byte arithmetic is preflighted without promising practical memory
+availability. Staging reserves only actual match count and publishes atomically.
+
+**9 new registrations**, **44 -> 53**, no weakened/deleted existing tests.
+Exact hand-constructed bit/cell oracles test 0/1/2/3, inclusive boundary,
+all ties, four matches for one query, missing query gap, one match, zero matches,
+exact field mapping. WTA2/3/4 additionally compare every ORB query/train pair to
+an independent pure-Ada bit/cell oracle, without hard-coded scene counts.
+Separate empties/mismatch/threshold/preservation/one-row/max/lifetime/high-index
+cases execute. Test-only fixture child preserves pairing and exists only in
+the test crate, not the production installed library/API.
+
+Both actual-shim raw variants execute radius exact fixtures, negative null/
+selector/schema/depth/channel/column/N-D/threshold cases, cleared publication/get
+outputs, null destroy, compatible empties, norm maximum, truly noncontiguous ROI,
+shared train rows across queries (not cross-check), input lifetime and high index.
+Existing fault framework stages **15/16/17/18**, all **five exception categories**,
+plus empty cleanup cover preallocation, post-match, staging and prepublication.
+Overflow is tested through the **same production arithmetic helpers**, without
+forged handles or billions of native matches. Actual INT32_MAX result allocation/
+native count overflow is not executed; real allocator exhaustion is not claimed.
+
+### Local qualification environment and commands
+
+Linux x86_64, OpenCV **4.10.0 / features2d (opencv4)**, GNU g++ **14.2.0**
+(Debian 14.2.0-19), Alire **2.1.1**, GNAT **16.1.0**, GPRbuild crate **26.0.1**
+(banner **GPRBUILD 26.0.0**). Core pin above, warnings-as-errors unchanged.
+Alire/GPR commands run **serially** against shared artifacts. Log evidence is
+retained outside tracked source. Final tested commit and remote run evidence
+are recorded in the Task 005 PR qualification body/comment, avoiding a corrective
+documentation-only commit after the final pinned-matrix dispatch.
+
+| Exact command | Executed result |
+| --- | --- |
+| `alr -n build` | PASS production build |
+| `alr -n -C tests build` | PASS test build |
+| `alr -n -C tests exec -- sh ../scripts/run_native.sh bin/run_tests` | **53 registered / 53 executed / 53 passed**, 0 failed assertions / 0 unexpected errors |
+| `alr test` | PASS, same **53/53/53**, not 106 distinct tests |
+| `python3 -m unittest discover -s tests/configuration -v` | **20 executed / 20 passed**, 0 failures/errors |
+| `python3 scripts/check_repository.py` | PASS **17 ABI declarations/imports / 53 registrations**, manifests/pin/ownership/CI topology |
+| `sh scripts/run_profile_tests.sh` | **2 helper executables / 2 passed**, including checked radius count/layout compile-time boundaries; not native algorithm coverage |
+| `for script in scripts/*.sh; do sh -n "$script"; done` | **6 scripts / 6 passed** |
+| `alr -n exec -- sh scripts/run_sanitizers.sh native` | **2/2** actual-shim variants PASS (production, fault injection) |
+| `alr -n exec -- sh scripts/run_sanitizers.sh` | **2/2** actual-shim ASan+UBSan variants PASS, ASan leak detection and halt-on-error / UBSan halt-on-error, no diagnostics/suppressions |
+| `alr -n -C examples build` | PASS |
+| `alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic` | PASS |
+| `alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_match_synthetic` | PASS, explicit absolute radius **32** example policy, **89** radius matches locally |
+| `git diff --check` | PASS |
+
+Observed matching example counts remain Query=406 / Train=418 / nearest=406 /
+mutual=218 / KNN2=406 / ratio-accepted=121; radius32=89 is not a portable API
+guarantee or confidence/geometric/navigation evidence. ASan and UBSan instrument
+the actual Features shim, not all upstream/Core libraries. Only test-driver
+policy disables OpenCL; production leaves global state unchanged.
+
+Validation correction: first test compile diagnosed tautological Positive>0
+assertions under warnings-as-errors. Replaced with meaningful result-index bounds,
+without weakening compiler checks. Serial rebuild/direct suite passed. No native
+algorithm correction, sanitizer suppression or baseline failure concealed.
+
+### Remote qualification gate policy
+
+Normal non-draft PR stays OPEN, unmerged, auto-merge disabled. Require actual
+repository/Linux/macOS/Linux-sanitizer job logs on unchanged final PR head before
+one manual pinned-matrix dispatch. Each 4.1/4.10/5.0 target must execute the same
+53 registered tests and radius/raw/fault/sanitizer cases, not 159 distinct tests.
+Actual run IDs/job logs/counts and local=remote=PR SHA equality belong in the PR
+qualification record. Windows is deferred to post-merge; do not merge for evidence.
+No release, complete cross-version safety, installed-consumer qualification,
+formal proof, timing or navigation accuracy follows from these tests.
+
 ## Task 004 — fixed two-nearest binary matching and pure-Ada ratio filtering
 
 Starting fetched `origin/main`: **`966df5acd603f3e6ffddde3f13ff78dd54e9e97b`**

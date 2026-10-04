@@ -7,6 +7,7 @@ with OpenCV.Core.Module_Interop;
 with OpenCV.Features.Internal.C_API;
 with OpenCV.Features.ORB;
 with OpenCV.Features.Matching;
+with OpenCV.Features.Radius_Fixtures;
 with Interfaces;
 with Interfaces.C;
 with System;
@@ -1036,6 +1037,303 @@ package body Features_Tests is
       Ada.Text_IO.Put_Line ("; C-written interchange PASS");
    end KNN2_Layout;
 
+   package Radius_Fixtures renames OpenCV.Features.Radius_Fixtures;
+
+   function Binary_Distance (A, B : OpenCV.Core.Mat; Q, R : Natural;
+                             Norm : Binary_Descriptor_Norm)
+      return Matching.Binary_Descriptor_Distance
+   is
+      Total : Matching.Binary_Descriptor_Distance := 0;
+   begin
+      for C in 0 .. 31 loop
+         declare
+            Bits : OpenCV.UInt8_Value := Bytes.Get (A, Q, C) xor Bytes.Get (B, R, C);
+            Base : constant OpenCV.UInt8_Value := (if Norm = Hamming then 2 else 4);
+         begin
+            for I in 1 .. (if Norm = Hamming then 8 else 4) loop
+               if Bits mod Base /= 0 then
+                  Total := Total + 1;
+               end if;
+               Bits := Bits / Base;
+            end loop;
+         end;
+      end loop;
+      return Total;
+   end Binary_Distance;
+
+   procedure Radius_Exact (Norm : Binary_Descriptor_Norm) is
+      Q : OpenCV.Core.Mat := OpenCV.Core.Create (3, 32, (OpenCV.Core.UInt8, 1));
+      D : OpenCV.Core.Mat := OpenCV.Core.Create (6, 32, (OpenCV.Core.UInt8, 1));
+   begin
+      Q.Set_To (OpenCV.Make_Scalar (0.0)); D.Set_To (OpenCV.Make_Scalar (0.0));
+      for C in 0 .. 31 loop
+         Bytes.Set (Q, 1, C, 170); Bytes.Set (Q, 2, C, 255); Bytes.Set (D, 5, C, 255);
+      end loop;
+      Bytes.Set (D, 1, 0, (if Norm = Hamming then 1 else 3));
+      Bytes.Set (D, 2, 0, (if Norm = Hamming then 3 else 15));
+      Bytes.Set (D, 3, 0, (if Norm = Hamming then 7 else 63));
+      Bytes.Set (D, 4, 0, (if Norm = Hamming then 2 else 12));
+      declare
+         Query : constant Feature_Set := Radius_Fixtures.Paired (Q, Norm);
+         Train : constant Feature_Set := Radius_Fixtures.Paired (D, Norm);
+         Before_Q : constant OpenCV.Core.Mat := Descriptor_Copy (Query);
+         Before_T : constant OpenCV.Core.Mat := Descriptor_Copy (Train);
+         Points_Q : constant Keypoint_Array := Keypoints (Query);
+         Points_T : constant Keypoint_Array := Keypoints (Train);
+         Matches : constant Matching.Descriptor_Match_Array :=
+           Matching.Brute_Force_Radius_Match (Query, Train, 2);
+         Seen : array (1 .. 6) of Boolean := [others => False];
+         Previous : Matching.Binary_Descriptor_Distance := 0;
+      begin
+         Assert (Matches'First = 1 and then Matches'Length = 5, "radius exact flattened count");
+         for I in 1 .. 4 loop
+            declare
+               Item : constant Matching.Descriptor_Match := Matches (I);
+            begin
+               Assert (Item.Query_Index = 1 and then Item.Train_Index <= 5
+                       and then Item.Train_Index /= 4 and then not Seen (Item.Train_Index),
+                       "radius ties/indices are invalid or duplicated");
+               Assert (Item.Distance = Binary_Distance (Q, D, 0, Item.Train_Index - 1, Norm)
+                       and then Item.Distance <= 2 and then Item.Distance >= Previous,
+                       "radius exact distance/order/boundary");
+               Seen (Item.Train_Index) := True; Previous := Item.Distance;
+               Assert (Descriptor_Row (Train, Item.Train_Index) = Item.Train_Index - 1
+                       and then Point (Query, Item.Query_Index) = Points_Q (1), "radius index mapping");
+            end;
+         end loop;
+         Assert (Seen (1) and then Seen (2) and then Seen (3) and then Seen (5),
+                 "radius missing qualifying tie/boundary");
+         Assert (Matches (5).Query_Index = 3 and then Matches (5).Train_Index = 6
+                 and then Matches (5).Distance = 0, "radius one-result bucket/missing-query gap");
+         Assert_Same (Before_Q, Descriptor_Copy (Query)); Assert_Same (Before_T, Descriptor_Copy (Train));
+         Assert (Points_Q = Keypoints (Query) and then Points_T = Keypoints (Train), "radius changed pairing");
+      end;
+   end Radius_Exact;
+
+   procedure Radius_ORB (Tuple : ORB.Tuple_Size) is
+      Source : constant OpenCV.Core.Mat := Image;
+      Related : constant OpenCV.Core.Mat := Source.Region ((8, 6, 224, 224)).Clone;
+      Detector : constant ORB.Detector := ORB.Create ((Maximum_Features => 80, Tuple => Tuple, others => <>));
+      Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Related);
+      Q : constant OpenCV.Core.Mat := Descriptor_Copy (Query);
+      D : constant OpenCV.Core.Mat := Descriptor_Copy (Train);
+      PQ : constant Keypoint_Array := Keypoints (Query);
+      PT : constant Keypoint_Array := Keypoints (Train);
+      Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (Query, Train, 32);
+      Expected : Natural := 0;
+      Previous_Query : Natural := 0;
+      Previous_Distance : Matching.Binary_Descriptor_Distance := 0;
+   begin
+      Assert (Count (Query) > 0 and then Count (Train) > 0, "radius ORB fixture empty");
+      for Item of Matches loop
+         Assert (Item.Query_Index <= Count (Query) and then Item.Train_Index <= Count (Train)
+                 and then Item.Query_Index >= Previous_Query, "radius ORB index/order");
+         if Item.Query_Index = Previous_Query then
+            Assert (Item.Distance >= Previous_Distance, "radius ORB bucket ordering");
+         end if;
+         Assert (Item.Distance = Binary_Distance (Q, D, Item.Query_Index - 1, Item.Train_Index - 1,
+                                                 Required_Norm (Query)) and then Item.Distance <= 32,
+                 "radius ORB exact independent distance oracle");
+         Previous_Query := Item.Query_Index; Previous_Distance := Item.Distance;
+      end loop;
+      for I in 1 .. Count (Query) loop
+         for J in 1 .. Count (Train) loop
+            if Binary_Distance (Q, D, I - 1, J - 1, Required_Norm (Query)) <= 32 then
+               Expected := Expected + 1;
+               declare
+                  Occurrences : Natural := 0;
+               begin
+                  for Item of Matches loop
+                     if Item.Query_Index = I and then Item.Train_Index = J then
+                        Occurrences := Occurrences + 1;
+                     end if;
+                  end loop;
+                  Assert (Occurrences = 1, "radius qualifying pair missing/duplicated");
+               end;
+            end if;
+         end loop;
+      end loop;
+      Assert (Matches'Length = Expected, "radius exhaustive ORB oracle count");
+      Assert_Same (Q, Descriptor_Copy (Query)); Assert_Same (D, Descriptor_Copy (Train));
+      Assert (PQ = Keypoints (Query) and then PT = Keypoints (Train), "radius ORB keypoints changed");
+   end Radius_ORB;
+
+   procedure Radius_WTA2 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Radius_Exact (Hamming); Radius_ORB (ORB.Two_Samples);
+   end Radius_WTA2;
+   procedure Radius_WTA3 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Radius_Exact (Hamming_2); Radius_ORB (ORB.Three_Samples);
+   end Radius_WTA3;
+   procedure Radius_WTA4 (T : in out Fixture) is
+      pragma Unreferenced (T);
+   begin
+      Radius_Exact (Hamming_2); Radius_ORB (ORB.Four_Samples);
+   end Radius_WTA4;
+
+   procedure Radius_Empty (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Data : OpenCV.Core.Mat;
+      Full_Data : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+      procedure Check (A, B : Feature_Set) is
+         Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (A, B, 1);
+      begin
+         Assert (Matches'First = 1 and then Matches'Last = 0, "radius compatible empty bounds");
+      end Check;
+   begin
+      Full_Data.Set_To (OpenCV.Make_Scalar (0.0));
+      for Norm in Binary_Descriptor_Norm loop
+         declare
+            Empty_Set : constant Feature_Set := Radius_Fixtures.Paired (Empty_Data, Norm);
+            Full : constant Feature_Set := Radius_Fixtures.Paired (Full_Data, Norm);
+         begin
+            Check (Empty_Set, Full); Check (Full, Empty_Set); Check (Empty_Set, Empty_Set);
+         end;
+      end loop;
+   end Radius_Empty;
+
+   procedure Radius_Mismatch (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Data : OpenCV.Core.Mat;
+      Full_Data : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+      procedure Reject (A, B : Feature_Set) is
+      begin
+         declare
+            Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (A, B, 1);
+            pragma Unreferenced (Matches);
+         begin
+            Assert (False, "radius incompatible norms accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end Reject;
+   begin
+      Full_Data.Set_To (OpenCV.Make_Scalar (0.0));
+      for Query_Empty in Boolean loop
+         for Train_Empty in Boolean loop
+            declare
+               Q : constant Feature_Set := Radius_Fixtures.Paired
+                 ((if Query_Empty then Empty_Data else Full_Data), Hamming);
+               D : constant Feature_Set := Radius_Fixtures.Paired
+                 ((if Train_Empty then Empty_Data else Full_Data), Hamming_2);
+            begin
+               Reject (Q, D); Reject (D, Q);
+            end;
+         end loop;
+      end loop;
+   end Radius_Mismatch;
+
+   procedure Radius_Invalid (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Data : OpenCV.Core.Mat;
+      Full_Data : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+      procedure Reject (A, B : Feature_Set; Limit : Matching.Binary_Descriptor_Distance) is
+      begin
+         declare
+            Before_A : constant OpenCV.Core.Mat := Descriptor_Copy (A);
+            Before_B : constant OpenCV.Core.Mat := Descriptor_Copy (B);
+         begin
+            begin
+               declare
+                  Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (A, B, Limit);
+                  pragma Unreferenced (Matches);
+               begin
+                  Assert (False, "radius invalid threshold accepted");
+               end;
+            exception
+               when OpenCV.OpenCV_Error => null;
+            end;
+            Assert_Same (Before_A, Descriptor_Copy (A)); Assert_Same (Before_B, Descriptor_Copy (B));
+         end;
+      end Reject;
+   begin
+      Full_Data.Set_To (OpenCV.Make_Scalar (0.0));
+      for Norm in Binary_Descriptor_Norm loop
+         for Query_Empty in Boolean loop
+            for Train_Empty in Boolean loop
+               declare
+                  Q : constant Feature_Set := Radius_Fixtures.Paired
+                    ((if Query_Empty then Empty_Data else Full_Data), Norm);
+                  D : constant Feature_Set := Radius_Fixtures.Paired
+                    ((if Train_Empty then Empty_Data else Full_Data), Norm);
+               begin
+                  Reject (Q, D, 0);
+                  if Norm = Hamming_2 then
+                     Reject (Q, D, 129); Reject (Q, D, 256);
+                  end if;
+               end;
+            end loop;
+         end loop;
+      end loop;
+   end Radius_Invalid;
+
+   procedure Radius_One_Zero (T : in out Fixture) is
+      pragma Unreferenced (T);
+      A : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+      B : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+   begin
+      A.Set_To (OpenCV.Make_Scalar (0.0)); B.Set_To (OpenCV.Make_Scalar (255.0));
+      for Norm in Binary_Descriptor_Norm loop
+         declare
+            Q : constant Feature_Set := Radius_Fixtures.Paired (A, Norm);
+            D : constant Feature_Set := Radius_Fixtures.Paired (B, Norm);
+            Zero : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (Q, D, 1);
+            Maximum : constant Matching.Binary_Descriptor_Distance := (if Norm = Hamming then 256 else 128);
+            One : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (Q, D, Maximum);
+         begin
+            Assert (Zero'First = 1 and then Zero'Last = 0, "radius entirely empty flattened result");
+            Assert (One'Length = 1 and then One (1).Query_Index = 1 and then One (1).Train_Index = 1
+                    and then One (1).Distance = Maximum, "radius one-row train/norm maximum accepted");
+         end;
+      end loop;
+   end Radius_One_Zero;
+
+   procedure Radius_Lifetime (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Local_Matches return Matching.Descriptor_Match_Array is
+         Source : constant OpenCV.Core.Mat := Image;
+         Detector : ORB.Detector := ORB.Create;
+         Q : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+         D : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      begin
+         ORB.Close (Detector);
+         return Matching.Brute_Force_Radius_Match (Q, D, 1);
+      end Local_Matches;
+      Matches : constant Matching.Descriptor_Match_Array := Local_Matches;
+   begin
+      Assert (Matches'Length > 0, "radius lifetime fixture empty");
+      for Item of Matches loop
+         Assert (Item.Query_Index <= Matches'Length and then Item.Train_Index <= Matches'Length and then Item.Distance <= 1,
+                 "radius owned fields lost after finalization");
+      end loop;
+   end Radius_Lifetime;
+
+   procedure Radius_High_Index (T : in out Fixture) is
+      pragma Unreferenced (T);
+      A : OpenCV.Core.Mat := OpenCV.Core.Create (1, 32, (OpenCV.Core.UInt8, 1));
+      B : OpenCV.Core.Mat := OpenCV.Core.Create (262_145, 32, (OpenCV.Core.UInt8, 1));
+   begin
+      A.Set_To (OpenCV.Make_Scalar (0.0)); B.Set_To (OpenCV.Make_Scalar (255.0));
+      for C in 0 .. 31 loop
+         Bytes.Set (B, 262_144, C, 0);
+      end loop;
+      for Norm in Binary_Descriptor_Norm loop
+         declare
+            Q : constant Feature_Set := Radius_Fixtures.Paired (A, Norm);
+            D : constant Feature_Set := Radius_Fixtures.Paired (B, Norm);
+            Matches : constant Matching.Descriptor_Match_Array := Matching.Brute_Force_Radius_Match (Q, D, 1);
+         begin
+            Assert (Count (D) = 262_145 and then Matches'Length = 1
+                    and then Matches (1).Query_Index = 1 and then Matches (1).Train_Index = 262_145
+                    and then Matches (1).Distance = 0, "radius high one-based train index lost");
+         end;
+      end loop;
+   end Radius_High_Index;
+
    package Caller is new AUnit.Test_Caller (Fixture);
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
@@ -1125,6 +1423,15 @@ package body Features_Tests is
       Result.Add_Test (Caller.Create ("KNN2 owned values survive inputs/detector", KNN2_Lifetime'Access));
       Result.Add_Test (Caller.Create ("KNN2 translated scene strict ratio filter", KNN2_Related_Ratio'Access));
       Result.Add_Test (Caller.Create ("Compiler-derived C/Ada KNN2 layout/interchange", KNN2_Layout'Access));
+      Result.Add_Test (Caller.Create ("Radius WTA2 exact Hamming boundary/ties/buckets and ORB oracle", Radius_WTA2'Access));
+      Result.Add_Test (Caller.Create ("Radius WTA3 exact Hamming2 boundary/ties/buckets and ORB oracle", Radius_WTA3'Access));
+      Result.Add_Test (Caller.Create ("Radius WTA4 exact Hamming2 boundary/ties/buckets and ORB oracle", Radius_WTA4'Access));
+      Result.Add_Test (Caller.Create ("Radius compatible empty query/train/both", Radius_Empty'Access));
+      Result.Add_Test (Caller.Create ("Radius incompatible norms including all empty combinations", Radius_Mismatch'Access));
+      Result.Add_Test (Caller.Create ("Radius invalid thresholds including empties and preserved inputs", Radius_Invalid'Access));
+      Result.Add_Test (Caller.Create ("Radius one-row train, entirely empty result, norm maximum", Radius_One_Zero'Access));
+      Result.Add_Test (Caller.Create ("Radius values survive inputs/detector/native finalization", Radius_Lifetime'Access));
+      Result.Add_Test (Caller.Create ("Radius direct high train index 262145 in both norms", Radius_High_Index'Access));
       return Result;
    end Suite;
 end Features_Tests;

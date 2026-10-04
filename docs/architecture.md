@@ -51,13 +51,25 @@ an additional unbounded stack scratch array. See `bfmatcher-source-review.md`.
 
 ## Boundary and lifecycle
 
+Radius matching reuses the one-best flat C record and result get/destroy ABI,
+not KNN2 pairs or nested vectors. CPU BF radiusMatch executes locally with no
+masks/cross-check and compactResult=false. Outer buckets retain query gaps;
+the shim validates all indices/imgIdx, exact norm-bounded/inclusive distances,
+distance order, per-query train uniqueness and checked flat count before atomic
+publication. Actual-count staging reserves no unbounded Cartesian product.
+Integer thresholds 1..256 (Hamming) / 1..128 (Hamming2) are checked before empties;
+zero rejects. Radius direct indices have no KNN 18-bit train cap. Native full
+distance storage has checked size_t arithmetic but ordinary memory failures
+remain possible. Scoped Core borrowing, RAII staging and owned Ada conversion
+remain unchanged. See `radius-matcher-source-review.md` for immutable evidence.
+
 KNN2 has its own five-int32 C record, opaque staging handle, getter and destructor,
 not an overloaded one-best result or persistent matcher. Both languages use RAII
 to release staging on conversion/publication failure. The shim verifies outer
 count = Query rows, each bucket length = 2, imgIdx=0, expected ascending query row,
 distinct bounded train indices, finite integral norm-bounded distances and nearest
 <= second. Ada repeats pair/count/order checks before one-based conversion.
-Train <=262143 derives from packed train indexing; Query has no 18-bit cap.
+For KNN2, Train <=262143 derives from packed train indexing; Query has no 18-bit cap.
 Compatible empties bypass native matching, after norm compatibility validation;
 one-row Train with nonempty Query rejects. K=2 never combines with cross-check,
 whose native implementation requires K=1.

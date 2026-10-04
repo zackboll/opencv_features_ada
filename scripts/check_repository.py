@@ -45,11 +45,11 @@ def main() -> None:
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()
     registrations = re.findall(r"Result\.Add_Test\s*\(Caller\.Create", tests)
-    check(len(registrations) == 44, "update the documented AUnit inventory when changing tests")
+    check(len(registrations) == 53, "update the documented AUnit inventory when changing tests")
     for path in list((ROOT / "src").rglob("*.ads")) + list((ROOT / "src").rglob("*.adb")):
         check("pragma Import" not in path.read_text() or "/internal/" in path.as_posix(),
               f"C import leaked into public Ada: {path}")
-    print(f"PASS: manifests, shared Core pin, {len(declared)} ABI declarations/imports, ownership layout, 44 AUnit registrations, CI topology")
+    print(f"PASS: manifests, shared Core pin, {len(declared)} ABI declarations/imports, ownership layout, 53 AUnit registrations, CI topology")
 
 if __name__ == "__main__":
     try:
