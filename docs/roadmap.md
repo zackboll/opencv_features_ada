@@ -8,9 +8,14 @@ and the raw-ABI coverage added during review; validate OpenCV 4 and 5 and the
 three intended platform runtimes. Record commands, versions and actual counts.
 Do not label unrun tests PASS. See the complete first task.
 
-## 002 — brute-force binary descriptor matching
+## 002 — ORB native qualification
 
-Add a small vertical API consuming two `Feature_Set` values. Borrow their
+Source/ABI/layout/mask/raw-boundary and actual-shim sanitizer evidence is
+recorded in `bootstrap-validation.md`. Installed/consumer Task 001 work remains.
+
+## 003 — brute-force binary descriptor matching
+
+Implemented: a small vertical API consuming two `Feature_Set` values. Borrow their
 private Core Mats through scoped handles. Return Ada-owned match values with
 validated one-based query/train indices, explicit distances, and well-defined
 empty-input behavior. Support Hamming and Hamming_2 based on the stored
@@ -22,7 +27,10 @@ Add optional mutual one-nearest-neighbor checking as a separately clear policy.
 Synthetic translated/rotated imagery should test identity/index mapping,
 not pretend to establish terrain-navigation accuracy.
 
-## 003 — KNN matching and explicit filtering
+See `bfmatcher-source-review.md` for the exact one-best matching contract and
+the native train-index bound. No geometric accuracy follows from this slice.
+
+## 004 — KNN matching and explicit filtering
 
 Represent per-query results without assuming every query has exactly K
 neighbors. Define missing/empty neighbor semantics and grouping. Preserve
@@ -30,7 +38,7 @@ query indexing. Keep a ratio threshold and other application filters explicit;
 never bake an unexplained ratio constant into the binding. Do not combine
 native k=1 cross-check semantics blindly with k=2 matching.
 
-## 004 — expand only after evidence
+## Later — expand only after evidence
 
 Measure whether broader ORB pyramid tuning, bulk keypoint transfer, alternative
 descriptors, or reference-database indexing is the next real bottleneck.

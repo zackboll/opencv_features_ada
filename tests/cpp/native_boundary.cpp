@@ -16,9 +16,9 @@ void check(bool condition, const char* message) {
     if (!condition) throw std::runtime_error(message);
 }
 using Mat = std::unique_ptr<opencv_core_mat_handle, decltype(&opencv_core_mat_destroy)>;
-Mat matrix(int rows, int columns, int depth = OPENCV_CORE_DEPTH_UINT8) {
+Mat matrix(int rows, int columns, int depth = OPENCV_CORE_DEPTH_UINT8, int channels = 1) {
     opencv_core_mat_handle* handle = nullptr;
-    check(opencv_core_mat_create_2d(rows, columns, depth, 1, &handle) == OPENCV_CORE_OK,
+    check(opencv_core_mat_create_2d(rows, columns, depth, channels, &handle) == OPENCV_CORE_OK,
           "Core factory failed");
     return Mat(handle, opencv_core_mat_destroy);
 }
@@ -37,6 +37,169 @@ void schema(const opencv_core_mat_handle* handle, int count) {
     check(count == 0 ? image->empty() :
           image->rows == count && image->cols == 32 && image->type() == CV_8UC1,
           "descriptor schema");
+}
+using Matches = std::unique_ptr<opencv_features_match_result_handle,
+                               decltype(&opencv_features_match_result_destroy)>;
+void matching() {
+    auto query = matrix(2,32), train = matrix(1,32);
+    fill(query.get(),false); fill(train.get(),false);
+    // q0 identical, q1 one differing bit/bin; train has one unique candidate.
+    cv::Mat *q = nullptr;
+    check(opencv_core_module_output_mat(query.get(),&q) == 0, "descriptor writer");
+    q->at<unsigned char>(1,0) = 1;
+    for (int norm : {OPENCV_FEATURES_HAMMING, OPENCV_FEATURES_HAMMING2}) {
+        for (int mode : {OPENCV_FEATURES_NEAREST, OPENCV_FEATURES_MUTUAL_NEAREST}) {
+            opencv_features_match_result_handle *raw = nullptr;
+            int32_t count = -1;
+            check(opencv_features_bf_match(query.get(),train.get(),norm,mode,&raw,&count) == 0 &&
+                  raw != nullptr && count == (mode == 0 ? 2 : 1), "nearest/cross-check count");
+            Matches result(raw,opencv_features_match_result_destroy);
+            for (int i = 0; i < count; ++i) {
+                opencv_features_descriptor_match item{};
+                check(opencv_features_match_result_get(raw,i,&item) == 0 && item.query_index == i &&
+                      item.train_index == 0 && item.distance == i, "exact distance 0/1 and index oracle");
+            }
+            opencv_features_descriptor_match item{7,8,9};
+            for (int i : {-1,count}) {
+                item = {7,8,9};
+                check(opencv_features_match_result_get(raw,i,&item) == 1 && item.query_index == 0 &&
+                      item.train_index == 0 && item.distance == 0, "match invalid-index clearing");
+            }
+            check(opencv_features_match_result_get(raw,0,nullptr) == 1, "null match output");
+            item = {7,8,9};
+            check(opencv_features_match_result_get(nullptr,0,&item) == 1 && item.query_index == 0 &&
+                  item.train_index == 0 && item.distance == 0, "null result clearing");
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+            opencv_features_test_fail(10,3);
+            check(opencv_features_match_result_get(raw,0,&item) == 3 && item.distance == 0,
+                  "match get exception barrier");
+#endif
+        }
+        auto maximum = matrix(1,32);
+        fill(maximum.get(),false,255);
+        opencv_features_match_result_handle *raw = nullptr;
+        int32_t count = -1;
+        check(opencv_features_bf_match(train.get(),maximum.get(),norm,0,&raw,&count) == 0 && count == 1,
+              "maximum distance match");
+        Matches result(raw,opencv_features_match_result_destroy);
+        // Results no longer depend on descriptor input lifetime.
+        maximum.reset();
+        opencv_features_descriptor_match item{};
+        check(opencv_features_match_result_get(raw,0,&item) == 0 && item.query_index == 0 &&
+              item.train_index == 0 && item.distance == (norm == 0 ? 256 : 128), "maximum distance oracle");
+    }
+    // Distinguish a changed 2-bit cell (0b11) from two changed bits.
+    q->at<unsigned char>(1,0) = 3;
+    for (int norm : {0,1}) {
+        opencv_features_match_result_handle *raw = nullptr;
+        int32_t count = 0;
+        check(opencv_features_bf_match(query.get(),train.get(),norm,0,&raw,&count) == 0 && count == 2,
+              "two-bit-cell fixture");
+        Matches result(raw,opencv_features_match_result_destroy);
+        opencv_features_descriptor_match item{};
+        check(opencv_features_match_result_get(raw,1,&item) == 0 && item.distance == (norm == 0 ? 2 : 1),
+              "Hamming versus Hamming2 cell oracle");
+    }
+    // Unique nonzero train index oracle and noncontiguous descriptor ROI.
+    auto backing = matrix(2,40);
+    fill(backing.get(),false,255);
+    cv::Mat *header = nullptr;
+    check(opencv_core_module_output_mat(backing.get(),&header) == 0, "ROI writer");
+    (*header) = (*header)(cv::Rect(0,0,32,2));
+    header->row(1).setTo(0);
+    opencv_features_match_result_handle *sentinel = nullptr;
+    int32_t count = -1;
+    check(opencv_features_bf_match(train.get(),backing.get(),0,0,&sentinel,&count) == 0 && count == 1,
+          "noncontiguous descriptors");
+    Matches live(sentinel,opencv_features_match_result_destroy);
+    opencv_features_descriptor_match item{};
+    check(opencv_features_match_result_get(sentinel,0,&item) == 0 && item.train_index == 1 &&
+          item.query_index == 0 && item.distance == 0, "unique train-index oracle");
+    auto raw = sentinel;
+    auto fail = [&](int status) {
+        check(status == 1 && raw == nullptr && count == 0, "failed match output initialization");
+        raw = sentinel; count = -1;
+    };
+    count = -1;
+    check(opencv_features_bf_match(query.get(),train.get(),0,0,nullptr,&count) == 1 && count == 0,
+          "null result output");
+    check(opencv_features_bf_match(query.get(),train.get(),0,0,&raw,nullptr) == 1 && raw == nullptr,
+          "null count output");
+    raw = sentinel; count = -1;
+    fail(opencv_features_bf_match(nullptr,train.get(),0,0,&raw,&count));
+    fail(opencv_features_bf_match(query.get(),nullptr,0,0,&raw,&count));
+    for (int selector : {-1,2,INT32_MAX}) {
+        fail(opencv_features_bf_match(query.get(),train.get(),selector,0,&raw,&count));
+        fail(opencv_features_bf_match(query.get(),train.get(),0,selector,&raw,&count));
+    }
+    auto wrong = matrix(1,32,OPENCV_CORE_DEPTH_FLOAT32), multi = matrix(1,32,0,2);
+    auto short_row = matrix(1,31), long_row = matrix(1,33), too_many = matrix(262144,32);
+    const int32_t sizes[] = {2,2,32};
+    opencv_core_mat_handle *nd = nullptr;
+    check(opencv_core_mat_create_nd(3,sizes,0,1,&nd) == 0, "real N-D descriptor factory");
+    Mat dimensional(nd,opencv_core_mat_destroy);
+    for (auto *bad : {wrong.get(),multi.get(),short_row.get(),long_row.get(),dimensional.get()}) {
+        fail(opencv_features_bf_match(bad,train.get(),0,0,&raw,&count));
+        fail(opencv_features_bf_match(query.get(),bad,0,0,&raw,&count));
+    }
+    fail(opencv_features_bf_match(query.get(),too_many.get(),0,0,&raw,&count));
+    fail(opencv_features_bf_match(query.get(),too_many.get(),0,1,&raw,&count));
+    // Exact admissible train bound; unique minimum at the last packed index.
+    auto last_train = matrix(262143,32);
+    fill(last_train.get(),false,255);
+    cv::Mat *last_header = nullptr;
+    check(opencv_core_module_output_mat(last_train.get(),&last_header) == 0, "train bound writer");
+    last_header->row(262142).setTo(0);
+    for (int mode : {0,1}) {
+        raw = nullptr;
+        check(opencv_features_bf_match(train.get(),last_train.get(),0,mode,&raw,&count) == 0 && count == 1,
+              "262143 train rows accepted");
+        Matches result(raw,opencv_features_match_result_destroy);
+        check(opencv_features_match_result_get(raw,0,&item) == 0 && item.train_index == 262142 &&
+              item.query_index == 0 && item.distance == 0, "last packed train index preserved");
+    }
+    // Query is NOT subject to packed train-index bound, including cross-check.
+    fill(too_many.get(),false);
+    for (int mode : {0,1}) {
+        raw = nullptr;
+        check(opencv_features_bf_match(too_many.get(),train.get(),0,mode,&raw,&count) == 0 &&
+              count == (mode == 0 ? 262144 : 1), "large query accepted");
+        Matches large(raw,opencv_features_match_result_destroy);
+        check(opencv_features_match_result_get(raw,count-1,&item) == 0 && item.distance == 0 &&
+              (mode == 0 ? item.query_index == 262143 :
+               item.query_index >= 0 && item.query_index < 262144), "large query index is not packed");
+    }
+    opencv_core_mat_handle *empty_handle = nullptr;
+    check(opencv_core_mat_create(&empty_handle) == 0, "empty Core descriptor factory");
+    Mat empty(empty_handle,opencv_core_mat_destroy);
+    for (int mode : {0,1}) {
+        for (int combination = 0; combination < 3; ++combination) {
+            raw = nullptr;
+            check(opencv_features_bf_match(combination == 1 ? query.get() : empty.get(),
+                  combination == 0 ? train.get() : empty.get(),0,mode,&raw,&count) == 0 &&
+                  count == 0 && raw != nullptr, "empty match success");
+            Matches result(raw,opencv_features_match_result_destroy);
+            item = {7,8,9};
+            check(opencv_features_match_result_get(raw,0,&item) == 1 && item.distance == 0,
+                  "empty result access");
+        }
+    }
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+    for (int stage : {7,8,9}) for (int kind = 1; kind <= 5; ++kind) {
+        raw = sentinel; count = -1;
+        opencv_features_test_fail(stage,kind);
+        const int expected[] = {0,1,2,3,4,4};
+        check(opencv_features_bf_match(query.get(),train.get(),0,0,&raw,&count) == expected[kind] &&
+              raw == nullptr && count == 0, "matcher exception/publication atomicity");
+    }
+    raw = sentinel; count = -1;
+    opencv_features_test_fail(9,3);
+    check(opencv_features_bf_match(empty.get(),train.get(),0,0,&raw,&count) == 3 &&
+          raw == nullptr && count == 0, "empty matcher publication cleanup");
+#endif
+    opencv_features_match_result_destroy(nullptr);
+    std::cout << "PASS: matcher Hamming 0/1/2/256; Hamming2 0/1/128; cross-check A/X retained B/X rejected; "
+                 "raw negatives, empty, ROI, large query, lifetime/publication\n";
 }
 void run() {
     auto image = matrix(256, 256), mask = matrix(256, 256), blank = matrix(256, 256);
@@ -153,6 +316,7 @@ int main() {
         // Avoid loading optional host GPU ICDs; leak detection remains enabled.
         cv::ocl::setUseOpenCL(false);
         run();
+        matching();
         std::cout << "PASS: actual Features shim / Core bridge / ORB boundary on "
                   << opencv_features_native_version() << '\n';
         return 0;

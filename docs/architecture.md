@@ -6,7 +6,7 @@
 change when native OpenCV calls the module `features2d` (4.x) or `features`
 (5.0). Source references are recorded in `source-provenance.json`.
 
-The module owns feature detection, descriptions, and future descriptor
+The module owns feature detection, descriptions, and binary descriptor
 matching. It does not own image preprocessing, capture, serialization,
 geographic coordinates, DTED interpolation, calibration, robust pose
 estimation, or estimator/fusion policy. Do not introduce dependencies on
@@ -38,9 +38,16 @@ The private vector avoids an unbounded stack scratch array during extraction.
 The public array-copy getter can allocate a large function result; callers
 with large collections should use `Count`/`Point` to avoid that copy.
 
-Future matching code, as a child of Features, may borrow the private stored
-Mat through Core's scoped module bridge. It must not bypass ownership by
-exposing a writable raw descriptor view to applications.
+`OpenCV.Features.Matching` borrows the private stored Mat through nested Core
+scoped callbacks without copying descriptors. A local native BFMatcher and
+RAII staging result never escape. The result guard destroys native storage
+after copying validated plain values into an Ada array, including on failure.
+The public API exposes no matcher identity or writable descriptor view.
+Semantic selectors stay private; Required_Norm supplies automatic selection.
+Ascending query order is independently enforced below the Ada API. Native
+schema/count/index/integer-distance checks precede publication and allocation.
+The public array return can require a large function result; it does not use
+an additional unbounded stack scratch array. See `bfmatcher-source-review.md`.
 
 ## Boundary and lifecycle
 

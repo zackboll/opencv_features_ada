@@ -13,6 +13,28 @@ package OpenCV.Features.Internal.C_API is
       Octave, Class_Id            : Interfaces.Integer_32;
    end record with Convention => C;
 
+   type C_Descriptor_Match is record
+      Query_Index, Train_Index, Distance : Interfaces.Integer_32;
+   end record with Convention => C;
+
+   Hamming_Selector : constant Interfaces.Integer_32 := 0;
+   Hamming_2_Selector : constant Interfaces.Integer_32 := 1;
+   Nearest_Selector : constant Interfaces.Integer_32 := 0;
+   Mutual_Nearest_Selector : constant Interfaces.Integer_32 := 1;
+
+   function BF_Match
+     (Query, Train : OpenCV.Core.Module_Interop.Input_Mat_Handle;
+      Norm, Mode : Interfaces.Integer_32;
+      Result : access System.Address;
+      Count : access Interfaces.Integer_32) return Status
+     with Import, Convention => C, External_Name => "opencv_features_bf_match";
+   function Match_Result_Get
+     (Handle : System.Address; Index : Interfaces.Integer_32;
+      Item : access C_Descriptor_Match) return Status
+     with Import, Convention => C, External_Name => "opencv_features_match_result_get";
+   procedure Match_Result_Destroy (Handle : System.Address)
+     with Import, Convention => C, External_Name => "opencv_features_match_result_destroy";
+
    function Native_Version return Interfaces.C.Strings.chars_ptr
      with Import, Convention => C,
           External_Name => "opencv_features_native_version";

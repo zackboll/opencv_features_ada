@@ -82,7 +82,7 @@ This is not exhaustive OpenCV/vendor-HAL review or a guarantee for other tags.
 
 ## Boundary qualification
 
-The native AUnit inventory is 24 cases, including direct C exports driven
+The native AUnit inventory is 33 cases, including direct C exports driven
 through scoped Core callbacks and compiler-derived C/Ada size/alignment/all
 field offsets plus C-written record interchange. Linux additionally runs
 Core's actual C factories through the production shim and a dedicated

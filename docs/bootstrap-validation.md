@@ -6,6 +6,108 @@
 Historical ZIP checks below are distinct from actual build/test evidence.
 No native result is implied by the existence of a test or workflow.
 
+## Task 003 — binary one-best descriptor matching
+
+Starting fetched `origin/main`: **`086e655b4a5d0d02960a3c9eda2452eba0ef6854`**
+(PR #2 merge), clean worktree. Previously checked out
+`feature/002-orb-native-qualification`, HEAD
+`e273ae3ea9fc83aae6660bb8d05cff2792684492`. Requested branch:
+`feature/003-binary-bfmatcher`, created from actual fetched main. Core pin
+`7956981a7881ce9121115f8cb65909aeb9edc439` and version `0.1.0-dev` unchanged.
+
+### Gate 0: PR #2 post-merge Windows
+
+[Run 37174688163](https://github.com/zackboll/opencv_features_ada/actions/runs/37174688163),
+job 111354758918, completed **success** on starting main at 2026-10-04 03:45 UTC.
+OpenCV **5.0.0 / features**, MSYS2 `mingw-w64-x86_64-opencv 5.0.0-5`;
+selected MSYS2 MinGW64 `mingw64/bin/g++.exe`, GCC package **16.2.0-4**, not
+GNAT's C++ compiler. **24 registered / 24 executed / 24 successful**, **0
+failed assertions / 0 unexpected errors**. Features DLL and `.dll.a` checks
+passed, static archive absence check passed, all three configured native
+Features/Core/Core-shim import-library checks passed. PE imports explicitly
+include `libopencv_features-500.dll` and `libopencv_core_shim.dll`.
+No rerun or baseline correction needed. This is Task 002 Windows evidence,
+not execution of Task 003 matching. Windows remains post-merge only.
+
+### Public/native contract and source review
+
+`OpenCV.Features.Matching.Brute_Force_Match` consumes two immutable owned
+Feature_Sets, borrowing private descriptor Mats via Core callbacks without
+deep copies. Ada-owned results have ascending one-based query/train indices,
+exact integer distances, automatic Required_Norm selection, nearest or native
+mutual-nearest modes, and compatible empty success. Norm mismatch is rejected
+even when empty. Hamming is 0..256; Hamming2 is 0..128. Ties do not promise a
+particular exact train index. There are no masks or ratio filtering.
+
+Source review covers official peeled 4.1.0/4.10.0/5.0.0 revisions and paths
+recorded in `bfmatcher-source-review.md` and `source-provenance.json`.
+Train <=262143 derives from CPU BFMatcher's 18-bit packed index assertion;
+reverse cross-check batchDistance uses plain indices, so Query has no such cap.
+Native checks cover schema, selectors, imgIdx=0, count/index/order/uniqueness,
+finite integral distances and norm-specific bounds before result publication.
+
+### Local execution evidence
+
+Linux x86_64, OpenCV **4.10.0 / features2d**, external GNU g++ **14.2.0**,
+Alire **2.1.1**, GNAT **16.1.0**, GPRbuild **26.0.1**. Warnings remain errors.
+Executed against the implementation in this Task 003 branch before commit:
+
+| Validation | Actual result/count |
+| --- | --- |
+| `python3 scripts/check_repository.py` | PASS; 13 matched ABI exports/imports, 33 AUnit registrations, manifest/pin/ownership/CI checks |
+| Python unittest discovery | **20 executed / 20 passed**, 0 failures/errors |
+| Profile/header helper script | **2 C/C++ helper executables executed/passed**, not native algorithm tests |
+| Shell syntax | **6 scripts checked/passed** |
+| Root build and tests build | PASS |
+| Direct native AUnit | **33 registered / 33 executed / 33 passed**, 0 failed assertions, 0 unexpected errors |
+| `alr test` | PASS; separate invocation of the same **33** cases, not 66 distinct tests |
+| Raw actual-shim boundary | **2 variants executed/passed**: production and fault-injection |
+| ASan + UBSan actual-shim | **2 jointly instrumented variants executed/passed**, no diagnostics/suppressions, leak detection enabled |
+| C/Ada match layout | PASS: compiler-derived size **12**, alignment **4**, offsets **0/4/8**, C-written record read by Ada |
+| Exact Hamming oracle | PASS: 0/1/2/256, valid zero-based query/train indices |
+| Exact Hamming2 oracle | PASS: 0/1/128; 0x03 changed cell gives 1 versus Hamming's 2 |
+| Cross-check oracle | PASS for both norms: A/X retained at 0, B/X rejected (B nearest X at 1) |
+| Native bound oracles | PASS: Train=262144 rejected; Train=262143 accepted with unique last index 262142; Query=262144 accepted in both modes |
+| Raw negatives/ownership | PASS: null outputs/inputs, selectors, depth/channels/31/33 columns/N-D, cleared get(-1/count), null destruction, empty/ROI/lifetime, publication cleanup |
+| ORB synthetic example | PASS: 393 keypoints/descriptors |
+| Matching synthetic example | PASS: Query 406 / Train 418; nearest 406 (86 zero, min/max 0/99); mutual 218 (86 zero, min/max 0/92) |
+| `git diff --check` | PASS |
+
+Local supplemental **4.1.0 / features2d** qualification also passed: build,
+**33/33/33 AUnit**, raw production/fault, compiler layout, Hamming/Hamming2,
+cross-check and both ASan+UBSan variants. Source-built 4.1 uses WITH_ADE=OFF.
+An attempted extra local 5.0 run selected an existing **Core/Geometry-only**
+installation with no `opencv2/features.hpp`; configuration correctly rejected
+it. This is an incomplete local native installation, not matching execution or
+a code defect. Default 4.10 configuration was restored and qualification rerun.
+Final remote 5.0 qualification is required, not inferred from source review.
+
+During development, concurrent test/example Alire builds contended for the
+shared generated `opencv_features_install.gpr.tmp`. Serial rerun resolved it;
+subsequent Alire builds were serialized. Compiler diagnostics for Ada aggregate
+syntax, equality visibility/unused use clause, and the synthetic checker modulus
+were corrected normally, retaining all warning-as-error checks. No production
+fallback, sanitizer suppression, Core change or unrelated build refactor added.
+
+### Remote evidence and review gate
+
+The final-head ordinary PR jobs and once-dispatched corrected pinned matrix
+must be recorded with immutable SHA/run/job IDs in the Task 003 PR body before
+the review gate. They are **not claimed as run or passed by this pre-dispatch
+local record**. [Task 003 Actions](https://github.com/zackboll/opencv_features_ada/actions?query=branch%3Afeature%2F003-binary-bfmatcher)
+and [Task 003 PR](https://github.com/zackboll/opencv_features_ada/pulls?q=is%3Apr+head%3Afeature%2F003-binary-bfmatcher)
+provide the live evidence. Do not equate written workflows with passing jobs.
+The matrix must qualify 4.1/features2d, 4.10/features2d and 5.0/features,
+including all 33 AUnit, layout/raw oracles and actual-shim ASan+UBSan variants.
+It supplies previously missing corrected remote Task 002 4.1 evidence too.
+
+Remaining Task 001 installed/clean-consumer relocation/linkage qualification
+is outstanding. Upstream libraries are not fully sanitizer-instrumented; real
+allocator exhaustion, optional vendor HAL/GPU paths and future native versions
+are not comprehensively qualified. KNN/ratio/radius/masks/float descriptors,
+FLANN, geometry and navigation accuracy remain outside this slice. No version,
+release, merge or auto-merge work is authorized or performed.
+
 ## Task 002 — ORB native qualification
 
 Starting fetched `origin/main`: `1feceff04f8323f8d9ec5f01f8875529d4265c45`
