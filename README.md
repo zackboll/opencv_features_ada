@@ -45,8 +45,20 @@ Alire roots. Review/remove the development pin when preparing an Alire
 index release. [Dependency and platform notes](docs/build-and-platforms.md).
 
 The first agent task is [Task 001: validate the bootstrap](docs/tasks/001-validate-bootstrap.md).
-Its installed/clean-consumer qualification remains outstanding; the native
-ORB build/test baseline has been established in Task 002.
+The native ORB build/test baseline was established in Task 002. Task 007 adds
+[source-pinned, installed and relocated consumer qualification](docs/installed-consumer-validation.md).
+With system OpenCV/pkg-config prerequisites above, run the tested validator:
+
+```sh
+sh scripts/validate_clean_consumer.sh
+```
+
+It builds a fresh source-pinned Alire application, recursively installs resolved
+Core and Features into an isolated prefix, then builds/runs separate installed
+GPR consumers before and after relocation. Installed consumers use
+`with "opencv_features";` and prefix-only lookup, not Alire source pins.
+This is not bare public-index or release qualification; the Core bootstrap pin
+and version **0.1.0-dev** remain unchanged.
 
 ## Included API
 

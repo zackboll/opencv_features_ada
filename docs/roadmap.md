@@ -1,5 +1,12 @@
 # Navigation-oriented roadmap
 
+Task 007 addresses the oldest installed/clean-consumer gap with separate
+source-pinned, installed-prefix and fresh relocated-prefix proofs. See
+[qualification details](installed-consumer-validation.md). Linux baseline passes
+without production packaging changes; Linux/macOS PR CI executes the validator
+and Windows remains post-merge only. Index resolution/pin removal, release
+tarballs, version bump, tag/release/index submission remain deferred.
+
 ## 001 — qualify the bootstrap
 
 Build the current source against the real pinned Core dependency. Fix any

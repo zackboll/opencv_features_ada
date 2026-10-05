@@ -40,6 +40,37 @@ def check_correspondences(root: Path) -> None:
           re.search(r"\bPoint\s*\(Train,", source) is not None,
           "correspondences must use public accessors for both feature sets")
 
+def check_clean_consumer(root: Path) -> None:
+    fixture = (root / "scripts/features_clean_consumer.adb").read_text()
+    fixture = re.sub(r"--[^\n]*", "", fixture)
+    contexts = set(re.findall(r"^with\s+([\w.]+)\s*;", fixture, re.IGNORECASE | re.MULTILINE))
+    allowed = {"Ada.Text_IO", "OpenCV", "OpenCV.Core", "OpenCV.Core.UInt8_Access",
+               "OpenCV.Features", "OpenCV.Features.ORB", "OpenCV.Features.Matching",
+               "OpenCV.Features.Correspondences"}
+    check(contexts == allowed, "consumer fixture must use only the required public API")
+    check(not re.search(r"\b(?:Internal|Radius_Fixtures|Module_Interop|Interfaces|System)\b",
+                        fixture, re.IGNORECASE), "private/native access in clean consumer")
+    validator = (root / "scripts/validate_clean_consumer.sh").read_text()
+    for setting in ("GPR_PROJECT_PATH", "ADA_PROJECT_PATH", "CPATH", "C_INCLUDE_PATH",
+                    "CPLUS_INCLUDE_PATH", "LIBRARY_PATH", "GCC_EXEC_PREFIX", "COMPILER_PATH"):
+        check(re.search(r"^unset [^\n]*\b" + setting + r"\b", validator, re.MULTILINE),
+              f"consumer validator must unset inherited {setting}")
+    for operation in ("alr -n init --bin", "alr -n with opencv_features --use=",
+                      "gprinstall -f -p -r", "mv \"$prefix_a\" \"$prefix\"",
+                      "check_consumer_install.py"):
+        check(operation in validator, f"missing consumer stage: {operation}")
+    check("with opencv_core --use" not in validator, "do not manually select Core")
+    cross = (root / ".github/workflows/cross-platform.yml").read_text()
+    for job in ("linux", "macos"):
+        block = re.search(r"^  " + job + r":\n(.*?)(?=^  \S|\Z)",
+                          cross, re.MULTILINE | re.DOTALL)
+        check(block and "run: sh scripts/validate_clean_consumer.sh" in block[1],
+              f"{job} must execute consumer qualification")
+    windows = (root / ".github/workflows/windows-post-merge.yml").read_text()
+    check("run: sh scripts/validate_clean_consumer.sh" in windows,
+          "Windows post-merge must execute consumer qualification")
+
+
 def main() -> None:
     manifests = [tomllib.loads((ROOT / p).read_text()) for p in
                  ("alire.toml", "tests/alire.toml", "examples/alire.toml")]
@@ -61,6 +92,7 @@ def main() -> None:
     check(all(re.search(r"\b" + n + r"\s*\(", cpp) for n in declared), "missing C++ export")
     check_bridge_ownership(ROOT)
     check_correspondences(ROOT)
+    check_clean_consumer(ROOT)
     check_workflows(ROOT / ".github/workflows")
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()

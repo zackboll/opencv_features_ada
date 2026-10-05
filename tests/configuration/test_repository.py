@@ -6,11 +6,52 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from check_repository import check_bridge_ownership, check_correspondences
+from check_repository import check_bridge_ownership, check_correspondences, check_clean_consumer
 from workflow_topology import check_topology
 
 
 class RepositoryTests(unittest.TestCase):
+    def test_clean_consumer_contract(self):
+        check_clean_consumer(ROOT)
+
+    def test_clean_consumer_rejects_private_packages_or_lookup(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "scripts", root / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / ".github", root / ".github")
+            fixture = root / "scripts/features_clean_consumer.adb"
+            original = fixture.read_text()
+            for package in ("OpenCV.Features.Internal.C_API", "OpenCV.Features.Radius_Fixtures",
+                            "OpenCV.Core.Module_Interop"):
+                fixture.write_text(original + f"\nwith {package};\n")
+                with self.subTest(package=package), self.assertRaises(ValueError):
+                    check_clean_consumer(root)
+            fixture.write_text(original)
+            validator = root / "scripts/validate_clean_consumer.sh"
+            validator.write_text(validator.read_text().replace("unset GPR_PROJECT_PATH", "unset OMITTED"))
+            with self.assertRaisesRegex(ValueError, "unset inherited GPR_PROJECT_PATH"):
+                check_clean_consumer(root)
+
+    def test_each_consumer_workflow_stage_is_required(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "scripts", root / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / ".github", root / ".github")
+            for name in ("cross-platform.yml", "windows-post-merge.yml"):
+                path = root / ".github/workflows" / name
+                original = path.read_text()
+                count = original.count("run: sh scripts/validate_clean_consumer.sh")
+                for index in range(count):
+                    parts = original.split("run: sh scripts/validate_clean_consumer.sh")
+                    path.write_text("run: sh scripts/validate_clean_consumer.sh".join(parts[:index + 1])
+                                    + "run: echo omitted"
+                                    + "run: sh scripts/validate_clean_consumer.sh".join(parts[index + 1:]))
+                    with self.subTest(workflow=name, stage=index), self.assertRaises(ValueError):
+                        check_clean_consumer(root)
+                path.write_text(original)
+
     def test_correspondences_public_ada_boundary(self):
         check_correspondences(ROOT)
 
