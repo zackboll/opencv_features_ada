@@ -49,6 +49,18 @@ schema/count/index/integer-distance checks precede publication and allocation.
 The public array return can require a large function result; it does not use
 an additional unbounded stack scratch array. See `bfmatcher-source-review.md`.
 
+`OpenCV.Features.Correspondences` is a separate pure-Ada conversion child, not a
+matcher or geometry algorithm. It uses only the public `Count` and `Point`
+accessors despite child-package visibility. All indices are preflighted before
+an exact-length Ada result is constructed. Stored Float32 points, match indices
+and descriptor distance are copied exactly in caller order, including duplicates.
+No norm compatibility/distance reinterpretation, point transformation, reference-
+frame policy, geometric verification or controlled/native ownership is added.
+Empty matches always return 1..0; malformed indices raise `OpenCV_Error`.
+Returned values retain no references and outlive all sources. Native ABI remains
+17 declarations/imports; no Core bridge or descriptor access is used here.
+Calib3D/application may consume this output; Features never depends on Calib3D.
+
 ## Boundary and lifecycle
 
 Radius matching reuses the one-best flat C record and result get/destroy ABI,

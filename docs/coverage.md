@@ -2,7 +2,7 @@
 
 This is a handwritten capability inventory, not a generated header census.
 "Implemented draft" means source is present, not fully qualified. The initial
-53-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
+67-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see
 `bootstrap-validation.md` for exact evidence and remaining platform/version,
 source-review, sanitizer and ABI robustness gates.
 
@@ -19,6 +19,7 @@ source-review, sanitizer and ABI robustness gates.
 | Binary KNN, fixed K=2 | `Matching.Brute_Force_KNN_2` | Hamming/Hamming2, separate from cross-check |
 | Strict ratio filtering | `Passes_Ratio_Test`, `Filter_By_Ratio` | Pure Ada, explicit threshold, nearest values only |
 | Binary absolute radius | `Matching.Brute_Force_Radius_Match` | Inclusive CPU Hamming/Hamming2, flat owned values |
+| Accepted matches to 2-D points (no native operation) | `Correspondences.From_Matches` | Pure Ada exact value copy; order/duplicates retained, indices preflighted |
 | Arbitrary K, match masks | none | Deferred |
 | Other detectors, descriptors and FLANN | none | Deferred |
 | UMat/OpenCL/CUDA wrappers | none | Deferred |
@@ -39,7 +40,7 @@ absence of fault controls, and exercises test-only exception categories and
 publication-stage cleanup. Both production-source and fault-hook variants
 run ordinarily and under ASan/UBSan. These assertions are **not additional
 AUnit registrations**. C11 header and pure profile helper checks remain
-separate static/helper evidence; Python configuration/topology inventory is 20.
+separate static/helper evidence; current Python configuration/topology inventory is 22.
 
 Source review is limited to the fixed CPU profile in 4.1.0/4.10.0/5.0.0;
 see `orb-source-review.md`. Real allocator exhaustion and installed/clean
@@ -96,3 +97,20 @@ and empty cleanup. Checked production count/layout helpers exercise overflow
 without manufacturing invalid handles or allocating INT32_MAX matches: this is
 helper evidence, **not** a billions-of-results native execution. Sanitizer
 qualification remains separate from AUnit registrations; see validation record.
+
+Task 006 adds **14 registrations**, total **67**, preserving all previous 53:
+exact Float32 mapping/indices/distance; reordered input with shifted and
+Positive'Last bounds; identical/repeated-query/repeated-train duplicates;
+query/train bounds rejection; late-invalid preflight; all four empty-set
+combinations; separate empty-query/train rejection; detector/set lifetime;
+Nearest/Mutual/KNN2-ratio/Radius interoperability; input preservation including
+descriptors; differing norms/full distance metadata; noncontiguous Region-local
+coordinate copy. No tolerance is used for copied coordinates. The existing
+test-only pairing fixture accepts explicit points; no production constructor
+is added. Preflight construction order is verified by source inspection; tests
+observe rejection without a returned partial result, not allocation instrumentation.
+
+Two Python regressions enforce the public-accessor/pure-Ada boundary. The
+repository checker explicitly requires unchanged **17** native declarations/
+imports. Existing actual-shim/raw/fault/sanitizer regression suites remain
+separate evidence; no new Task 006-specific pure-Ada sanitizer coverage is claimed.

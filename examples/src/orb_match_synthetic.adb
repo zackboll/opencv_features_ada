@@ -2,6 +2,7 @@ with Ada.Text_IO;
 with OpenCV.Core.UInt8_Access;
 with OpenCV.Features.ORB;
 with OpenCV.Features.Matching;
+with OpenCV.Features.Correspondences;
 
 procedure ORB_Match_Synthetic is
    package Features renames OpenCV.Features;
@@ -65,12 +66,16 @@ begin
          Ratio : constant OpenCV.Float64_Value := 0.80;
          Pairs : constant Matching.Two_Nearest_Match_Array := Matching.Brute_Force_KNN_2 (Query, Train);
          Accepted : constant Matching.Descriptor_Match_Array := Matching.Filter_By_Ratio (Pairs, Ratio);
+          Points : constant Features.Correspondences.Point_Correspondence_Array :=
+            Features.Correspondences.From_Matches (Query, Train, Accepted);
          Minimum : Matching.Binary_Descriptor_Distance := 256;
          Maximum : Matching.Binary_Descriptor_Distance := 0;
       begin
          Ada.Text_IO.Put_Line ("KNN2 candidate count:" & Natural'Image (Pairs'Length));
          Ada.Text_IO.Put_Line ("Ratio threshold (example policy, no library default):" & OpenCV.Float64_Value'Image (Ratio));
          Ada.Text_IO.Put_Line ("Ratio-accepted count:" & Natural'Image (Accepted'Length));
+          Ada.Text_IO.Put_Line ("Owned candidate 2-D correspondences:" & Natural'Image (Points'Length));
+          Ada.Text_IO.Put_Line ("Candidates only: not geometric inliers; downstream Calib3D/application policy required.");
          for Item of Accepted loop
             Minimum := Matching.Binary_Descriptor_Distance'Min (Minimum, Item.Distance);
             Maximum := Matching.Binary_Descriptor_Distance'Max (Maximum, Item.Distance);

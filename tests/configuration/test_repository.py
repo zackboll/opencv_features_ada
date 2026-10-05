@@ -6,11 +6,30 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from check_repository import check_bridge_ownership
+from check_repository import check_bridge_ownership, check_correspondences
 from workflow_topology import check_topology
 
 
 class RepositoryTests(unittest.TestCase):
+    def test_correspondences_public_ada_boundary(self):
+        check_correspondences(ROOT)
+
+    def test_correspondences_reject_private_or_native_access(self):
+        original = (ROOT / "src/opencv-features-correspondences.adb").read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "src/opencv-features-correspondences.ads").write_text(
+                (ROOT / "src/opencv-features-correspondences.ads").read_text())
+            body = root / "src/opencv-features-correspondences.adb"
+            for forbidden in ("Query.Points", "Train.Data", "Descriptor_Copy (Query)",
+                              "Required_Norm (Train)", "pragma Import (C, X)",
+                              "with OpenCV.Core.Module_Interop;", "with Interfaces;"):
+                with self.subTest(forbidden=forbidden):
+                    body.write_text(original + "\n" + forbidden)
+                    with self.assertRaises(ValueError):
+                        check_correspondences(root)
+
     def test_bridge_dependency_caches_are_not_vendoring(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

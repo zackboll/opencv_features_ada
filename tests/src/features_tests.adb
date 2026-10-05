@@ -7,6 +7,7 @@ with OpenCV.Core.Module_Interop;
 with OpenCV.Features.Internal.C_API;
 with OpenCV.Features.ORB;
 with OpenCV.Features.Matching;
+with OpenCV.Features.Correspondences;
 with OpenCV.Features.Radius_Fixtures;
 with Interfaces;
 with Interfaces.C;
@@ -17,6 +18,8 @@ package body Features_Tests is
    use OpenCV.Features;
    package ORB renames OpenCV.Features.ORB;
    package Matching renames OpenCV.Features.Matching;
+   package Correspondences renames OpenCV.Features.Correspondences;
+   use type Correspondences.Point_Correspondence_Array;
    use type Matching.Binary_Descriptor_Distance;
    package Bytes renames OpenCV.Core.UInt8_Access;
    use type OpenCV.Core.Depth_Type;
@@ -1334,6 +1337,255 @@ package body Features_Tests is
       end loop;
    end Radius_High_Index;
 
+   function Correspondence_Set
+     (Rows : Positive := 4; Norm : Binary_Descriptor_Norm := Hamming;
+      Train_Frame : Boolean := False) return Feature_Set
+   is
+      Data : OpenCV.Core.Mat := OpenCV.Core.Create (Rows, 32, (OpenCV.Core.UInt8, 1));
+      Points : Keypoint_Array (1 .. Rows);
+   begin
+      Data.Set_To (OpenCV.Make_Scalar (0.0));
+      for I in Points'Range loop
+         --  Distinct exact descriptors; signed fractional positions distinguish
+         --  axes and frames, and detect rounding/clamping/coordinate swapping.
+         Bytes.Set (Data, I - 1, 0, OpenCV.UInt8_Value (I));
+         Points (I) :=
+           (Position => (X => OpenCV.Float32_Value (I) + 0.25,
+                         Y => -OpenCV.Float32_Value (I) -
+                           (if Train_Frame then 0.75 else 0.5)),
+            Size => 1.0, Angle_Degrees => 0.0, Response => 0.0,
+            Octave => 0, Class_Id => OpenCV.Int32_Value (I));
+      end loop;
+      return Radius_Fixtures.Paired (Data, Norm, Points);
+   end Correspondence_Set;
+
+   procedure Assert_Correspondences
+     (Query, Train : Feature_Set; Matches : Matching.Descriptor_Match_Array;
+      Pairs : Correspondences.Point_Correspondence_Array)
+   is
+   begin
+      Assert (Pairs'First = 1 and then Pairs'Last = Matches'Length,
+              "correspondence canonical bounds/count");
+      for I in Pairs'Range loop
+         declare
+            Item : constant Matching.Descriptor_Match := Matches (Matches'First + (I - 1));
+            Q : constant OpenCV.Float32_Point := Point (Query, Item.Query_Index).Position;
+            D : constant OpenCV.Float32_Point := Point (Train, Item.Train_Index).Position;
+         begin
+            Assert (Pairs (I).Query_Index = Item.Query_Index
+                    and then Pairs (I).Train_Index = Item.Train_Index
+                    and then Pairs (I).Distance = Item.Distance
+                    and then Pairs (I).Query_Point.X = Q.X
+                    and then Pairs (I).Query_Point.Y = Q.Y
+                    and then Pairs (I).Train_Point.X = D.X
+                    and then Pairs (I).Train_Point.Y = D.Y,
+                    "correspondence fields differ from exact public Point/match values");
+         end;
+      end loop;
+   end Assert_Correspondences;
+
+   procedure Check_Correspondences
+     (Query, Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) is
+      Pairs : constant Correspondences.Point_Correspondence_Array :=
+        Correspondences.From_Matches (Query, Train, Matches);
+   begin
+      Assert_Correspondences (Query, Train, Matches, Pairs);
+   end Check_Correspondences;
+
+   procedure Reject_Correspondences
+     (Query, Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) is
+   begin
+      declare
+         Pairs : constant Correspondences.Point_Correspondence_Array :=
+           Correspondences.From_Matches (Query, Train, Matches);
+         pragma Unreferenced (Pairs);
+      begin
+         Assert (False, "invalid correspondence index accepted");
+      end;
+   exception
+      when OpenCV.OpenCV_Error => null;
+   end Reject_Correspondences;
+
+   procedure Correspondence_Exact (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set (3);
+      Train : constant Feature_Set := Correspondence_Set (Train_Frame => True);
+   begin
+      Check_Correspondences (Query, Train, [(1, 4, 0), (2, 3, 129), (3, 2, 256)]);
+   end Correspondence_Exact;
+
+   procedure Correspondence_Order (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set (3);
+      Train : constant Feature_Set := Correspondence_Set (Train_Frame => True);
+      Shifted : constant Matching.Descriptor_Match_Array (7 .. 9) :=
+        [(3, 2, 90), (1, 4, 5), (2, 1, 70)];
+      High : constant Matching.Descriptor_Match_Array (Positive'Last - 2 .. Positive'Last) := Shifted;
+   begin
+      Check_Correspondences (Query, Train, Shifted);
+      Check_Correspondences (Query, Train, High);
+   end Correspondence_Order;
+
+   procedure Correspondence_Duplicates (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set (Train_Frame => True);
+   begin
+      Check_Correspondences
+        (Query, Train, [(2, 3, 17), (2, 3, 17), (2, 1, 17), (4, 3, 17)]);
+   end Correspondence_Duplicates;
+
+   procedure Correspondence_Query_Index (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set;
+   begin
+      Reject_Correspondences (Query, Train, [(Count (Query) + 1, 1, 0)]);
+      Reject_Correspondences (Query, Train, [(Positive'Last, 1, 0)]);
+   end Correspondence_Query_Index;
+
+   procedure Correspondence_Train_Index (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set;
+   begin
+      Reject_Correspondences (Query, Train, [(1, Count (Train) + 1, 0)]);
+      Reject_Correspondences (Query, Train, [(1, Positive'Last, 0)]);
+   end Correspondence_Train_Index;
+
+   procedure Correspondence_Preflight (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set;
+   begin
+      Reject_Correspondences (Query, Train, [(1, 2, 1), (2, 1, 3), (Count (Query) + 1, 1, 0)]);
+      Reject_Correspondences (Query, Train, [(1, 2, 1), (2, 1, 3), (1, Count (Train) + 1, 0)]);
+      --  Rejection publishes nothing; subsequent valid conversion remains usable.
+      Check_Correspondences (Query, Train, [(1, 2, 1), (2, 1, 3)]);
+   end Correspondence_Preflight;
+
+   procedure Correspondence_Empty (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Set : Feature_Set;
+      Full_Set : constant Feature_Set := Correspondence_Set;
+      Empty : constant Matching.Descriptor_Match_Array := [1 .. 0 => <>];
+      Shifted_Empty : constant Matching.Descriptor_Match_Array (9 .. 8) := [others => <>];
+   begin
+      Check_Correspondences (Empty_Set, Empty_Set, Empty);
+      Check_Correspondences (Empty_Set, Full_Set, Empty);
+      Check_Correspondences (Full_Set, Empty_Set, Empty);
+      Check_Correspondences (Full_Set, Full_Set, Empty);
+      Check_Correspondences (Empty_Set, Empty_Set, Shifted_Empty);
+   end Correspondence_Empty;
+
+   procedure Correspondence_Empty_Query (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Set : Feature_Set;
+      Full_Set : constant Feature_Set := Correspondence_Set;
+   begin
+      Reject_Correspondences (Empty_Set, Full_Set, [(1, 1, 0)]);
+   end Correspondence_Empty_Query;
+
+   procedure Correspondence_Empty_Train (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Empty_Set : Feature_Set;
+      Full_Set : constant Feature_Set := Correspondence_Set;
+   begin
+      Reject_Correspondences (Full_Set, Empty_Set, [(1, 1, 0)]);
+   end Correspondence_Empty_Train;
+
+   procedure Correspondence_Lifetime (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Expected : Correspondences.Point_Correspondence_Array (1 .. 3);
+      function Local_Pairs return Correspondences.Point_Correspondence_Array is
+         Source : constant OpenCV.Core.Mat := Image;
+         Detector : constant ORB.Detector := ORB.Create;
+         Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+         Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+         Matches : constant Matching.Descriptor_Match_Array := [(3, 2, 256), (1, 3, 129), (2, 1, 0)];
+      begin
+         Assert (Count (Query) >= 3 and then Count (Train) >= 3, "correspondence lifetime fixture undersized");
+         for I in Expected'Range loop
+            Expected (I) :=
+              (Matches (I).Query_Index, Matches (I).Train_Index,
+               Point (Query, Matches (I).Query_Index).Position,
+               Point (Train, Matches (I).Train_Index).Position, Matches (I).Distance);
+         end loop;
+         return Correspondences.From_Matches (Query, Train, Matches);
+      end Local_Pairs;
+      Pairs : constant Correspondences.Point_Correspondence_Array := Local_Pairs;
+   begin
+      --  Both sets, detector, image and Matches have finalized/left scope.
+      Assert (Pairs = Expected, "owned correspondence fields changed after source finalization");
+   end Correspondence_Lifetime;
+
+   procedure Correspondence_Sources (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set (Train_Frame => True);
+      procedure Convert (Matches : Matching.Descriptor_Match_Array) is
+      begin
+         Assert (Matches'Length > 0, "matcher-source conversion would be vacuous");
+         Check_Correspondences (Query, Train, Matches);
+      end Convert;
+   begin
+      Convert (Matching.Brute_Force_Match (Query, Train, Matching.Nearest));
+      Convert (Matching.Brute_Force_Match (Query, Train, Matching.Mutual_Nearest));
+      Convert (Matching.Filter_By_Ratio (Matching.Brute_Force_KNN_2 (Query, Train), 0.80));
+      Convert (Matching.Brute_Force_Radius_Match (Query, Train, 1));
+   end Correspondence_Sources;
+
+   procedure Correspondence_Preservation (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set;
+      Train : constant Feature_Set := Correspondence_Set (Train_Frame => True);
+      Q_Count : constant Natural := Count (Query);
+      T_Count : constant Natural := Count (Train);
+      Q_Points : constant Keypoint_Array := Keypoints (Query);
+      T_Points : constant Keypoint_Array := Keypoints (Train);
+      Q_Norm : constant Binary_Descriptor_Norm := Required_Norm (Query);
+      T_Norm : constant Binary_Descriptor_Norm := Required_Norm (Train);
+      Q_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Query);
+      T_Data : constant OpenCV.Core.Mat := Descriptor_Copy (Train);
+   begin
+      Check_Correspondences (Query, Train, [(3, 2, 17), (1, 4, 0), (2, 1, 256)]);
+      Reject_Correspondences (Query, Train, [(1, 1, 0), (1, T_Count + 1, 0)]);
+      Assert (Count (Query) = Q_Count and then Count (Train) = T_Count
+              and then Keypoints (Query) = Q_Points and then Keypoints (Train) = T_Points
+              and then Required_Norm (Query) = Q_Norm and then Required_Norm (Train) = T_Norm,
+              "correspondence conversion/rejection modified public input observations");
+      Assert_Same (Q_Data, Descriptor_Copy (Query));
+      Assert_Same (T_Data, Descriptor_Copy (Train));
+   end Correspondence_Preservation;
+
+   procedure Correspondence_Norms (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Query : constant Feature_Set := Correspondence_Set (Norm => Hamming);
+      Train : constant Feature_Set := Correspondence_Set (Norm => Hamming_2, Train_Frame => True);
+      Empty_Set : Feature_Set;
+      Empty : constant Matching.Descriptor_Match_Array := [1 .. 0 => <>];
+   begin
+      Check_Correspondences (Query, Train, [(1, 2, 256), (3, 4, 129)]);
+      Check_Correspondences (Train, Query, [(2, 1, 256), (4, 3, 129)]);
+      Check_Correspondences (Query, Train, Empty);
+      Check_Correspondences (Empty_Set, Train, Empty);
+      Check_Correspondences (Train, Empty_Set, Empty);
+   end Correspondence_Norms;
+
+   procedure Correspondence_Region (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+      Region : constant OpenCV.Core.Mat := Source.Region ((8, 6, 224, 224));
+      Detector : constant ORB.Detector := ORB.Create;
+      Query : constant Feature_Set := ORB.Detect_And_Compute (Detector, Region);
+      Train : constant Feature_Set := ORB.Detect_And_Compute (Detector, Source);
+      Matches : constant Matching.Descriptor_Match_Array := [(1, 1, 17)];
+   begin
+      Assert (not Region.Is_Continuous and then Count (Query) > 0 and then Count (Train) > 0,
+              "correspondence Region fixture invalid");
+      Check_Correspondences (Query, Train, Matches);
+   end Correspondence_Region;
+
    package Caller is new AUnit.Test_Caller (Fixture);
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
@@ -1432,6 +1684,20 @@ package body Features_Tests is
       Result.Add_Test (Caller.Create ("Radius one-row train, entirely empty result, norm maximum", Radius_One_Zero'Access));
       Result.Add_Test (Caller.Create ("Radius values survive inputs/detector/native finalization", Radius_Lifetime'Access));
       Result.Add_Test (Caller.Create ("Radius direct high train index 262145 in both norms", Radius_High_Index'Access));
+      Result.Add_Test (Caller.Create ("Correspondences exact indices Float32 coordinates and distance", Correspondence_Exact'Access));
+      Result.Add_Test (Caller.Create ("Correspondences preserve reordered shifted and highest input bounds", Correspondence_Order'Access));
+      Result.Add_Test (Caller.Create ("Correspondences preserve identical repeated-query and repeated-train duplicates", Correspondence_Duplicates'Access));
+      Result.Add_Test (Caller.Create ("Correspondences reject out-of-range query indices with OpenCV_Error", Correspondence_Query_Index'Access));
+      Result.Add_Test (Caller.Create ("Correspondences reject out-of-range train indices with OpenCV_Error", Correspondence_Train_Index'Access));
+      Result.Add_Test (Caller.Create ("Correspondences preflight late invalid query and train items", Correspondence_Preflight'Access));
+      Result.Add_Test (Caller.Create ("Correspondences canonical empty bounds for all feature-set combinations", Correspondence_Empty'Access));
+      Result.Add_Test (Caller.Create ("Correspondences reject nonempty matches with empty query", Correspondence_Empty_Query'Access));
+      Result.Add_Test (Caller.Create ("Correspondences reject nonempty matches with empty train", Correspondence_Empty_Train'Access));
+      Result.Add_Test (Caller.Create ("Correspondences owned values survive sets and detector finalization", Correspondence_Lifetime'Access));
+      Result.Add_Test (Caller.Create ("Correspondences accept Nearest Mutual KNN2-ratio and Radius outputs", Correspondence_Sources'Access));
+      Result.Add_Test (Caller.Create ("Correspondences preserve input counts keypoints norms and descriptors", Correspondence_Preservation'Access));
+      Result.Add_Test (Caller.Create ("Correspondences ignore norm mismatch and preserve full distance metadata", Correspondence_Norms'Access));
+      Result.Add_Test (Caller.Create ("Correspondences copy noncontiguous Region-local coordinates unchanged", Correspondence_Region'Access));
       return Result;
    end Suite;
 end Features_Tests;

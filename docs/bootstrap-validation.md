@@ -6,6 +6,160 @@
 Historical ZIP checks below are distinct from actual build/test evidence.
 No native result is implied by the existence of a test or workflow.
 
+## Task 006 — owned candidate 2-D point correspondences
+
+Starting fetched `origin/main`: **`009c911da04586340d3354c2723480267f193e3d`**,
+the actual normal PR #5 merge (2026-10-05 01:11:35 UTC). Verified unchanged Task
+005 head **`06c4c224065a503e29c4af3fa37bca3a7cd3d607`** is an ancestor of main.
+Initial worktree was clean on `feature/005-radius-binary-matching` at that head;
+fetched, checked out main, pulled `--ff-only`. After both gates passed, created
+**`feature/006-point-correspondences`** from exact clean current `origin/main`.
+Core pin remains `7956981a7881ce9121115f8cb65909aeb9edc439`; version **0.1.0-dev**.
+No native source, interop, dependency, version or workflow change is included.
+
+### Gate 1 — actual Task 005 Windows post-merge log
+
+[Windows post-merge Features run 37250457092](https://github.com/zackboll/opencv_features_ada/actions/runs/37250457092),
+[job 111576833776](https://github.com/zackboll/opencv_features_ada/actions/runs/37250457092/job/111576833776),
+workflow and job completed **success**, job completion 2026-10-05 01:15:52 UTC.
+Metadata and actual checkout log identify exact merge/main head
+**`009c911da04586340d3354c2723480267f193e3d`**. Waited for completion before
+creating the Task 006 branch or editing source. Retrieved actual job log via
+`gh api repos/zackboll/opencv_features_ada/actions/jobs/111576833776/logs`:
+**130525 bytes**, SHA-256
+**`8ff01b2ea42f42ef3dc198297072732d8adc9cd47af7cc7ecc7c70bd7ebb9584`**.
+Evidence is from that log, not a green badge.
+
+OpenCV **5.0.0 / features (opencv5)**, MSYS2 OpenCV package **5.0.0-5**;
+external **msys64/mingw64/bin/g++.exe**, GCC package **16.2.0-4**, Ada
+GNAT native **16.1.0** / GPRbuild **26.0.1**. Independently matched all **53**
+registered case names to actual log OK lines: **53 registered / 53 executed /
+53 passed / 0 failed assertions / 0 unexpected errors**. All **nine** Task 005
+radius cases executed; one-best/KNN2/ratio regressions remain green. Keypoint,
+match and KNN2 ABI/layout tests pass; match size/alignment/offsets **12/4/0,4,8**,
+KNN2 **20/4/0,4,8,12,16**, C-written interchange PASS.
+
+Successful external-DLL inspection checks Features `.dll` and `.dll.a` exist,
+static `.a` absent, driver external MinGW64 and not GNAT's C++ driver, configured
+Features/Core/Core-shim import libraries present. Actual PE imports
+**libopencv_features-500.dll** and **libopencv_core_shim.dll**. Native build/link
+and AUnit execution with Core linkage succeed. No baseline correction needed.
+This is Task 005 Windows coverage, not Task 006 post-merge Windows coverage.
+
+### Public contract, architecture and inventory
+
+New package **`OpenCV.Features.Correspondences`** declares
+`Point_Correspondence` (Query_Index/Train_Index Positive; Query_Point/Train_Point
+shared OpenCV.Float32_Point; Distance Matching.Binary_Descriptor_Distance),
+`Point_Correspondence_Array (Positive range <>)`, and
+`From_Matches (Query, Train : Feature_Set; Matches : Descriptor_Match_Array)`.
+Pure Ada implementation uses only public `Count`/`Point`; no private fields,
+descriptor copies, handles, Core bridges or native calls. Explicit complete
+index preflight precedes exact-length result construction. Positive indices
+beyond the respective count raise **OpenCV_Error**; no partial result escapes.
+Positive-indexed input length fits Natural; offset arithmetic parenthesizes
+`I - 1` to handle valid input bounds ending at Positive'Last without overflow.
+Source inspection establishes preflight-before-construction; tests observe clean
+late-invalid rejection, not instrumentation of allocation/construction internals.
+
+Copy positions exactly, with no rounding/Float64/integer conversion, clamping,
+normalization, coordinate offsets/transforms or Region-frame reinterpretation.
+Preserve indices, descriptor distance, exact input order and every duplicate.
+Empty matches return **1..0** for any empty/full Query/Train combination; nonempty
+matches with either empty set reject. No norm compatibility or norm-specific
+distance check; manually supplied matches may have differing norms. Distance
+remains descriptor metadata, not confidence/probability/geometric residual/error.
+Returned ordinary Ada records contain no references and outlive all inputs,
+detectors, descriptor Mats and native storage. Inputs unchanged. Normal Ada
+allocation errors remain possible. Raw KNN2 requires caller selection first;
+Nearest/Mutual/KNN2-ratio/Radius outputs interoperate without new matcher policy.
+Candidate points are **not geometric inliers**. No Calib3D dependency is added.
+
+**This task adds no native C/C++ ABI and no new OpenCV algorithm dependency.**
+ABI **17 -> 17** declarations/imports: zero new exports/imports, C++ production
+functions, native handles or native allocator paths. Existing native source and
+ABI files unchanged. Checker explicitly enforces 17 and pure-Ada public accessors.
+
+AUnit **53 -> 67**, **14** actual new registrations, all executed/passed locally.
+Exact case names (each prefixed `Correspondences ` in the suite/log):
+
+1. `exact indices Float32 coordinates and distance`
+2. `preserve reordered shifted and highest input bounds`
+3. `preserve identical repeated-query and repeated-train duplicates`
+4. `reject out-of-range query indices with OpenCV_Error`
+5. `reject out-of-range train indices with OpenCV_Error`
+6. `preflight late invalid query and train items`
+7. `canonical empty bounds for all feature-set combinations`
+8. `reject nonempty matches with empty query`
+9. `reject nonempty matches with empty train`
+10. `owned values survive sets and detector finalization`
+11. `accept Nearest Mutual KNN2-ratio and Radius outputs`
+12. `preserve input counts keypoints norms and descriptors`
+13. `ignore norm mismatch and preserve full distance metadata`
+14. `copy noncontiguous Region-local coordinates unchanged`
+
+Reused/extended existing test-only pairing fixture with optional exact keypoints;
+not installed in production. Signed fractional coordinates distinguish frames
+and axes. No tolerance is used for value copies. Two checker regressions increase
+Python **20 -> 22**, including rejection of private/native access.
+
+### Local qualification
+
+Linux x86_64, OpenCV **4.10.0 / features2d (opencv4)**, Alire **2.1.1**, GNAT
+**16.1.0**, GPRbuild crate **26.0.1**. Host g++ **14.2.0**; inside Alire the
+resolved g++ banner is **GNAT-FSF-builds 16.1.0**, using Linux libstdc++.
+Python **3.13.5**. Warnings-as-errors unchanged. Shared build operations serial;
+actual logs retained outside tracked source. Unchanged merged baseline also
+executed/passed **53/53**, raw and sanitizer variants, and both examples before
+Task 006 edits. First implementation build/suite passed without corrections.
+
+| Command | Actual result |
+| --- | --- |
+| `alr -n build` | PASS production build |
+| `alr -n -C tests build` | PASS test build |
+| `alr -n -C tests exec -- sh ../scripts/run_native.sh bin/run_tests` | **67 registered / 67 executed / 67 passed**, **14/14 Task 006**, 0 failed assertions / 0 unexpected errors |
+| `alr -n test` | PASS same **67/67/67**, not 134 distinct cases |
+| `python3 -m unittest discover -s tests/configuration -v` | **22/22**, no failures/errors |
+| `python3 scripts/check_repository.py` | PASS **17 ABI / 67 registrations**, public-accessor boundary/pins/manifests/ownership/topology |
+| `sh scripts/run_profile_tests.sh` | **2/2** C/C++ helper executables PASS, not native algorithm coverage |
+| `for script in scripts/*.sh; do sh -n "$script"; done` | **6/6** PASS |
+| `alr -n exec -- sh scripts/run_sanitizers.sh native` | **2/2** production and fault-injection actual-shim variants PASS |
+| `alr -n exec -- sh scripts/run_sanitizers.sh` | **2/2** existing ASan+UBSan variants PASS, leak detection/halt-on-error, no diagnostics/suppressions |
+| `alr -n -C examples build` | PASS |
+| `alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic` | PASS, 393 features locally |
+| `alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_match_synthetic` | PASS, 121 ratio-accepted owned candidate point pairs locally; 89 radius32 matches |
+| `git diff --check` | PASS |
+
+Native regression/sanitizer suites remain green; **no Task 006-specific pure-Ada
+memory sanitizer coverage** is claimed. Existing upstream/Core libraries are not
+all instrumented. Example counts are observations, not portable API guarantees.
+
+### Ordinary PR gate and explicit matrix omission
+
+Final tested commit, remote/PR SHA equality and completed ordinary job log
+evidence are recorded in the Task 006 PR body/qualification comment, avoiding
+an evidence-only source commit that would invalidate the tested final head.
+Require repository-checks/Linux/macOS/linux-sanitizers on that exact final PR
+head, actual Task 006 OK case names and full suite counts, unchanged 17 ABI,
+existing raw/fault/sanitizer regression green. Keep PR OPEN, non-draft, unmerged,
+auto-merge disabled. No amend, force push, merge, tag, release or version bump.
+
+**No manual 4.1/4.10/5.0 matrix dispatched for Task 006**: pure Ada conversion
+adds no native API/call or version-dependent algorithm semantics. Existing
+Windows Gate 1 plus full local regressions and ordinary PR CI are the intended
+evidence; pinned-matrix dispatch would add no meaningful Task 006 evidence.
+
+All geometry/estimator policy remains deferred: homography, RANSAC/LMEDS/RHO/
+USAC, fundamental/essential matrices, epipolar filtering/recoverPose, PnP,
+triangulation, camera/stereo calibration, undistortion/rectification, inlier
+flags/reprojection error, coordinate transforms/pixel normalization/intrinsics,
+3-D points, DTED/terrain/geospatial/navigation logic. Persistent databases,
+arbitrary K, masks, FLANN, SIFT/SURF/GFTT, GPU/UMat and optical flow also remain
+deferred. Calib3D/application may consume Features output, never the reverse.
+Installed/clean-consumer qualification, allocator exhaustion and broader
+platform/version/source-review limitations remain as documented historically;
+no release readiness, formal proof, timing or navigation accuracy is claimed.
+
 ## Task 005 — absolute binary distance radius matching
 
 Starting fetched `origin/main`: **`c545f00d3aaff18af1a5385fccb800800deb23dc`**,

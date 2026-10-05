@@ -3,11 +3,13 @@
 Handwritten, thick Ada binding to feature detection, description and binary matching, using
 `OpenCV.Core.Mat` from `opencv_core`. Repository: `opencv_features_ada`;
 Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
-`OpenCV.Features.ORB` and `OpenCV.Features.Matching`.
+`OpenCV.Features.ORB`, `OpenCV.Features.Matching`, and
+`OpenCV.Features.Correspondences`.
 
 **Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
-ORB, binary BF one-best/KNN2/radius matching and pure-Ada ratio filtering, 53 registered
-AUnit cases, build scripts, and CI workflows are included. Local qualification passes all 53
+ORB, binary BF one-best/KNN2/radius matching, pure-Ada ratio filtering and owned
+2-D correspondence conversion, 67 registered AUnit cases, build scripts, and CI
+workflows are included. Local qualification passes all 67
 native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
 still outstanding. See
 [the validation record](docs/bootstrap-validation.md) before treating the
@@ -234,6 +236,60 @@ public package policy. Geometry's special prohibition on a Mat bridge is
 not copied here: Features actually needs image/descriptor Mats.
 [Architecture decisions and source provenance](docs/architecture.md).
 
+## Owned candidate 2-D correspondences
+
+`OpenCV.Features.Correspondences.From_Matches (Query, Train, Matches)` converts
+accepted `Matching.Descriptor_Match_Array` values into ordinary Ada-owned
+`Point_Correspondence_Array` values. Each record contains `Query_Index`,
+`Train_Index`, `Query_Point`, `Train_Point`, and the original binary descriptor
+`Distance`. It uses only public `Count`/`Point` accessors, with **no native call
+or new C/C++ ABI**; the native inventory remains **17 declarations/imports**.
+
+- Every query/train index is one-based and explicitly validated against its
+  respective feature count. All indices are checked before result construction;
+  an out-of-range positive index raises `OpenCV_Error`.
+- Stored `Float32_Point` values, indices and distance are copied exactly. No
+  rounding, normalization, integer/Float64 conversion, coordinate transformation,
+  offset or Region-local reference-frame reinterpretation occurs.
+- Exact input order and every duplicate survive: no sorting, deduplication,
+  cross-check, ratio filtering, tie rejection or matching occurs here.
+- Results have bounds `1 .. Matches'Length`; empty matches return `1 .. 0`
+  regardless of empty Query/Train sets. Nonempty matches against an empty set
+  reject. Input array bounds need not start at one.
+- Descriptor norms need not agree, and distances are not revalidated against a
+  norm. Manually supplied matches are supported. `Distance` is retained descriptor
+  metadata, **not** confidence, probability, geometric error or reprojection error.
+- Inputs are unchanged. Results own all their values and survive source sets,
+  detectors, descriptor Mats and native storage. Normal Ada allocation failures
+  remain possible for array results.
+
+```ada
+with OpenCV.Features.Matching;
+with OpenCV.Features.Correspondences;
+
+-- Query and Train are existing Feature_Set values.
+declare
+   Matches : constant OpenCV.Features.Matching.Descriptor_Match_Array :=
+     OpenCV.Features.Matching.Filter_By_Ratio
+       (OpenCV.Features.Matching.Brute_Force_KNN_2 (Query, Train), 0.80);
+   Pairs : constant
+     OpenCV.Features.Correspondences.Point_Correspondence_Array :=
+       OpenCV.Features.Correspondences.From_Matches (Query, Train, Matches);
+begin
+   -- Pairs are candidate 2-D correspondences for downstream geometry.
+   -- 0.80 is example caller policy, not a library recommendation/default.
+   null;
+end;
+```
+
+Nearest, Mutual_Nearest, ratio-accepted KNN2 and radius outputs all share this
+conversion boundary. Raw `Two_Nearest_Match_Array` is intentionally not accepted:
+the caller must first select candidates. These points are **not automatically
+RANSAC/homography/fundamental-matrix inliers, epipolar-consistent, pose-consistent
+or navigation-valid**. Calib3D/application geometry owns those decisions and
+coordinate-frame interpretation. Features has no Ada dependency on Calib3D.
+The standalone matching example also exercises this conversion.
+
 ## Validation and CI
 
 Commands that do not need Ada or native OpenCV:
@@ -245,7 +301,7 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 53 cases covering extraction, masks, descriptors, ownership, matching, ratio, radius,
+contains 67 cases covering extraction, masks, descriptors, ownership, matching, ratio, radius, correspondences,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures. Linux also runs the
 real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
@@ -262,7 +318,8 @@ reference setup; pin action commits as part of CI hardening.
 
 ## Navigation direction and exclusions
 
-This crate provides correspondences' front-end building blocks. It does not
+This crate detects/describes features, matches descriptors, and converts accepted
+matches into owned candidate spatial point correspondences. It does not
 provide a position fix. The planned first pipeline is camera features plus
 georeferenced reference imagery, followed by geometric verification and
 terrain-aware pose estimation using a separate elevation/geospatial layer.
