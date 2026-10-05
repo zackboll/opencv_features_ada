@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "orb_profile.hpp"
 #include "opencv_features_shim.h"
+#include "radius_limits.hpp"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -13,6 +14,12 @@ static_assert(offsetof(opencv_features_keypoint, octave) == 20, "C keypoint ABI 
 static_assert(offsetof(opencv_features_keypoint, class_id) == 24, "C keypoint ABI offset");
 static_assert(parameters_fit(500, 2, 0, 20), "default profile");
 static_assert(image_layout_fits(256, 256), "default image");
+static_assert(radius_layout_fits(1, 262145), "radius has no KNN packed row limit");
+static_assert(radius_count_fits(INT32_MAX - 1, 1, INT32_MAX), "radius exact count bound");
+static_assert(!radius_count_fits(INT32_MAX, 1, INT32_MAX), "radius count addition overflow");
+static_assert(!radius_count_fits(0, std::size_t(INT32_MAX) + 1, INT32_MAX), "radius ABI count overflow");
+static_assert(!radius_count_fits(2, 1, 2), "radius allocation count bound");
+static_assert(!radius_layout_fits(std::numeric_limits<std::size_t>::max(), 2), "radius layout overflow");
 int main() {
     constexpr auto hi = std::numeric_limits<std::int32_t>::max();
     constexpr auto lo = std::numeric_limits<std::int32_t>::min();

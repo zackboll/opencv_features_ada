@@ -371,6 +371,12 @@
       "sha256": "44d1bd10d6a0a3ddcfd9e3df04f31dd83e97e930e1745588cfe1401c5e24af2f"
     }
   ],
+  "radius_bfmatcher_source_review": {
+    "task": "005",
+    "method": "Before implementation: re-retrieved and SHA-256 verified all binary_bfmatcher_source_review files at peeled official commits; radius-specific conclusions and exact matchers.cpp hashes/anchors in docs/radius-matcher-source-review.md.",
+    "file_inventory": "binary_bfmatcher_source_review",
+    "scope": "CPU Mat single-train 32-byte binary radiusMatch, direct and collection overloads, BF radiusMatchImpl, batchDistance K=0, Hamming/Hamming2, DMatch construction/sort, empty/mask/threshold behavior, direct signed-int indices without KNN 18-bit packing; no exhaustive vendor HAL/GPU/future-version claim"
+  },
   "binary_bfmatcher_source_review": [
     {
       "tag": "4.1.0",

@@ -80,6 +80,15 @@ begin
                                   & " /" & Matching.Binary_Descriptor_Distance'Image (Maximum));
          end if;
       end;
+      declare
+         --  Explicit absolute distance: example application policy only, not
+         --  a library default or recommended navigation threshold.
+         Radius_Matches : constant Matching.Descriptor_Match_Array :=
+           Matching.Brute_Force_Radius_Match (Query, Train, Maximum_Distance => 32);
+      begin
+         Ada.Text_IO.Put_Line ("Absolute inclusive radius 32 (example policy), match count:"
+                               & Natural'Image (Radius_Matches'Length));
+      end;
       Ada.Text_IO.Put_Line ("Descriptor correspondence only: no geometric registration or navigation accuracy claim.");
    end;
 end ORB_Match_Synthetic;

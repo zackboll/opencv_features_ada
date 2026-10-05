@@ -4,6 +4,7 @@
 #endif
 #include "opencv_features_shim.h"
 #include "orb_profile.hpp"
+#include "radius_limits.hpp"
 #include "opencv_core_module_bridge.hpp"
 #include <opencv2/core/version.hpp>
 #if CV_VERSION_MAJOR == 4
@@ -310,6 +311,67 @@ opencv_features_status opencv_features_match_result_get(
 }
 void opencv_features_match_result_destroy(opencv_features_match_result_handle *handle) {
     try { delete handle; } catch (...) {}
+}
+opencv_features_status opencv_features_bf_radius_match(
+    const opencv_core_mat_handle *query_handle, const opencv_core_mat_handle *train_handle,
+    int32_t norm, int32_t maximum_distance,
+    opencv_features_match_result_handle **out_result, int32_t *out_count) {
+    if (out_result != nullptr) *out_result = nullptr;
+    if (out_count != nullptr) *out_count = 0;
+    return guarded([&] {
+        require(out_result != nullptr && out_count != nullptr, "null radius output");
+        require(norm == OPENCV_FEATURES_HAMMING || norm == OPENCV_FEATURES_HAMMING2,
+                "invalid binary descriptor norm selector");
+        const int maximum = norm == OPENCV_FEATURES_HAMMING ? 256 : 128;
+        require(maximum_distance > 0 && maximum_distance <= maximum, "invalid binary radius threshold");
+        const cv::Mat &query = descriptors(query_handle), &train = descriptors(train_handle);
+        require(query.empty() || train.empty() || opencv_features_detail::radius_layout_fits(
+                std::size_t(query.rows), std::size_t(train.rows)), "radius distance allocation overflow");
+        checkpoint(15); // before result allocation, including empty results
+        auto result = std::make_unique<opencv_features_match_result_handle>();
+        std::vector<std::vector<cv::DMatch>> native;
+        if (!query.empty() && !train.empty()) {
+            auto matcher = cv::BFMatcher::create(norm == OPENCV_FEATURES_HAMMING ?
+                            cv::NORM_HAMMING : cv::NORM_HAMMING2, false);
+            require(!matcher.empty(), "native matcher factory returned no matcher");
+            matcher->radiusMatch(query, train, native, static_cast<float>(maximum_distance), cv::noArray(), false);
+        }
+        checkpoint(16); // after matching, before validation/flattening
+        const auto expected = query.empty() || train.empty() ? std::size_t(0) : std::size_t(query.rows);
+        require(native.size() == expected, "invalid native radius bucket count");
+        std::size_t count = 0;
+        for (const auto &bucket : native) {
+            require(opencv_features_detail::radius_count_fits(count, bucket.size(), result->matches.max_size()),
+                    "radius result count/allocation overflow");
+            count += bucket.size();
+        }
+        // Reserve actual qualifying count, never the theoretical Cartesian product.
+        result->matches.reserve(count);
+        std::vector<int> train_indices;
+        for (std::size_t i = 0; i < native.size(); ++i) {
+            const auto &bucket = native[i];
+            float previous = -1;
+            train_indices.clear();
+            for (const auto &match : bucket) {
+                require(match.imgIdx == 0 && match.queryIdx == static_cast<int>(i) &&
+                        match.trainIdx >= 0 && match.trainIdx < train.rows &&
+                        std::isfinite(match.distance) && match.distance >= 0 &&
+                        match.distance <= maximum && match.distance <= maximum_distance &&
+                        std::trunc(match.distance) == match.distance && match.distance >= previous,
+                        "invalid native radius match or ordering");
+                previous = match.distance;
+                train_indices.push_back(match.trainIdx);
+                result->matches.push_back({match.queryIdx, match.trainIdx, static_cast<int32_t>(match.distance)});
+                checkpoint(17); // staged values remain private if validation/allocation fails
+            }
+            std::sort(train_indices.begin(), train_indices.end());
+            require(std::adjacent_find(train_indices.begin(), train_indices.end()) == train_indices.end(),
+                    "duplicate native radius train row within query");
+        }
+        checkpoint(18); // publish only a fully validated flat result
+        *out_count = static_cast<int32_t>(result->matches.size());
+        *out_result = result.release();
+    });
 }
 opencv_features_status opencv_features_bf_knn2(
     const opencv_core_mat_handle *query_handle, const opencv_core_mat_handle *train_handle,

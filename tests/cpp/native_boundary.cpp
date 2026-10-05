@@ -2,6 +2,7 @@
 #include "opencv_features_shim.h"
 #include "opencv_core_shim.h"
 #include "opencv_core_module_bridge.hpp"
+#include "radius_limits.hpp"
 #include <opencv2/core/ocl.hpp>
 #include <iostream>
 #include <memory>
@@ -386,6 +387,160 @@ void knn2() {
     std::cout << "PASS: KNN2 Hamming/Hamming2 exact 0/1, nonzero 1/2, 0x03 cell, tie; "
                  "raw negatives/empty/one-row; 262143 train high indices; 262144 query; ROI/lifetime/get/publication\n";
 }
+void radius() {
+    auto query = matrix(3,32), train = matrix(6,32);
+    cv::Mat *q = nullptr, *t = nullptr;
+    check(opencv_core_module_output_mat(query.get(),&q) == 0 &&
+          opencv_core_module_output_mat(train.get(),&t) == 0, "radius descriptor writers");
+    for (int norm : {0,1}) {
+        fill(query.get(),false); fill(train.get(),false);
+        q->row(1).setTo(170); // no matches: preserve missing-query gap
+        q->row(2).setTo(255);
+        t->at<unsigned char>(1,0) = norm == 0 ? 1 : 3;
+        t->at<unsigned char>(2,0) = norm == 0 ? 3 : 15;
+        t->at<unsigned char>(3,0) = norm == 0 ? 7 : 63;
+        t->at<unsigned char>(4,0) = norm == 0 ? 2 : 12; // distance-1 tie
+        t->row(5).setTo(255); // exactly one q2 match
+        const auto before_q = q->clone(), before_t = t->clone();
+        opencv_features_match_result_handle *raw = nullptr;
+        int32_t count = -1;
+        check(opencv_features_bf_radius_match(query.get(),train.get(),norm,2,&raw,&count) == 0 && raw && count == 5,
+              "radius multiple/one/zero bucket count, not K=2");
+        Matches result(raw,opencv_features_match_result_destroy);
+        bool seen[6] = {}; int previous = -1;
+        for (int i = 0; i < count; ++i) {
+            opencv_features_descriptor_match item{};
+            check(opencv_features_match_result_get(raw,i,&item) == 0, "radius getter");
+            if (i < 4) {
+                check(item.query_index == 0 && item.train_index >= 0 && item.train_index < 5 &&
+                      item.train_index != 3 && !seen[item.train_index] && item.distance >= previous &&
+                      item.distance == (item.train_index == 0 ? 0 : item.train_index == 2 ? 2 : 1),
+                      "radius exact Hamming/Hamming2 inclusive boundary/tie/order");
+                seen[item.train_index] = true; previous = item.distance;
+            } else check(item.query_index == 2 && item.train_index == 5 && item.distance == 0,
+                         "radius missing-query gap and one bucket");
+        }
+        check(cv::countNonZero(*q != before_q) == 0 && cv::countNonZero(*t != before_t) == 0,
+              "radius inputs preserved");
+        opencv_features_descriptor_match item{7,8,9};
+        for (int index : {-1,count}) {
+            item = {7,8,9};
+            check(opencv_features_match_result_get(raw,index,&item) == 1 && item.query_index == 0 &&
+                  item.train_index == 0 && item.distance == 0, "radius invalid-index clearing");
+        }
+        check(opencv_features_match_result_get(raw,0,nullptr) == 1, "radius null output record");
+        item = {7,8,9};
+        check(opencv_features_match_result_get(nullptr,0,&item) == 1 && item.query_index == 0 &&
+              item.train_index == 0 && item.distance == 0, "radius null result clearing");
+        std::cout << "PASS: radius " << (norm == 0 ? "Hamming" : "Hamming2")
+                  << " exact 0/1/2/3, inclusive boundary, ties, multiple/one/zero buckets\n";
+    }
+    // High index really appears. Use row 262144 (one-based 262145), beyond
+    // even the representable low packed KNN index, not merely a large Mat.
+    auto one = matrix(1,32), high = matrix(262145,32);
+    fill(one.get(),false); fill(high.get(),false,255);
+    cv::Mat *h = nullptr;
+    check(opencv_core_module_output_mat(high.get(),&h) == 0, "radius high-index writer");
+    h->row(262144).setTo(0);
+    for (int norm : {0,1}) {
+        opencv_features_match_result_handle *raw = nullptr; int32_t count = -1;
+        check(opencv_features_bf_radius_match(one.get(),high.get(),norm,1,&raw,&count) == 0 && count == 1,
+              "radius high train row accepted");
+        Matches result(raw,opencv_features_match_result_destroy);
+        opencv_features_descriptor_match item{};
+        check(opencv_features_match_result_get(raw,0,&item) == 0 && item.query_index == 0 &&
+              item.train_index == 262144 && item.distance == 0, "radius direct high train index preserved");
+    }
+    std::cout << "PASS: radius high train index 262144 (Ada 262145), both norms; KNN rejection retained\n";
+    opencv_features_match_result_handle *sentinel = nullptr; int32_t count = -1;
+    check(opencv_features_bf_radius_match(one.get(),one.get(),0,1,&sentinel,&count) == 0, "radius sentinel");
+    Matches live(sentinel,opencv_features_match_result_destroy);
+    auto raw = sentinel;
+    auto fail = [&](int status) {
+        check(status == 1 && raw == nullptr && count == 0, "radius failure atomicity");
+        raw = sentinel; count = -1;
+    };
+    check(opencv_features_bf_radius_match(one.get(),one.get(),0,1,nullptr,&count) == 1 && count == 0,
+          "radius null result pointer");
+    check(opencv_features_bf_radius_match(one.get(),one.get(),0,1,&raw,nullptr) == 1 && raw == nullptr,
+          "radius null count pointer");
+    raw = sentinel; count = -1;
+    fail(opencv_features_bf_radius_match(nullptr,one.get(),0,1,&raw,&count));
+    fail(opencv_features_bf_radius_match(one.get(),nullptr,0,1,&raw,&count));
+    for (int norm : {-1,2,INT32_MAX}) fail(opencv_features_bf_radius_match(one.get(),one.get(),norm,1,&raw,&count));
+    auto wrong = matrix(2,32,OPENCV_CORE_DEPTH_FLOAT32), multi = matrix(2,32,0,2);
+    auto short_row = matrix(2,31), long_row = matrix(2,33);
+    const int32_t sizes[] = {2,2,32}; opencv_core_mat_handle *nd = nullptr;
+    check(opencv_core_mat_create_nd(3,sizes,0,1,&nd) == 0, "radius N-D Core factory");
+    Mat dimensional(nd,opencv_core_mat_destroy);
+    for (auto *bad : {wrong.get(),multi.get(),short_row.get(),long_row.get(),dimensional.get()}) {
+        fail(opencv_features_bf_radius_match(bad,one.get(),0,1,&raw,&count));
+        fail(opencv_features_bf_radius_match(one.get(),bad,0,1,&raw,&count));
+    }
+    opencv_core_mat_handle *empty_handle = nullptr;
+    check(opencv_core_mat_create(&empty_handle) == 0, "radius empty Core factory");
+    Mat empty(empty_handle,opencv_core_mat_destroy);
+    for (int norm : {0,1}) {
+        for (int threshold : {-1,0,norm == 0 ? 257 : 129,INT32_MAX}) {
+            fail(opencv_features_bf_radius_match(one.get(),one.get(),norm,threshold,&raw,&count));
+            fail(opencv_features_bf_radius_match(empty.get(),one.get(),norm,threshold,&raw,&count));
+            fail(opencv_features_bf_radius_match(one.get(),empty.get(),norm,threshold,&raw,&count));
+            fail(opencv_features_bf_radius_match(empty.get(),empty.get(),norm,threshold,&raw,&count));
+        }
+        for (int combination = 0; combination < 3; ++combination) {
+            raw = nullptr;
+            check(opencv_features_bf_radius_match(combination == 1 ? one.get() : empty.get(),
+                  combination == 0 ? one.get() : empty.get(),norm,1,&raw,&count) == 0 && raw && count == 0,
+                  "radius compatible owned empty");
+            Matches result(raw,opencv_features_match_result_destroy);
+        }
+        raw = nullptr;
+        check(opencv_features_bf_radius_match(one.get(),high.get(),norm,norm == 0 ? 256 : 128,&raw,&count) == 0 &&
+              count == 262145, "radius norm attainable maximum inclusive");
+        Matches all(raw,opencv_features_match_result_destroy);
+    }
+    // Pure arithmetic injection of impossible counts uses the exact production
+    // helper, without allocating billions of matches or forged native handles.
+    check(opencv_features_detail::radius_count_fits(INT32_MAX-1,1,INT32_MAX) &&
+          !opencv_features_detail::radius_count_fits(INT32_MAX,1,INT32_MAX) &&
+          !opencv_features_detail::radius_count_fits(0,std::size_t(INT32_MAX)+1,INT32_MAX) &&
+          !opencv_features_detail::radius_count_fits(2,1,2) &&
+          !opencv_features_detail::radius_layout_fits(std::numeric_limits<std::size_t>::max(),2),
+          "radius count/layout overflow arithmetic");
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+    for (int stage : {15,16,17,18}) for (int kind = 1; kind <= 5; ++kind) {
+        raw = sentinel; count = -1;
+        opencv_features_test_fail(stage,kind);
+        const int expected[] = {0,1,2,3,4,4};
+        check(opencv_features_bf_radius_match(one.get(),one.get(),0,1,&raw,&count) == expected[kind] &&
+              raw == nullptr && count == 0, "radius injected exception/publication atomicity");
+    }
+    for (int stage : {15,16,18}) {
+        raw = sentinel; count = -1; opencv_features_test_fail(stage,3);
+        check(opencv_features_bf_radius_match(empty.get(),one.get(),0,1,&raw,&count) == 3 &&
+              raw == nullptr && count == 0, "radius empty result cleanup");
+    }
+    std::cout << "PASS: radius fault stages 15/16/17/18 x five exception categories, empty cleanup\n";
+#endif
+    // Noncontiguous descriptor rows and result lifetime after input destruction.
+    auto roi = matrix(2,40); fill(roi.get(),false);
+    cv::Mat *r = nullptr;
+    check(opencv_core_module_output_mat(roi.get(),&r) == 0, "radius ROI writer");
+    *r = (*r)(cv::Rect(0,0,32,2));
+    check(!r->isContinuous(), "radius ROI fixture must be noncontiguous");
+    const auto roi_before = r->clone();
+    raw = nullptr;
+    check(opencv_features_bf_radius_match(roi.get(),one.get(),0,1,&raw,&count) == 0 && count == 2 &&
+          cv::countNonZero(*r != roi_before) == 0, "radius ROI preserved/no cross-check");
+    Matches saved(raw,opencv_features_match_result_destroy);
+    roi.reset(); one.reset();
+    opencv_features_descriptor_match item{};
+    for (int i : {0,1})
+        check(opencv_features_match_result_get(raw,i,&item) == 0 && item.query_index == i &&
+              item.train_index == 0 && item.distance == 0, "radius input-independent lifetime/no global uniqueness");
+    opencv_features_match_result_destroy(nullptr);
+    std::cout << "PASS: radius raw negatives, thresholds/empties/one row, overflow helpers, ROI/lifetime\n";
+}
 void run() {
     auto image = matrix(256, 256), mask = matrix(256, 256), blank = matrix(256, 256);
     auto wrong = matrix(256, 256, OPENCV_CORE_DEPTH_FLOAT32), small = matrix(128, 128);
@@ -503,6 +658,7 @@ int main() {
         run();
         matching();
         knn2();
+        radius();
         std::cout << "PASS: actual Features shim / Core bridge / ORB boundary on "
                   << opencv_features_native_version() << '\n';
         return 0;
