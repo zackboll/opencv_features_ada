@@ -140,6 +140,14 @@ one synthetic test passes.
 
 ## Platform boundary
 
+Installation qualification is separate from native algorithm tests. Real
+recursive GPRinstall projects/libraries, not copied specs, serve consumers.
+Task 007 removes original lookup locations, restricts project/runtime paths to
+the installed prefix and recompiles after relocation. Unused build variables
+may retain provenance; actual lookup must not depend on source or prefix A.
+See [the installation contract](installed-consumer-validation.md). Core owns
+its install/bridge contract; Features neither modifies nor vendors it.
+
 Linux follows GNU g++/libstdc++ with a static-PIC C++ shim. macOS follows
 Imgproc's GPR-driven Apple clang++/libc++ relocatable shim and Core closure.
 Windows follows the external MSYS2/MinGW DLL and explicit import library

@@ -1,5 +1,13 @@
 # Features binding coverage
 
+Task 007 adds integration qualification, not AUnit cases or native exports:
+**67 registrations and 17 ABI declarations/imports remain unchanged**.
+Its public-only fixture covers ORB, matching, KNN2/ratio, radius and owned
+correspondences in three separate external consumer modes. Eight Python checks
+bring configuration tests from **22 to 30**: fixture/lookup boundaries, CI stages
+and installed metadata/actual-trace audits. These static/helper tests do not
+substitute for native consumer execution. See `installed-consumer-validation.md`.
+
 This is a handwritten capability inventory, not a generated header census.
 "Implemented draft" means source is present, not fully qualified. The initial
 67-case AUnit suite now passes locally on Linux/OpenCV 4.10.0; see

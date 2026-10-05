@@ -1,5 +1,86 @@
 # Bootstrap validation record
 
+## Task 007 — installation research and local qualification
+
+Start/main and Task 006 merge: `7bac60fcc776918615985fa2cc89e5b8bfe426c7`;
+Task 006 implementation `41c5d652e9471de7ec213dd2a67a221c02c31a90` is an
+ancestor. Initial checkout was clean on that implementation branch. After
+Gate 0, main fast-forwarded and `feature/007-clean-consumer-install` was created.
+
+Gate 0 actual completed logs, exact merge SHA:
+
+| Run | Job IDs | Result |
+|---|---|---|
+| 37252589376 Cross-platform | repository-checks 111583093614; linux 111583093693; macos 111583093431; linux-sanitizers 111583093604 | all success |
+| 37252589409 Windows post-merge | windows 111583093151 | success |
+
+SHA256 full downloaded logs:
+cross-platform `290d9aa534c671defdbc6f9a8b94b83163bc10aeed3743584bbc8f28daaf2312`;
+Windows `95250e5535a982edd7795be03759e999fbd93035f73babe2dc0b6a27ae9e37e9`.
+JSON/job evidence hashes:
+cross-platform `e68dd64c56755805d06c2baca0f5c23ae5c5b27c1dcf52d5421dafb8133b5ee7`;
+Windows `f93a99046310de4457d325849e14378523435f4ca0fc7c832b89c496136574ca`.
+Windows log has **67 OK lines**, **14 correspondence OK lines**, Successful
+Tests 67, Failed Assertions 0, Unexpected Errors 0. Registration/ABI inventory
+on the same SHA is recorded by the repository-check job: **67 and 17**.
+Windows native output is OpenCV **5.0.0 / features**, external MSYS2
+`mingw64/bin/g++.exe`, static Ada Features/Core archives and external Features
+DLL/import-library checks. Actual PE checks print `libopencv_features-500.dll`
+and `libopencv_core_shim.dll`; the step verifies Features/Core/Core-shim imports
+exist. Existing extraction/matching/KNN2/ratio/radius and all correspondence
+regressions execute successfully, not merely an overall green badge.
+
+Local evidence retained outside Git under
+`/tmp/features-task007-evidence.P4HK8vyM`. Baseline install workspace:
+`/tmp/features-task007-baseline.2UyyMKhs`; prefix A moved to
+`relocated-longer-prefix-b`. Both fresh public fixture builds/runs pass against
+unchanged production/package files on Linux/OpenCV **4.10.0 / features2d**.
+Commands: `alr -n build`; resolved-environment recursive
+`gprinstall -f -p -r --prefix=<A> -P <resolved Core>/opencv_core.gpr`, then
+the same command for Features; sanitized `gprbuild -p -v -vP2 -P consumer.gpr`;
+fresh compilation after `mv <A> <B>`. Baseline inventory/generated config and
+both full traces are preserved. First fixture compile exposed a missing Ada
+enum operator visibility clause; corrected in the new fixture, not packaging.
+
+First reusable validator run passed all three modes at
+`/tmp/features-consumer.Mwq3oigx`. Core resolved normally from the new source
+consumer's `alire/cache/pins/opencv_core_7956981a`, verified exact pinned SHA.
+Original snapshot/source-consumer paths and prefix A are unavailable during
+relocated compilation. Both projects and all four static archives resolve
+under the intended prefix. Unused Common_Cxx_Switches retains bridge build
+provenance but no Compiler package/use; no load-bearing source lookup found.
+Linux ldd/readelf records system OpenCV linkage; runtime lookup is prefix-only.
+See [installation contract and artifact inventory](installed-consumer-validation.md).
+
+Final local validator evidence: `/tmp/features-consumer.4XUlDyB0` (all three
+modes PASS). Core source was
+`/tmp/features-consumer.4XUlDyB0/features_clean_consumer/alire/cache/pins/opencv_core_7956981a`;
+it is retained under `unavailable-source-consumer` after installation. Prefix A
+`/tmp/features-consumer.4XUlDyB0/prefix-a` was removed by relocation to
+`/tmp/features-consumer.4XUlDyB0/relocated-longer-prefix-b`.
+Both installed GPR paths and all four library paths are the inventory paths
+in the installation document under A/B respectively. Source workspace is
+retained as `unavailable-source-consumer`; fresh application workspaces are
+`installed-consumer` and `relocated-consumer`. All three run logs contain
+`opencv_features clean consumer ok` and OpenCV 4.10.0/features2d. Local native
+compiler g++ Debian 14.2.0-19; GNAT 16.1.0; GPRbuild package 26.0.1.
+
+Serial local regression: production/test builds, direct native AUnit,
+`alr -n test`, **30** Python tests (previous **22**), repository checker,
+C/C++ profile/header helpers, all shell syntax checks, raw production/fault
+actual-shim tests, both ASan/UBSan variants, examples build/run and diff check
+completed. Direct native counts **67 executed / 67 passed**, zero assertions
+or unexpected errors; AUnit registrations **67 -> 67**, native ABI **17 -> 17**.
+Alire test repeats the configured native suite and Linux raw tests; those
+repeated results are not additional registered cases. No production API/configuration/version
+changes or Core modifications were needed for the Linux baseline.
+
+Ordinary PR exact-head evidence is recorded at review handoff after completed
+logs are retrieved; it is not implied by local success. Task 007 Windows
+execution remains post-merge only. Manual native-version matrix not dispatched:
+no version-dependent linking/algorithm change. Release/index/pin removal/tag/
+tarball qualification remains deferred.
+
 ## Status
 
 **Build/CI tranche qualified locally; not a fully qualified binding or release.**

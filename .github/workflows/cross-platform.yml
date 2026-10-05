@@ -49,6 +49,8 @@ jobs:
           alr -n -C examples build
           alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_synthetic
           alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_match_synthetic
+      - name: Qualify source installed and relocated consumers
+        run: sh scripts/validate_clean_consumer.sh
   linux-sanitizers:
     runs-on: ubuntu-24.04
     steps:
@@ -99,3 +101,5 @@ jobs:
           grep -E 'libopencv_core_shim' /tmp/features-linkage.txt
           grep -E 'libc\+\+' /tmp/features-linkage.txt
           if grep -E 'libstdc\+\+' /tmp/features-linkage.txt; then exit 1; fi
+      - name: Qualify source installed and relocated consumers
+        run: sh scripts/validate_clean_consumer.sh
