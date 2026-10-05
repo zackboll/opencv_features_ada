@@ -98,6 +98,18 @@ An earlier reproduction attempt hit `/tmp` tmpfs exhaustion (actual compiler
 TMPDIR, not a weakened test. All 30 Python tests/checker and sh/Bash-3.2 syntax
 checks pass after correction. No production/package change.
 
+Second PR run `37255117048` on `e827a93c141c94c23bccf25b659e5c452c577597`
+passed repository-checks/Linux (all three consumers)/Linux-sanitizers. macOS
+passed native/source/install and compiled/linked consumer A, but the strict
+otool audit rejected executable libstdc++ automatically injected by GPR's
+GNAT g++ driver. Native Features/Core dylibs use libc++ correctly. The generated
+macOS Ada consumer now explicitly selects GNAT gcc as linker: already-built
+Apple dylibs own their C++ runtime linkage. Linux remains g++; no production
+or Core correction. Log SHA256
+`df1c4517fcd619e1152566dce5c81e33492114cae2f11e938f70492716972b14`;
+macOS job `111590419073` log
+`768c5b1d40db7d6529c6c2f400f2981b59fe02b9c19617985b8588af70cb8d3c`.
+
 ## Status
 
 **Build/CI tranche qualified locally; not a fully qualified binding or release.**

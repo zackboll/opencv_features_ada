@@ -111,6 +111,9 @@ project Consumer is
    package Compiler is
       for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-gnatwe");
    end Compiler;
+   package Linker is
+      for Driver use external ("FEATURES_CONSUMER_LINKER", "g++");
+   end Linker;
 end Consumer;
 GPR
     (
@@ -121,6 +124,12 @@ GPR
             *) GPR_PROJECT_PATH="$prefix/share/gpr" ;;
         esac
         export GPR_PROJECT_PATH
+        unset FEATURES_CONSUMER_LINKER
+        # Installed dylibs already own their Apple libc++ linkage. Do not let
+        # GPR's C++ language inference inject GNAT g++/libstdc++ into Ada main.
+        if [ "$(uname -s)" = Darwin ]; then
+            export FEATURES_CONSUMER_LINKER=gcc
+        fi
         echo "Project lookup: $GPR_PROJECT_PATH"
         cd "$consumer"
         gprbuild -p -v -vP2 -P consumer.gpr > "$work/$mode-build.log" 2>&1 || {

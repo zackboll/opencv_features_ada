@@ -96,6 +96,9 @@ Linux inspects executables with ldd/readelf. Static archives are proven by the
 link command, not expected in ldd. Runtime lookup includes installed directories
 plus system loader paths. macOS uses otool -L on executables/installed dylibs,
 requires libc++ and rejects libstdc++; DYLD_LIBRARY_PATH is prefix-only.
+The macOS installed Ada main explicitly links with GNAT gcc, not GNAT g++:
+already-built Apple shim dylibs own libc++ linkage. GPR's default C++ driver
+would add an unused libstdc++ dependency to the main; the strict check caught it.
 Windows uses external MSYS2 MinGW64 and objdump PE inspection. Installed lib/bin
 and matching MSYS2 runtime are prepended only when executing, not compiling Ada.
 
