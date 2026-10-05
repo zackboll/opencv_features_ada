@@ -68,12 +68,13 @@ cp "$work/candidate/scripts/features_clean_consumer.adb" "$work/fixture.adb"
 # Preserve evidence, but make the precise build/source locations inaccessible.
 mv "$work/candidate" "$work/unavailable-candidate"
 mv "$work/features_clean_consumer" "$work/unavailable-source-consumer"
-PATH=$(tr ':' '\n' < "$work/toolchain-path.txt" | while IFS= read -r directory; do
+tr ':' '\n' < "$work/toolchain-path.txt" | while IFS= read -r directory; do
     case "$directory" in
         "$work"/*|"$source_root"/*) ;;
         *) printf '%s\n' "$directory" ;;
     esac
-done | paste -sd ':' -); export PATH
+done > "$work/installed-toolchain-path.txt"
+PATH=$(paste -sd ':' "$work/installed-toolchain-path.txt"); export PATH
 unset OPENCV_CORE_ALIRE_PREFIX OPENCV_FEATURES_ALIRE_PREFIX ALIRE
 prefix_a="$work/prefix-a"
 test -f "$prefix_a/include/opencv_core_module_bridge.hpp"

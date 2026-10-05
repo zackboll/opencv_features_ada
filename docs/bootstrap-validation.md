@@ -81,6 +81,23 @@ execution remains post-merge only. Manual native-version matrix not dispatched:
 no version-dependent linking/algorithm change. Release/index/pin removal/tag/
 tarball qualification remains deferred.
 
+First PR run `37254467678` on `11690347d2ca27355f75d91d52b4d5dca582edb2`:
+repository-checks/Linux/Linux-sanitizers passed; macOS native AUnit and libc++
+boundary/source consumer/install passed, but validator shell parsing failed at
+line 73 before installed-consumer compilation. Reproduced exactly with GNU
+Bash 3.2.0: case patterns inside a command substitution report unexpected `;;`
+(modern Bash/dash accept it). Fix separates PATH-filter loop from command
+substitution; no native/package/Core change. Completed log SHA256
+`bbe99271ee102ca15bfb8d1d24bce7b8dae0fa6a98533243c10bd03b8a13c442`;
+macOS job log `4349deba390a2804f70b1dbdaf407977e06a850d8b149c906f5ee5dc5f2530e6`.
+Failure is validator implementation/old-shell portability, not Core contract.
+Corrected validator passes all three modes under actual Bash 3.2 at
+`/home/zboll/features-task007-local.L7988mcE/features-consumer.4kNNQUuI`.
+An earlier reproduction attempt hit `/tmp` tmpfs exhaustion (actual compiler
+"No space left on device" diagnostics preserved); retry used an isolated disk
+TMPDIR, not a weakened test. All 30 Python tests/checker and sh/Bash-3.2 syntax
+checks pass after correction. No production/package change.
+
 ## Status
 
 **Build/CI tranche qualified locally; not a fully qualified binding or release.**
