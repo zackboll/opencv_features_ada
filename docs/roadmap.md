@@ -63,6 +63,34 @@ No Calib3D dependency or geometric verification was added. Exact-zero radius,
 arbitrary K, matcher databases, persistent matchers, masks, float descriptors,
 FLANN, GPU and broader feature/geometry policy remain deferred.
 
+## 006 — owned candidate 2-D point correspondences
+
+Implemented `OpenCV.Features.Correspondences`: one record and one unconstrained
+array type, with `From_Matches (Query, Train, Matches)`. Pure Ada, public
+`Count`/`Point` only; zero native ABI additions (17 declarations/imports remain).
+All one-based query/train indices are preflighted before result construction;
+out-of-range positive indices raise `OpenCV_Error`. Exact stored Float32 points,
+indices and descriptor distance are copied without arithmetic or coordinate
+transforms. Input order and all duplicates survive. Output bounds are
+1..Matches'Length, with 1..0 empty success for any empty/full set combination;
+nonempty matches against an empty set reject. No norm agreement or norm-specific
+distance validation is required. Inputs unchanged; returned Ada values outlive
+sets, detectors, descriptor Mats and native staging.
+
+Features **detects descriptors, matches descriptors, and turns accepted matches
+into spatial point correspondences**. Calib3D/application geometry **performs
+geometric estimation using those points**, with no reverse Features-to-Calib3D
+Ada dependency. Nearest, mutual-nearest, ratio-selected KNN2 and radius outputs
+all feed the same conversion. Raw KNN2 needs caller selection first.
+Descriptor distance remains metadata, not confidence or geometric error; no
+geometric inlier status or reference-frame interpretation follows from conversion.
+
+No homography, RANSAC/LMEDS/RHO/USAC, fundamental/essential matrix, epipolar
+filtering, pose recovery, PnP, triangulation, calibration, undistortion,
+rectification, intrinsics, 3-D points, coordinate/pixel normalization, geospatial
+or navigation policy is added. Broader detectors, match masks, arbitrary K,
+persistent/FLANN matchers, GPU and optical flow remain deferred.
+
 ## Later — expand only after evidence
 
 Measure whether broader ORB pyramid tuning, bulk keypoint transfer, alternative
