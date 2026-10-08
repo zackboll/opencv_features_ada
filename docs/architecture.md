@@ -148,6 +148,13 @@ may retain provenance; actual lookup must not depend on source or prefix A.
 See [the installation contract](installed-consumer-validation.md). Core owns
 its install/bridge contract; Features neither modifies nor vendors it.
 
+Task 008A retains C++ and actual native source directories even for externally
+built Windows libraries: these describe the GPRinstall library, not compilation
+ownership. `Externally_Built` keeps compilation in MSYS2. Required import
+artifacts fail installation if missing; no static archive substitution is
+allowed. Core's immutable 0.4.1 source pin supplies the same installation
+contract while remaining the sole production Ada library dependency.
+
 Linux follows GNU g++/libstdc++ with a static-PIC C++ shim. macOS follows
 Imgproc's GPR-driven Apple clang++/libc++ relocatable shim and Core closure.
 Windows follows the external MSYS2/MinGW DLL and explicit import library

@@ -18,7 +18,7 @@ pkg_config = "*"
 # Bootstrap source pin, not a vendored copy. Review/remove for publication.
 # Pins are repeated in tests/examples because each is its own Alire root.
 [[pins]]
-opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "7956981a7881ce9121115f8cb65909aeb9edc439" }
+opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "386c5360ac51f2b62e522853d94290aec4ee14a0" }
 
 [depends-on.'case(os)'.windows]
 mingw_w64_gcc = "*"

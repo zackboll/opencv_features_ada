@@ -14,8 +14,8 @@ project OpenCV_Features_Shim is
       when "Relocatable" => for Library_Kind use "relocatable";
       when "External_Relocatable" =>
          for Externally_Built use "True";
-         for Languages use ();
-         for Source_Dirs use ();
+         --  Retain the C++ language and real sources declared above so that
+         --  GPRinstall recognizes a library. Only the MSYS2 builder compiles it.
          for Library_Kind use "relocatable";
    end case;
    Common_Cxx_Switches :=
@@ -59,4 +59,13 @@ project OpenCV_Features_Shim is
          when "External_Relocatable" => null;
       end case;
    end Linker;
+   package Install is
+      case OpenCV_Features_Install.Shim_Build is
+         when "External_Relocatable" =>
+            --  Required, not optional or a stale static archive substitute.
+            for Required_Artifacts ("lib/opencv_features_shim") use
+              ("lib/libopencv_features_shim.dll.a");
+         when "Static_PIC" | "Relocatable" => null;
+      end case;
+   end Install;
 end OpenCV_Features_Shim;

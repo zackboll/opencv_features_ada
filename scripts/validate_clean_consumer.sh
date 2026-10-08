@@ -51,7 +51,7 @@ alr -n exec -- sh -c '
     set -eu
     printf "Resolved Core source: %s\n" "$OPENCV_CORE_ALIRE_PREFIX"
     git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD
-    test "$(git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD)" = 7956981a7881ce9121115f8cb65909aeb9edc439
+    test "$(git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD)" = 386c5360ac51f2b62e522853d94290aec4ee14a0
     printf "%s\n" "$OPENCV_CORE_ALIRE_PREFIX" > "$1/core-source.txt"
     printf "%s\n" "$PATH" > "$1/toolchain-path.txt"
     gprinstall -f -p -r --prefix="$1/prefix-a" -P "$OPENCV_CORE_ALIRE_PREFIX/opencv_core.gpr"
@@ -83,6 +83,19 @@ find "$prefix_a" -type f \( -name '*.gpr' -o -name '*opencv*ada.a' -o -name '*sh
 for project in opencv_features opencv_core opencv_features_shim opencv_core_shim; do
     test -f "$prefix_a/share/gpr/$project.gpr"
 done
+case "$(uname -s)" in
+    MINGW*|MSYS*)
+        for shim in opencv_core_shim opencv_features_shim; do
+            test -f "$prefix_a/lib/$shim/lib$shim.dll"
+            test -f "$prefix_a/lib/$shim/lib$shim.dll.a"
+            test ! -f "$prefix_a/lib/$shim/lib$shim.a"
+        done
+        "$native_bin/objdump.exe" -p "$prefix_a/lib/opencv_features_shim/libopencv_features_shim.dll" \
+            > "$work/installed-features-pe.log"
+        grep -i 'DLL Name.*opencv_features' "$work/installed-features-pe.log"
+        grep -i 'DLL Name.*opencv_core[0-9]' "$work/installed-features-pe.log"
+        grep -i 'DLL Name.*opencv_core_shim' "$work/installed-features-pe.log" ;;
+esac
 for spec in opencv-features.ads opencv-features-orb.ads opencv-features-matching.ads opencv-features-correspondences.ads; do
     test -f "$prefix_a/include/opencv_features/$spec"
 done
@@ -108,23 +121,38 @@ project Consumer is
    for Object_Dir use "obj";
    for Exec_Dir use "bin";
    for Main use ("features_clean_consumer.adb");
+   type Static_Runtime_Kind is ("False", "True");
+   Static_Runtime : Static_Runtime_Kind :=
+     external ("FEATURES_CONSUMER_STATIC_RUNTIME", "False");
    package Compiler is
       for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-gnatwe");
    end Compiler;
+   package Binder is
+      case Static_Runtime is
+         when "True" => for Switches ("Ada") use ("-static");
+         when "False" => null;
+      end case;
+   end Binder;
    package Linker is
       for Driver use external ("FEATURES_CONSUMER_LINKER", "g++");
+      case Static_Runtime is
+         when "True" => for Trailing_Switches ("Ada") use ("-static-libgcc");
+         when "False" => null;
+      end case;
    end Linker;
 end Consumer;
 GPR
     (
         unset GPR_PROJECT_PATH ADA_PROJECT_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
         unset LIBRARY_PATH GCC_EXEC_PREFIX COMPILER_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH LD_RUN_PATH
+        unset FEATURES_CONSUMER_LINKER FEATURES_CONSUMER_STATIC_RUNTIME
         case "$(uname -s)" in
-            MINGW*|MSYS*) GPR_PROJECT_PATH=$(cygpath -m "$prefix/share/gpr") ;;
+            MINGW*|MSYS*)
+                GPR_PROJECT_PATH=$(cygpath -m "$prefix/share/gpr")
+                export FEATURES_CONSUMER_LINKER=gcc FEATURES_CONSUMER_STATIC_RUNTIME=True ;;
             *) GPR_PROJECT_PATH="$prefix/share/gpr" ;;
         esac
         export GPR_PROJECT_PATH
-        unset FEATURES_CONSUMER_LINKER
         # Installed dylibs already own their Apple libc++ linkage. Do not let
         # GPR's C++ language inference inject GNAT g++/libstdc++ into Ada main.
         if [ "$(uname -s)" = Darwin ]; then
@@ -132,14 +160,15 @@ GPR
         fi
         echo "Project lookup: $GPR_PROJECT_PATH"
         cd "$consumer"
-        gprbuild -p -v -vP2 -P consumer.gpr > "$work/$mode-build.log" 2>&1 || {
+        gprbuild -p -v -P consumer.gpr > "$work/$mode-build.log" 2>&1 || {
             cat "$work/$mode-build.log"; exit 1;
         }
-        # Project parser plus final link line prove the lookup, not just our
-        # intended environment. Full traces are retained separately.
-        grep -E 'opencv_(features|core)(\.gpr|/|_ada|_shim)' "$work/$mode-build.log" \
-            > "$work/$mode-resolution.log"
-        grep -E '\.gpr|features_clean_consumer.o|/lib/opencv_' "$work/$mode-resolution.log" | tail -12
+        # GPRbuild 26 on Windows rejects -vP2. Keep raw build and GPRls
+        # diagnostics; audit actual installed source/ALI and linker paths.
+        gprls -v -vP2 -U -P consumer.gpr > "$work/$mode-projects.log" 2>&1 || {
+            cat "$work/$mode-projects.log"; exit 1;
+        }
+        cat "$work/$mode-projects.log" "$work/$mode-build.log" > "$work/$mode-resolution.log"
         runtime_dirs=$(find "$prefix/lib" "$prefix/bin" -type d 2>/dev/null | paste -sd ':' -)
         binary=bin/features_clean_consumer
         case "$(uname -s)" in

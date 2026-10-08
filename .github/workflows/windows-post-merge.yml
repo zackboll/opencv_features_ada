@@ -48,5 +48,7 @@ jobs:
           "$(dirname "$driver")/objdump.exe" -p lib/libopencv_features_shim.dll > features-pe.log
           grep -i 'DLL Name.*opencv_features' features-pe.log
           grep -i 'DLL Name.*opencv_core_shim' features-pe.log
+      - name: External shim GPRinstall regressions
+        run: alr -n exec -- python tests/test_external_shim_install.py -v
       - name: Qualify source installed and relocated consumers (post-merge only)
         run: sh scripts/validate_clean_consumer.sh

@@ -1,5 +1,14 @@
 # Features binding coverage
 
+Task 008A preserves **67 AUnit registrations and 17 native exports**. Six
+separate toolchain-backed GPRinstall regressions cover empty-language rejection,
+language-only abstract installation, shared library/import archive byte copying,
+missing required archive failure, no duplicate external compilation, and parsing
+both nonexternal modes. Linux synthetic import bytes do not certify a Windows
+DLL/import archive. Three path-audit negatives/normalization checks bring
+toolchain-free configuration coverage to **33**. See
+`task-008a-validation.md` for executed qualification and platform limitations.
+
 Task 007 adds integration qualification, not AUnit cases or native exports:
 **67 registrations and 17 ABI declarations/imports remain unchanged**.
 Its public-only fixture covers ORB, matching, KNN2/ratio, radius and owned
