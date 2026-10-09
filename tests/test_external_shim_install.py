@@ -5,12 +5,28 @@ Kept outside configuration discovery, which needs no Ada toolchain.
 """
 from pathlib import Path
 import os
+import platform
 import re
+import shlex
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def source_directory_present(expected, trace, system):
+    """Match the complete directory, including its trailing separator.
+
+    Darwin GPRls lowercases paths on the hosted case-insensitive filesystem.
+    Do not apply that equivalence to case-sensitive Linux paths.
+    """
+    expected = str(expected).replace("\\", "/").rstrip("/") + "/"
+    trace = trace.replace("\\", "/")
+    if system in ("Darwin", "Windows"):
+        expected, trace = expected.casefold(), trace.casefold()
+    return expected in trace
 
 
 class ExternalInstallTests(unittest.TestCase):
@@ -54,9 +70,31 @@ class ExternalInstallTests(unittest.TestCase):
     def prebuild(self):
         driver = re.search(r'Cxx_Driver := "([^"]+)";', self.config)[1]
         command = [driver, "-shared", "-fPIC", str(self.source), "-o", str(self.library)]
+        if sys.platform == "darwin":
+            if self._testMethodName == "test_actual_external_library_and_archive_install":
+                # Preserve one exact predecessor probe for diagnosis. Its
+                # status is not an oracle; the corrected build below must pass.
+                predecessor = subprocess.run(command, text=True, capture_output=True)
+                print(f"Predecessor compiler command: {shlex.join(command)}\n"
+                      f"exit: {predecessor.returncode}\nstdout:\n{predecessor.stdout}\n"
+                      f"stderr:\n{predecessor.stderr}", flush=True)
+            sysroot = re.search(r'Cxx_Sysroot := "([^"]*)";', self.config)[1]
+            self.assertTrue(sysroot and Path(sysroot).is_dir(),
+                            "Darwin fixture requires the configured Apple SDK")
+            command = [driver, "-dynamiclib", "-isysroot", sysroot,
+                       "-arch", platform.machine(), str(self.source),
+                       "-o", str(self.library)]
         if os.name == "nt":
             command.append(f"-Wl,--out-implib,{self.archive}")
-        subprocess.run(command, check=True, capture_output=True)
+        result = subprocess.run(command, text=True, capture_output=True)
+        diagnostics = (f"Compiler command: {shlex.join(command)}\n"
+                       f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
+        # Display captured diagnostics in unittest failures rather than hiding
+        # CalledProcessError.output/stderr. Successful Darwin commands also
+        # record the selected compiler, SDK and native architecture in CI.
+        if sys.platform == "darwin":
+            print(diagnostics, flush=True)
+        self.assertEqual(result.returncode, 0, diagnostics)
         if os.name != "nt":
             # Nonempty deterministic fixture, not a valid Windows import archive.
             self.archive.write_bytes(b"synthetic import archive copy fixture\x00\xff\n")
@@ -117,8 +155,18 @@ class ExternalInstallTests(unittest.TestCase):
                 # nor can GNU/MSYS2 certify Apple libc++ or Windows DLLs.
                 result = self.run_tool("gprls", "-v", "-U")
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn(str(self.root / "cpp").replace("\\", "/"),
-                              (result.stdout + result.stderr).replace("\\", "/"))
+                trace = result.stdout + result.stderr
+                self.assertTrue(source_directory_present(
+                    self.root / "cpp", trace, platform.system()), trace)
+                # Negative full-path oracle: neither a different unique
+                # fixture nor a cpp-prefixed sibling can satisfy this check.
+                for unrelated in (self.root.with_name(self.root.name + "-other") / "cpp",
+                                  self.root / "cpp-other"):
+                    with self.subTest(unrelated=unrelated):
+                        self.assertFalse(source_directory_present(
+                            self.root / "cpp", str(unrelated) + "/", platform.system()))
+                self.assertTrue(source_directory_present(
+                    self.root / "cpp", str(self.root / "cpp").lower() + "/", "Darwin"))
 
 
 if __name__ == "__main__":

@@ -94,3 +94,37 @@ actual native PE imports, installed execution and relocated execution remain
 an explicit post-merge main gate; Linux synthetic fixtures are not Windows
 native evidence. Windows PR jobs were not added. Pinned compatibility workflow
 remains manual and was not dispatched. No merge, release or tag is authorized.
+
+## PR #8 corrective fixture qualification
+
+Starting PR head: `d698958c823e963ca6ea5d19941f649158f7383c`.
+Hosted run 37717575918 / macOS job 113117507317 passed production build,
+67/67 AUnit and Apple libc++ linkage, then failed the synthetic regression step
+with three compiler errors and two path assertions. The original fixture hid
+compiler stdout/stderr; the captured command used Apple clang++ with generic
+`-shared -fPIC` and no configured SDK. GPRls reported the identical unique
+fixture source directory with lowercase `/t/` rather than `/T/`.
+
+The corrective fixture uses `-dynamiclib -isysroot <configured SDK>` and
+`-arch <native host architecture>`, retaining the selected Apple compiler.
+Linux/Windows compile arguments are unchanged. Captured compiler command,
+stdout and stderr appear in failure assertions, and Darwin commands are logged
+even on success. One non-oracle predecessor probe records the exact old command
+and diagnostics on Darwin; the corrected build must still succeed.
+
+Source-directory comparison normalizes separators and Darwin/Windows case,
+retaining the complete unique fixture path and terminal `cpp/`. Negative
+subtests reject another fixture directory and a `cpp-other` sibling; a
+lowercased Darwin positive checks the observed behavior. All six original
+regressions still run, without macOS skips.
+
+Corrective local Linux execution: six regressions PASS; 67/67 AUnit with zero
+assertions/errors; 17 actual exports and certified resolved Core SHA verified;
+33 configuration tests, repository/profile checks, production/fault native
+boundaries and ASan/UBSan PASS. All shell syntax and diff checks PASS.
+Fresh three-stage consumer qualification PASS, evidence directory
+`features-consumer.1p19gP9l`; original prefix A physically removed and complete
+Core/Features installed project/source/library resolution audits PASS.
+Exact corrective-head hosted macOS and installed/relocated results must be
+checked before declaring the review gate ready; original failed CI is not
+substituted for corrected-head evidence.
