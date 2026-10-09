@@ -94,6 +94,30 @@ runs in a new workspace with no objects.
 
 ## Runtime/platform scope
 
+### Task 008A-W2 linker metadata correction
+
+Windows main run 37876542933 at `641a1a262db63570ecca76b076f0407c9787e7ae`
+executed the source, installed and relocated applications successfully, then
+failed the final metadata audit. Installed `opencv_features.gpr` retained
+`Linker_Options` containing the evaluated original `candidate/lib` directory.
+The audit correctly rejected it; application execution did not certify the
+installed metadata or complete relocation qualification.
+
+The source-specific `-L` was removed from Features' external-shim
+`Linker_Options` and relocatable `Library_Options`; `-lopencv_features_shim`
+remains. The imported `opencv_features_shim.gpr` library project declares the
+actual library directory. GPRbuild supplies library search paths from that
+closure, and GPRinstall emits prefix-relative installed `Library_Dir` values.
+Actual Unix GPRinstall/link fixtures reproduce the predecessor and prove the
+corrected mechanism after the original library directory is hidden and A is
+moved to B. They do not certify Windows import-library resolution.
+
+The Windows executions show the stale option did not prevent those particular
+links/runs. They do not identify which Windows linker search entry selected
+each library; no claim about Windows search order is inferred from execution.
+The new Windows post-merge run must pass the full final audit. Core remains
+source-pinned, and none of this establishes official indexed resolution.
+
 Linux inspects executables with ldd/readelf. Static archives are proven by the
 link command, not expected in ldd. Runtime lookup includes installed directories
 plus system loader paths. macOS uses otool -L on executables/installed dylibs,

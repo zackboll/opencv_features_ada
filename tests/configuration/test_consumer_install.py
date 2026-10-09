@@ -32,6 +32,20 @@ class InstallAuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             audit(self.work)
 
+    def test_source_library_linker_option_is_rejected(self):
+        self.project.write_text(
+            f'package Linker is\nfor Linker_Options use ("-L{self.work}/candidate/lib", '
+            '"-lopencv_features_shim");\nend Linker;\n')
+        with self.assertRaisesRegex(ValueError, "unreviewed source/original-prefix metadata"):
+            audit(self.work)
+
+    def test_removed_prefix_library_option_is_rejected(self):
+        self.project.write_text(
+            f'for Library_Options use ("-L{self.work}/prefix-a/lib", '
+            '"-lopencv_features_shim");\n')
+        with self.assertRaisesRegex(ValueError, "unreviewed source/original-prefix metadata"):
+            audit(self.work)
+
     def test_source_include_used_by_compiler_is_rejected(self):
         self.project.write_text(f'Common_Cxx_Switches := ("-I{self.work}/candidate/core");\npackage Compiler is\n')
         with self.assertRaises(ValueError):
