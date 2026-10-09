@@ -108,7 +108,18 @@ selection, following Core 0.4.1, to avoid GNAT C++ runtime contamination. Raw
 build/GPRls/PE logs are retained. Path auditing normalizes Windows separators
 without dropping Core or Features project, source, or linker-path requirements.
 Both installed DLL/import-archive pairs are required, static shim substitutes
-are rejected, and the installed Features DLL's native/Core imports are checked.
+are rejected, and the installed Features DLL must import the actual native
+Features backend and `libopencv_core_shim.dll` (whole names, case-insensitive).
+A direct native Core DLL import is not required: Core functionality may be
+reached through the Core shim or transitively. The configured native Core import
+library must still exist under the selected native installation.
+
+Before either source directory is renamed, the qualifier changes to the stable
+evidence directory. Inventories retain raw `find` output and separately sorted
+output; a failed `find` stops qualification before downstream processing. Runtime
+directory collection requires installed `lib`, includes `bin` when present, and
+does not suppress collection errors. Deterministic fixtures exercise these
+failure paths separately from actual platform relocation runs.
 
 Linux/macOS ordinary PR jobs execute all three modes. Windows Task 007 remains
 **post-merge only**, after native/linkage checks; it cannot be claimed executed

@@ -1,5 +1,13 @@
 # Features binding coverage
 
+Task 008A-W1 adds **9 deterministic qualifier regressions**, bringing current
+configuration discovery to **42**. They cover backend/Core-shim PE imports
+without direct native Core, missing imports, case variation, unrelated names,
+stable CWD across source renames, recovery from a removed CWD, failed inventory
+collection, and integration of checked helpers. These fixtures do not certify
+Windows native installation or relocation. **67 AUnit registrations and 17
+native exports remain unchanged**. See `task-008a-w1-validation.md`.
+
 Task 008A preserves **67 AUnit registrations and 17 native exports**. Six
 separate toolchain-backed GPRinstall regressions cover empty-language rejection,
 language-only abstract installation, shared library/import archive byte copying,

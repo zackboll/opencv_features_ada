@@ -4,6 +4,7 @@
 # Run directly (not inside alr exec): sh scripts/validate_clean_consumer.sh [source]
 set -eu
 source_root=$(CDPATH= cd -- "${1:-$(dirname -- "$0")/..}" && pwd)
+. "$source_root/scripts/consumer_validation_helpers.sh"
 work=$(mktemp -d "${TMPDIR:-/tmp}/features-consumer.XXXXXXXX")
 echo "Consumer evidence: $work"
 unset GPR_PROJECT_PATH ADA_PROJECT_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
@@ -66,8 +67,7 @@ case "$(uname -s)" in
 esac
 cp "$work/candidate/scripts/features_clean_consumer.adb" "$work/fixture.adb"
 # Preserve evidence, but make the precise build/source locations inaccessible.
-mv "$work/candidate" "$work/unavailable-candidate"
-mv "$work/features_clean_consumer" "$work/unavailable-source-consumer"
+hide_consumer_sources "$work"
 tr ':' '\n' < "$work/toolchain-path.txt" | while IFS= read -r directory; do
     case "$directory" in
         "$work"/*|"$source_root"/*) ;;
@@ -78,8 +78,9 @@ PATH=$(paste -sd ':' "$work/installed-toolchain-path.txt"); export PATH
 unset OPENCV_CORE_ALIRE_PREFIX OPENCV_FEATURES_ALIRE_PREFIX ALIRE
 prefix_a="$work/prefix-a"
 test -f "$prefix_a/include/opencv_core_module_bridge.hpp"
-find "$prefix_a" -type f | sort > "$work/installed-inventory.txt"
-find "$prefix_a" -type f \( -name '*.gpr' -o -name '*opencv*ada.a' -o -name '*shim*.a' -o -name '*.dll' -o -name '*.dylib' -o -name '*.so' -o -name '*bridge.hpp' \) | sort
+collect_consumer_inventory "$work/installed-inventory.txt" "$prefix_a" -type f
+collect_consumer_inventory "$work/installed-artifacts.txt" "$prefix_a" -type f \( -name '*.gpr' -o -name '*opencv*ada.a' -o -name '*shim*.a' -o -name '*.dll' -o -name '*.dylib' -o -name '*.so' -o -name '*bridge.hpp' \)
+cat "$work/installed-artifacts.txt"
 for project in opencv_features opencv_core opencv_features_shim opencv_core_shim; do
     test -f "$prefix_a/share/gpr/$project.gpr"
 done
@@ -92,14 +93,13 @@ case "$(uname -s)" in
         done
         "$native_bin/objdump.exe" -p "$prefix_a/lib/opencv_features_shim/libopencv_features_shim.dll" \
             > "$work/installed-features-pe.log"
-        grep -i 'DLL Name.*opencv_features' "$work/installed-features-pe.log"
-        grep -i 'DLL Name.*opencv_core[0-9]' "$work/installed-features-pe.log"
-        grep -i 'DLL Name.*opencv_core_shim' "$work/installed-features-pe.log" ;;
+        check_features_pe_imports "$work/installed-features-pe.log" ;;
 esac
 for spec in opencv-features.ads opencv-features-orb.ads opencv-features-matching.ads opencv-features-correspondences.ads; do
     test -f "$prefix_a/include/opencv_features/$spec"
 done
-if find "$prefix_a" -iname '*radius_fixtures*' -o -iname '*features_tests*' | grep .; then
+collect_consumer_inventory "$work/installed-test-sources.txt" "$prefix_a" \( -iname '*radius_fixtures*' -o -iname '*features_tests*' \)
+if grep . "$work/installed-test-sources.txt"; then
     echo 'error: test-only sources installed' >&2; exit 1
 fi
 for mode in installed relocated; do
@@ -169,7 +169,10 @@ GPR
             cat "$work/$mode-projects.log"; exit 1;
         }
         cat "$work/$mode-projects.log" "$work/$mode-build.log" > "$work/$mode-resolution.log"
-        runtime_dirs=$(find "$prefix/lib" "$prefix/bin" -type d 2>/dev/null | paste -sd ':' -)
+        set -- "$prefix/lib"
+        if [ -d "$prefix/bin" ]; then set -- "$@" "$prefix/bin"; fi
+        collect_consumer_inventory "$work/$mode-runtime-dirs.txt" "$@" -type d
+        runtime_dirs=$(paste -sd ':' "$work/$mode-runtime-dirs.txt")
         binary=bin/features_clean_consumer
         case "$(uname -s)" in
             Linux)
