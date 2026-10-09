@@ -19,6 +19,7 @@ class InstallAuditTests(unittest.TestCase):
         for mode, prefix in (("installed", "prefix-a"), ("relocated", "relocated-longer-prefix-b")):
             trace = "\n".join(str(self.work / prefix / sub) for sub in (
                 "share/gpr/opencv_core.gpr", "share/gpr/opencv_features.gpr",
+                "include/opencv_core/opencv-core.ads", "include/opencv_features/opencv-features.ads",
                 "lib/opencv_core/libopencv_core_ada.a", "lib/opencv_features/libopencv_features_ada.a"))
             (self.work / f"{mode}-resolution.log").write_text(trace)
 
@@ -45,5 +46,23 @@ class InstallAuditTests(unittest.TestCase):
     def test_source_in_actual_resolution_trace_is_rejected(self):
         path = self.work / "relocated-resolution.log"
         path.write_text(path.read_text() + f"\n{self.work}/candidate/lib\n")
+        with self.assertRaisesRegex(ValueError, "resolution trace"):
+            audit(self.work)
+
+    def test_windows_separators_are_audited(self):
+        for mode in ("installed", "relocated"):
+            path = self.work / f"{mode}-resolution.log"
+            path.write_text(path.read_text().replace("/", "\\"))
+        audit(self.work)
+
+    def test_windows_source_path_is_rejected(self):
+        path = self.work / "relocated-resolution.log"
+        path.write_text(path.read_text() + "\n" + str(self.work / "candidate/lib").replace("/", "\\"))
+        with self.assertRaisesRegex(ValueError, "resolution trace"):
+            audit(self.work)
+
+    def test_removed_prefix_in_actual_trace_is_rejected(self):
+        path = self.work / "relocated-resolution.log"
+        path.write_text(path.read_text() + f"\n{self.work}/prefix-a/lib\n")
         with self.assertRaisesRegex(ValueError, "resolution trace"):
             audit(self.work)

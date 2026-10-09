@@ -5,6 +5,11 @@ import re
 import sys
 
 
+def normalized(text: str) -> str:
+    """Compare Windows separators/case without discarding path components."""
+    return text.replace("\\", "/").casefold() if sys.platform == "win32" else text.replace("\\", "/")
+
+
 def audit(work: Path) -> None:
     forbidden = [str(work / "candidate"), str(work / "features_clean_consumer"),
                  (work / "core-source.txt").read_text().strip()]
@@ -16,7 +21,7 @@ def audit(work: Path) -> None:
         if not path.is_file() or path.suffix not in {".gpr", ".cgpr", ".pc", ".json"}:
             continue
         for line in path.read_text().splitlines():
-            if any(p.replace("\\", "/") in line.replace("\\", "/")
+            if any(normalized(p) in normalized(line)
                    for p in forbidden + [str(work / "prefix-a")]):
                 # GPRINSTALL retains this evaluated, unused variable but drops
                 # the Compiler package. It cannot drive an installed build.
@@ -27,17 +32,23 @@ def audit(work: Path) -> None:
                 else:
                     raise ValueError(f"unreviewed source/original-prefix metadata: {path}: {line}")
     for mode, name in (("installed", "prefix-a"), ("relocated", "relocated-longer-prefix-b")):
-        trace = (work / f"{mode}-resolution.log").read_text().replace("\\", "/")
-        expected = str(work / name).replace("\\", "/")
+        trace = normalized((work / f"{mode}-resolution.log").read_text())
+        expected = normalized(str(work / name))
         # Windows tool output uses drive-letter paths; suffix matching still
         # verifies the unique work root and prefix, independent of MSYS spelling.
         expected = expected[expected.index("features-consumer."):]
         for project in ("opencv_features", "opencv_core"):
-            if not re.search(re.escape(expected) + r"/share/gpr/" + project + r"(?:\.gpr)?", trace):
+            if not re.search(re.escape(expected) + r"/share/gpr/" + project + r"\.gpr", trace):
                 raise ValueError(f"missing resolved {project} project under {name}")
+            # GPRls resolves source/ALI paths; unlike unsupported -vP2 this
+            # provides portable actual project-resolution evidence.
+            if not re.search(re.escape(expected) + r"/include/" + project + r"/", trace):
+                raise ValueError(f"missing resolved {project} sources under {name}")
             if not re.search(re.escape(expected) + r"/lib/" + project + r"/", trace):
                 raise ValueError(f"missing linked {project} library under {name}")
         for original in forbidden + ([str(work / "prefix-a")] if mode == "relocated" else []):
+            original = normalized(original)
+            original = original[original.index("features-consumer."):] if "features-consumer." in original else original
             if original in trace:
                 raise ValueError(f"source/original prefix in {mode} resolution trace: {original}")
     (work / "path-audit.log").write_text("\n".join(findings) + "\n")

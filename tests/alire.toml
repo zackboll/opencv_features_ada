@@ -15,7 +15,7 @@ aunit = "^26.0.0"
 
 [[pins]]
 opencv_features = { path = ".." }
-opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "7956981a7881ce9121115f8cb65909aeb9edc439" }
+opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "386c5360ac51f2b62e522853d94290aec4ee14a0" }
 
 [build-switches."*"]
 ada_version = "Ada2022"

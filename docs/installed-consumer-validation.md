@@ -17,8 +17,9 @@ not a release, index submission, algorithm extension or compatibility promise.
    new application with no reused consumer objects.
 
 **Alire public-index consumption is not tested.** Bare `alr with opencv_features`
-is not documented as resolving from the index. Core 0.4.0 remains pinned to
-`7956981a7881ce9121115f8cb65909aeb9edc439`.
+is not documented as resolving from the index. Task 008A pins Core 0.4.1 to
+`386c5360ac51f2b62e522853d94290aec4ee14a0`; the production constraint stays
+`~0.4.0`. No unmerged public-index entry is required.
 
 ## Reproduce
 
@@ -86,7 +87,8 @@ access private units. macOS uses dylibs; Windows DLLs/import libraries.
 Actual inventories are recorded, not assumed to match Linux artifact types.
 
 The installed application contains `with "opencv_features";` and executes
-`gprbuild -p -v -vP2 -P consumer.gpr` with prefix-only project lookup. This is
+`gprbuild -p -v -P consumer.gpr` with prefix-only project lookup, followed by
+`gprls -v -vP2 -U -P consumer.gpr` for project/source/ALI resolution. This is
 not an ad-hoc copied-spec installation. After A moves to B the same command
 runs in a new workspace with no objects.
 
@@ -101,6 +103,12 @@ already-built Apple shim dylibs own libc++ linkage. GPR's default C++ driver
 would add an unused libstdc++ dependency to the main; the strict check caught it.
 Windows uses external MSYS2 MinGW64 and objdump PE inspection. Installed lib/bin
 and matching MSYS2 runtime are prepended only when executing, not compiling Ada.
+The installed Windows Ada consumer uses GNAT gcc and static Ada/libgcc runtime
+selection, following Core 0.4.1, to avoid GNAT C++ runtime contamination. Raw
+build/GPRls/PE logs are retained. Path auditing normalizes Windows separators
+without dropping Core or Features project, source, or linker-path requirements.
+Both installed DLL/import-archive pairs are required, static shim substitutes
+are rejected, and the installed Features DLL's native/Core imports are checked.
 
 Linux/macOS ordinary PR jobs execute all three modes. Windows Task 007 remains
 **post-merge only**, after native/linkage checks; it cannot be claimed executed

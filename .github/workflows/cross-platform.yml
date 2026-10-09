@@ -44,6 +44,8 @@ jobs:
           alr toolchain
       - name: Build and run native AUnit suite
         run: sh scripts/test.sh
+      - name: External shim GPRinstall regressions (synthetic artifacts)
+        run: alr -n exec -- python3 tests/test_external_shim_install.py -v
       - name: Build and run example
         run: |
           alr -n -C examples build
@@ -101,5 +103,7 @@ jobs:
           grep -E 'libopencv_core_shim' /tmp/features-linkage.txt
           grep -E 'libc\+\+' /tmp/features-linkage.txt
           if grep -E 'libstdc\+\+' /tmp/features-linkage.txt; then exit 1; fi
+      - name: External shim GPRinstall regressions (synthetic artifacts)
+        run: alr -n exec -- python3 tests/test_external_shim_install.py -v
       - name: Qualify source installed and relocated consumers
         run: sh scripts/validate_clean_consumer.sh

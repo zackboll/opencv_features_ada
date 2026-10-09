@@ -82,6 +82,10 @@ def main() -> None:
     commits = [m["pins"][0]["opencv_core"]["commit"] for m in manifests]
     check(len(set(commits)) == 1 and re.fullmatch(r"[0-9a-f]{40}", commits[0]) is not None,
           "Core pins must be the same full commit in all three roots")
+    check(any(group.get("opencv_core") == "~0.4.0" for group in production["depends-on"]),
+          "retain the Core production compatibility constraint")
+    check(commits[0] in (ROOT / "scripts/validate_clean_consumer.sh").read_text(),
+          "consumer must assert the same actual resolved Core commit")
     header = (ROOT / "cpp/opencv_features_shim.h").read_text()
     ada = (ROOT / "src/internal/opencv-features-internal-c_api.ads").read_text()
     cpp = (ROOT / "cpp/opencv_features_shim.cpp").read_text()

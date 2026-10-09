@@ -4,8 +4,9 @@
   "method": "Reviewed selected live GitHub files; blob IDs below identify the retrieved content. Not an exhaustive repository snapshot.",
   "core_pin": {
     "repo": "zackboll/opencv_core_ada",
-    "commit": "7956981a7881ce9121115f8cb65909aeb9edc439",
-    "manifest_version": "0.4.0"
+    "commit": "386c5360ac51f2b62e522853d94290aec4ee14a0",
+    "manifest_version": "0.4.1",
+    "qualification": "Task 008A; original bootstrap reference blobs below remain historical source-review evidence"
   },
   "references": [
     {

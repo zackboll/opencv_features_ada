@@ -7,9 +7,10 @@ are `opencv` and `pkg_config`; the Windows selector adds `mingw_w64_gcc`.
 The native OpenCV Alire external-package model uses `*`; configuration
 performs the actual native semantic-version check.
 
-Core is pinned to commit `7956981a7881ce9121115f8cb65909aeb9edc439` in all
-three manifests. This is a development pin to the observed Core 0.4.0
-source, not a claim that 0.4.0 is already published in the community index.
+Core is pinned to immutable commit `386c5360ac51f2b62e522853d94290aec4ee14a0`
+(annotated release 0.4.1) in all three manifests. Task 008A qualifies this
+revision and its corrected Windows GPRinstall contract without depending on
+acceptance of Alire-index PR #2208. Source-pinned development is retained.
 The pin is not transitive configuration: tests and examples are separate
 roots, so their pins are explicit too.
 
@@ -66,6 +67,13 @@ OpenCV installation's own prefix. It builds an independent DLL and import
 library outside GPRbuild. It explicitly links the OpenCV Features/Core
 import libraries and the Core shim import library. CPATH and related compiler
 environment injection are removed for this C++ subprocess.
+
+The externally built shim retains C++ and actual `cpp/` sources in its GPR:
+GPRinstall needs these to emit an installed library project, not an abstract
+project. `Externally_Built = True` still prevents duplicate GPRbuild compilation.
+`Install.Required_Artifacts` requires `lib/libopencv_features_shim.dll.a` beside
+the installed DLL under `lib/opencv_features_shim`; a stale static archive is
+not a substitute. Core 0.4.1 has the corresponding Core correction.
 
 Build Ada with its selected GNAT compiler. Do not put MSYS2's compiler at
 the front of the Ada build PATH. The test launcher changes runtime DLL lookup
