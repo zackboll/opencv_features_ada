@@ -20,7 +20,7 @@ project OpenCV_Features is
          case OpenCV_Features_Install.Shim_Build is
             when "External_Relocatable" =>
                for Library_Options use
-                 ("-L" & Project'Project_Dir & "lib", "-lopencv_features_shim");
+                 ("-lopencv_features_shim");
             when others => null;
          end case;
       when others => null;
@@ -35,8 +35,10 @@ project OpenCV_Features is
    package Linker is
       case OpenCV_Features_Install.Shim_Build is
          when "External_Relocatable" =>
+            --  The imported shim library project owns its search directory.
+            --  GPRinstall relocates Library_Dir, not evaluated source -L paths.
             for Linker_Options use
-              ("-L" & Project'Project_Dir & "lib", "-lopencv_features_shim");
+              ("-lopencv_features_shim");
          when others => null;
       end case;
    end Linker;

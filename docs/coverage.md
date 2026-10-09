@@ -1,5 +1,14 @@
 # Features binding coverage
 
+Task 008A-W2 adds **2 toolchain-backed installed-link metadata tests**:
+actual predecessor GPRinstall leakage, and corrected source/install/relocated
+linking for static-PIC and relocatable Ada libraries with an external fixture
+shim. The **6 existing GPRinstall regressions** remain separate. Two new
+linker-metadata negatives bring configuration discovery to **44**; all nine
+W1 regressions remain. **67 AUnit registrations and 17 exports are unchanged**.
+Unix fixtures are not Windows native DLL certification. See
+`task-008a-w2-validation.md`.
+
 Task 008A-W1 adds **9 deterministic qualifier regressions**, bringing current
 configuration discovery to **42**. They cover backend/Core-shim PE imports
 without direct native Core, missing imports, case variation, unrelated names,

@@ -155,6 +155,14 @@ artifacts fail installation if missing; no static archive substitution is
 allowed. Core's immutable 0.4.1 source pin supplies the same installation
 contract while remaining the sole production Ada library dependency.
 
+Task 008A-W2 makes the imported shim library project own Features shim search
+paths. GPRbuild uses its declared `Library_Dir`; GPRinstall rewrites that
+directory relative to the installed project. Features retains the external
+shim `-l` option but does not embed an evaluated source-tree `-L` in either
+consumer `Linker_Options` or relocatable `Library_Options`. Installation is
+not repaired with post-install text substitutions. The metadata/path audit
+remains strict, independent of successful execution.
+
 Linux follows GNU g++/libstdc++ with a static-PIC C++ shim. macOS follows
 Imgproc's GPR-driven Apple clang++/libc++ relocatable shim and Core closure.
 Windows follows the external MSYS2/MinGW DLL and explicit import library
