@@ -17,6 +17,9 @@ case "$(uname -s)" in
         export FEATURES_CONSUMER_SOURCE="$(cygpath -m "$source_root")"
         export FEATURES_CONSUMER_WORK="$(cygpath -m "$work")" ;;
 esac
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+    printf 'evidence-directory=%s\n' "$FEATURES_CONSUMER_WORK" >> "$GITHUB_OUTPUT"
+fi
 printf '%s\n' "$FEATURES_CONSUMER_SOURCE" > "$work/original-source.txt"
 # Copy only version-controlled/nonignored candidate files: no config, objects,
 # dependency caches, tests or examples. This also includes uncommitted changes.

@@ -90,6 +90,25 @@ class ConsumerValidationTests(unittest.TestCase):
         self.assertNotRegex(script, r'find "\$prefix[^\n]*\|')
         self.assertNotIn("opencv_core[0-9]", script)
 
+    def test_failure_artifact_is_narrow_and_post_merge_only(self):
+        workflow = (ROOT / ".github/workflows/windows-post-merge.yml").read_text()
+        self.assertIn("branches:\n      - main", workflow)
+        self.assertNotIn("pull_request:", workflow)
+        self.assertIn("failure() && steps.consumer.outcome == 'failure'", workflow)
+        artifact = workflow.split("uses: actions/upload-artifact@v4", 1)[1]
+        self.assertIn("/installed-projects.log", artifact)
+        self.assertIn("/installed-build.log", artifact)
+        self.assertIn("/relocated-resolution.log", artifact)
+        self.assertIn("/path-audit-failure.log", artifact)
+        for excluded in ("resolved-environment.log", "toolchain-path.txt", "/**\n", "continue-on-error"):
+            self.assertNotIn(excluded, artifact)
+
+    def test_ci_evidence_output_does_not_change_local_directory_selection(self):
+        script = (ROOT / "scripts/validate_clean_consumer.sh").read_text()
+        self.assertIn('if [ -n "${GITHUB_OUTPUT:-}" ]; then', script)
+        self.assertIn('"$FEATURES_CONSUMER_WORK" >> "$GITHUB_OUTPUT"', script)
+        self.assertIn('work=$(mktemp -d', script)
+
     def test_removed_cwd_recovers_before_artifact_checks(self):
         for name in ("candidate", "features_clean_consumer", "removed-cwd", "prefix-a"):
             (self.work / name).mkdir()

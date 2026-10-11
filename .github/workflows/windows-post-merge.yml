@@ -51,4 +51,23 @@ jobs:
       - name: External shim GPRinstall regressions
         run: alr -n exec -- python tests/test_external_shim_install.py -v
       - name: Qualify source installed and relocated consumers (post-merge only)
+        id: consumer
         run: sh scripts/validate_clean_consumer.sh
+      - name: Preserve failed consumer resolution evidence
+        if: ${{ failure() && steps.consumer.outcome == 'failure' && steps.consumer.outputs.evidence-directory != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-consumer-resolution-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          # Deliberately exclude printenv, PATH inventories, caches and binaries.
+          path: |
+            ${{ steps.consumer.outputs.evidence-directory }}/installed-projects.log
+            ${{ steps.consumer.outputs.evidence-directory }}/installed-build.log
+            ${{ steps.consumer.outputs.evidence-directory }}/installed-resolution.log
+            ${{ steps.consumer.outputs.evidence-directory }}/relocated-projects.log
+            ${{ steps.consumer.outputs.evidence-directory }}/relocated-build.log
+            ${{ steps.consumer.outputs.evidence-directory }}/relocated-resolution.log
+            ${{ steps.consumer.outputs.evidence-directory }}/path-audit-failure.log
+            ${{ steps.consumer.outputs.evidence-directory }}/relocated-longer-prefix-b/share/gpr/**/*.gpr
+            ${{ steps.consumer.outputs.evidence-directory }}/prefix-a/share/gpr/**/*.gpr
