@@ -64,3 +64,28 @@ The campaign commit/run identities are recorded after the single authorized
 dispatch. If it is still in progress, stop rather than poll or dispatch again.
 No PR, production edits, Core pins, manifests, C ABI, merge, tag or release.
 Any subsequent handoff commit must preserve the earlier tested SHA separately.
+
+## Single dispatch handoff
+
+Campaign SHA: `b7eefa3b430d38fdf56e2c2bb2a154c5d15b7f95`. Local and remote
+branch heads matched before dispatch. Exactly one workflow_dispatch was accepted.
+Run **38322895613**, created `2026-10-12T23:35:03Z`:
+https://github.com/zackboll/opencv_features_ada/actions/runs/38322895613
+
+The first immediate run-list query returned an empty list; one subsequent API
+lookup established the identifier, exact head SHA and **queued** status. No
+waiting/polling loop or second dispatch. Stopped at this required handoff gate.
+No hosted artifacts are available yet; no Apple/Windows result, numerical
+qualification, loaded math runtime, exact installed version or native-build
+correspondence is claimed. **PLATFORM_EVIDENCE_PENDING**.
+
+Resume after completion by downloading the two orb-r3 research artifacts from
+this run, verifying manifests and SHA-256 entries, independently inspecting raw
+power/rounding/trace outputs and native build info, and recording observed native
+versions without substituting them for the three source-reviewed releases.
+If a preparation failure prevents a manifest, preserve the focused failure logs
+and job diagnostics; classify it as infrastructure rather than numerical success.
+
+This handoff documentation is committed after dispatch. The campaign does not
+test that later commit. No additional push or dispatch is needed for this record.
+Protected worktrees and Task 010 hashes were rechecked after dispatch unchanged.
