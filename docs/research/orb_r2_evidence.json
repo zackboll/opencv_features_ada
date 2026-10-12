@@ -1,0 +1,240 @@
+{
+  "disposition": "PLATFORM_EVIDENCE_PENDING",
+  "macos": "MACOS_EVIDENCE_PENDING",
+  "windows": "WINDOWS_EVIDENCE_PENDING",
+  "linux_successful_configurations": 8,
+  "raw_logs": [
+    {
+      "path": "configuration-final.log",
+      "sha256": "233de26b973d0bf61178d9b32c8c79a4d24b6c19a79f301f6ad7b0a7f49b05c1"
+    },
+    {
+      "path": "linux-4.1.0-O0/environment.log",
+      "sha256": "989b624c56d1533a0d41638b4126b191467fe529b8f7e86033fa417295b4b389"
+    },
+    {
+      "path": "linux-4.1.0-O0/independent.log",
+      "sha256": "35a221f48a6033c79df2b96afdbcfb10117462518e7e9a6184042665b499e8da"
+    },
+    {
+      "path": "linux-4.1.0-O0/linkage.log",
+      "sha256": "ab3eaefa16777c737f8a6d4f3d0d5897e2b004e47bae705a8e512ee33d68c8b2"
+    },
+    {
+      "path": "linux-4.1.0-O0/numerical.log",
+      "sha256": "21f74c1d5fccbb1284e432189e8e9dc99fe69743d03fd8b2321f2ea287ead5fb"
+    },
+    {
+      "path": "linux-4.1.0-O0/r1/certificate.log",
+      "sha256": "08c160954c9e3a686f4061b706c257ec8a7bde3547e9fb9d30b240ca2e1dd587"
+    },
+    {
+      "path": "linux-4.1.0-O0/r1/probe.log",
+      "sha256": "f3c79af35e7fa6a01f8ac97f029a9e825ab86bb25ffe5887d1dd6434291c668d"
+    },
+    {
+      "path": "linux-4.1.0-O0/r1.log",
+      "sha256": "7e9a889707aef5daf0bcd5ab130c4560fac431518ebbc91681168bdfd4bd197a"
+    },
+    {
+      "path": "linux-4.1.0-O3/environment.log",
+      "sha256": "52c3f55452c6e01ced77d2ccc36e7c9c23653262af34e883c15ad12e182cc416"
+    },
+    {
+      "path": "linux-4.1.0-O3/independent.log",
+      "sha256": "704675dd2f3a55e197990a1f305967a414dee8ae6afd9324ee1963472782c6a8"
+    },
+    {
+      "path": "linux-4.1.0-O3/linkage.log",
+      "sha256": "2845c19acc523cd1ff1ec5ef72ac96ed1f46f82de8a7e8884b8523e5506802cc"
+    },
+    {
+      "path": "linux-4.1.0-O3/numerical.log",
+      "sha256": "21f74c1d5fccbb1284e432189e8e9dc99fe69743d03fd8b2321f2ea287ead5fb"
+    },
+    {
+      "path": "linux-4.1.0-O3/r1/certificate.log",
+      "sha256": "20a36646135cde9b7a21ba76d74cb3b2f605494a95db7866c9c7bf129f0c368a"
+    },
+    {
+      "path": "linux-4.1.0-O3/r1/probe.log",
+      "sha256": "f3c79af35e7fa6a01f8ac97f029a9e825ab86bb25ffe5887d1dd6434291c668d"
+    },
+    {
+      "path": "linux-4.1.0-O3/r1.log",
+      "sha256": "233280790fff74484b37ddff8a2f74c7d7464e08b264b0ad23db104ca303e0b5"
+    },
+    {
+      "path": "linux-4.10-O2/environment.log",
+      "sha256": "d0d85e6591b1b6a89690f8df3052a43ba5a5de2f03091d7236c35580819d00f3"
+    },
+    {
+      "path": "linux-4.10-O2/independent.log",
+      "sha256": "518290976074bdb510a5fcd96eeb25d021ca9d204acb88467746826d4f67758e"
+    },
+    {
+      "path": "linux-4.10-O2/linkage.log",
+      "sha256": "76f075a6e368fb6a2ef4f8d86f75e39ffed11eb14886ba9186d767296a3c0c32"
+    },
+    {
+      "path": "linux-4.10-O2/numerical.log",
+      "sha256": "487d37260a937617bee7f59bdc1d33887160399ca358f05b02930404bdadea24"
+    },
+    {
+      "path": "linux-4.10-O2/r1/certificate.log",
+      "sha256": "60404eab13b057c2f65dfb145da537fa0460e90d5bedae75a3bb7d85263f7d0c"
+    },
+    {
+      "path": "linux-4.10-O2/r1/probe.log",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c"
+    },
+    {
+      "path": "linux-4.10-O2/r1.log",
+      "sha256": "932b40a6cd168fb218ff14b04942daf77f79f33dde134bbc84fa4becad9cfd44"
+    },
+    {
+      "path": "linux-4.10-clang-O2/environment.log",
+      "sha256": "58f0566fff0dc59ca109e427af8da2d67824bd688e5e5aa8999b8b840322711c"
+    },
+    {
+      "path": "linux-4.10-clang-O2/independent.log",
+      "sha256": "b6540a65debde9b298b662b09366534b5354b4c816442c6ca48896c29eec683e"
+    },
+    {
+      "path": "linux-4.10-clang-O2/linkage.log",
+      "sha256": "8b2442f638e76133ab613c83b7a64846edd79d2bd954989a86ff2cb29080f350"
+    },
+    {
+      "path": "linux-4.10-clang-O2/numerical.log",
+      "sha256": "d669e6063fdedae7889ac578985817927a7e36785dc723cfef59e6a7b0bec6ad"
+    },
+    {
+      "path": "linux-4.10-clang-O2/r1/certificate.log",
+      "sha256": "dc16d1d077e06bdecefe2e548c428f1200c570591dd90ed5a39bf9bb492856d4"
+    },
+    {
+      "path": "linux-4.10-clang-O2/r1/probe.log",
+      "sha256": "fe3b07ef4cf73d9acd79f1b23d8808af3c05f983cd77ee873438892e4976bc88"
+    },
+    {
+      "path": "linux-4.10-clang-O2/r1.log",
+      "sha256": "839b5ad9c3fc945d4bbb1e933bb803c51f42403658ee08bcdc2b3ce926383cb3"
+    },
+    {
+      "path": "linux-4.10.0-O0/environment.log",
+      "sha256": "a33e107fb19caa54b8447c7eb3b181b81e5d309e61cfda0ae5e375e55bddaf88"
+    },
+    {
+      "path": "linux-4.10.0-O0/independent.log",
+      "sha256": "d95fcda48c4496e537423e372ea05de924da4f7ef62e438b4b0dceb55eda19af"
+    },
+    {
+      "path": "linux-4.10.0-O0/linkage.log",
+      "sha256": "cceabcadfb37122972c65254d657e5508b0307c8d9b93df3ae53da0cea9da687"
+    },
+    {
+      "path": "linux-4.10.0-O0/numerical.log",
+      "sha256": "487d37260a937617bee7f59bdc1d33887160399ca358f05b02930404bdadea24"
+    },
+    {
+      "path": "linux-4.10.0-O0/r1/certificate.log",
+      "sha256": "1d59c6a7fb268fbc50bae6568cdd3da329179cc5bb35cc1516bff29e09584fd2"
+    },
+    {
+      "path": "linux-4.10.0-O0/r1/probe.log",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c"
+    },
+    {
+      "path": "linux-4.10.0-O0/r1.log",
+      "sha256": "381b857a2320e630afde97b442e698bd99b9a45abe47cdbe794f289f0703e475"
+    },
+    {
+      "path": "linux-4.10.0-O3/environment.log",
+      "sha256": "45ac2c1ffa09d4509f31379e8ebd986e064e4d332aea999d7f55b68805b1fa7a"
+    },
+    {
+      "path": "linux-4.10.0-O3/independent.log",
+      "sha256": "6694ceded39afadb411e06657f24d91b633fc0f1b5feda6f70c82d342b1a7704"
+    },
+    {
+      "path": "linux-4.10.0-O3/linkage.log",
+      "sha256": "d504c0d6c0a0ba81eda9f8e1d7e30ee1276eeab1cc39b63329b81fc32235c4d0"
+    },
+    {
+      "path": "linux-4.10.0-O3/numerical.log",
+      "sha256": "487d37260a937617bee7f59bdc1d33887160399ca358f05b02930404bdadea24"
+    },
+    {
+      "path": "linux-4.10.0-O3/r1/certificate.log",
+      "sha256": "ba2558cc73719f310ab1bcffd6af639dd38d8ea6e35b4ab47972cc4697223f73"
+    },
+    {
+      "path": "linux-4.10.0-O3/r1/probe.log",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c"
+    },
+    {
+      "path": "linux-4.10.0-O3/r1.log",
+      "sha256": "7a9534fda7aeeb2ebce6c4e018967a89d78492052d5dfa6b1624ddc10e3c8c1a"
+    },
+    {
+      "path": "linux-5.0.0-O0/environment.log",
+      "sha256": "1cc6e4e61fdedcb9354e840b59cce9f5bb509e6711befde14997dd6486892f70"
+    },
+    {
+      "path": "linux-5.0.0-O0/independent.log",
+      "sha256": "bac92479a6ea2b169d4160b9f9afd0ac1e26633b523bbe2dc4526b657c2ffcd6"
+    },
+    {
+      "path": "linux-5.0.0-O0/linkage.log",
+      "sha256": "8103ebb59b4c996817ac6994310d79103249216cad60565c4f164435dfa1d73a"
+    },
+    {
+      "path": "linux-5.0.0-O0/numerical.log",
+      "sha256": "9a1f174bebf9cff5d07055c6e2b9fe7466a1da0cdb4632992e4c47882b4ec51b"
+    },
+    {
+      "path": "linux-5.0.0-O0/r1/certificate.log",
+      "sha256": "3ef7c8eec13c8786d845556cefe3717004fa1e3d3a34487ac2225cbd8ce751df"
+    },
+    {
+      "path": "linux-5.0.0-O0/r1/probe.log",
+      "sha256": "9e2aa214748d85daaa81dd4f1bbdeedc0cae4d4e83abff0bacb67206b4024940"
+    },
+    {
+      "path": "linux-5.0.0-O0/r1.log",
+      "sha256": "a550a5a2000d6531f50d9f997eae32807b8bf86e1ef5248387a0fd67642ce1f4"
+    },
+    {
+      "path": "linux-5.0.0-O3/environment.log",
+      "sha256": "379144620817189fa91259ac8e6d2fadad4173faf2b6275febf6363c3afcf42a"
+    },
+    {
+      "path": "linux-5.0.0-O3/independent.log",
+      "sha256": "45965dfd427e05dc10c02db36effd0a4ef7caab732edbc02734a69e30a8faa5e"
+    },
+    {
+      "path": "linux-5.0.0-O3/linkage.log",
+      "sha256": "41ce2f99a29a5ab9545ab55708e207c6251915b2a062f0027883b4a2d3e39950"
+    },
+    {
+      "path": "linux-5.0.0-O3/numerical.log",
+      "sha256": "9a1f174bebf9cff5d07055c6e2b9fe7466a1da0cdb4632992e4c47882b4ec51b"
+    },
+    {
+      "path": "linux-5.0.0-O3/r1/certificate.log",
+      "sha256": "1424ac4d4f9455c3430a31480d5f86f67355c8e6738d7595cdd5c9122fd9a100"
+    },
+    {
+      "path": "linux-5.0.0-O3/r1/probe.log",
+      "sha256": "9e2aa214748d85daaa81dd4f1bbdeedc0cae4d4e83abff0bacb67206b4024940"
+    },
+    {
+      "path": "linux-5.0.0-O3/r1.log",
+      "sha256": "2221d5d8f21868d2249e3875594b7542f1c4d34672715c3f1f0a7e2e650fd63f"
+    },
+    {
+      "path": "task010-final.log",
+      "sha256": "719d3c5f755f250aa7bee17ffb8c7f764ddeaa1d253cb054bbb4a4053804ee25"
+    }
+  ]
+}
