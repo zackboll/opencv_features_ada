@@ -10,6 +10,46 @@ def normalized(text: str) -> str:
     return text.replace("\\", "/").casefold() if sys.platform == "win32" else text.replace("\\", "/")
 
 
+def trace_failure(work: Path, mode: str, original: str) -> str:
+    """Report raw records without changing acceptance or guessing load-bearingness."""
+    resolution = work / f"{mode}-resolution.log"
+    report = [f"Resolution log: {resolution}", f"Matched normalized path: {original}"]
+    found = False
+    for suffix, tool in (("projects", "GPRls"), ("build", "GPRbuild")):
+        source = work / f"{mode}-{suffix}.log"
+        if not source.exists():
+            report.append(f"Source log unavailable: {source} ({tool})")
+            continue
+        lines = source.read_text().splitlines()
+        for index, line in enumerate(lines):
+            if original not in normalized(line):
+                continue
+            found = True
+            # Shapes are diagnostic hints only. No record is exempted by this.
+            if re.search(r"\b(?:gcc|g\+\+|clang\+\+)(?:\.exe)?(?=[\s\"']|$)", line, re.I):
+                shape = "compiler/linker command-shaped record (inspect switches)"
+            elif re.search(r"\b(?:gnatbind|gprbind|gnatlink|gprlink)(?:\.exe)?\b", line, re.I):
+                shape = "binder/linker command-shaped record"
+            elif tool == "GPRls":
+                shape = "project-resolution diagnostic; activity not yet established"
+            else:
+                shape = "unclassified build diagnostic; activity not yet established"
+            report.append(f"Source log: {source} ({tool}), line {index + 1}; {shape}")
+            report.append(f"Exact offending line: {line}")
+            report.append("Context:")
+            for nearby in range(max(0, index - 2), min(len(lines), index + 3)):
+                report.append(f"  {nearby + 1}: {lines[nearby]}")
+    if not found:
+        report.append("No matching raw source record found; inspect combined trace:")
+        for number, line in enumerate(resolution.read_text().splitlines(), 1):
+            if original in normalized(line):
+                report.append(f"  {number}: {line}")
+    report.append("Disposition: rejected; path provenance/effect requires raw-record review.")
+    text = "\n".join(report)
+    (work / "path-audit-failure.log").write_text(text + "\n")
+    return text
+
+
 def audit(work: Path) -> None:
     forbidden = [str(work / "candidate"), str(work / "features_clean_consumer"),
                  (work / "core-source.txt").read_text().strip()]
@@ -50,7 +90,8 @@ def audit(work: Path) -> None:
             original = normalized(original)
             original = original[original.index("features-consumer."):] if "features-consumer." in original else original
             if original in trace:
-                raise ValueError(f"source/original prefix in {mode} resolution trace: {original}")
+                raise ValueError(f"source/original prefix in {mode} resolution trace: {original}\n"
+                                 + trace_failure(work, mode, original))
     (work / "path-audit.log").write_text("\n".join(findings) + "\n")
     print("\n".join(findings) or "No source-path metadata findings")
     print("Installed/relocated project and library resolution VERIFIED")
