@@ -164,6 +164,19 @@ def check_topology(cross_text, windows_text, compatibility_text):
             jobs[current].append((level, line.strip()))
     expected = {"repository-checks": "ubuntu-24.04", "linux": "ubuntu-24.04",
                 "macos": "macos-14", "linux-sanitizers": "ubuntu-24.04"}
+    research = {"orb-r3-macos-numerics": "macos-14",
+                "orb-r3-windows-numerics": "windows-latest"}
+    guard = "${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3-hosted-numerics' }}"
+    for name, runner in research.items():
+        if name not in jobs:
+            continue
+        body = jobs[name]
+        level = min(indent for indent, _ in body)
+        guards = [line[len("if:"):].strip() for indent, line in body
+                  if indent == level and line.startswith("if:")]
+        if guards != [guard]:
+            raise ValueError("R3 research jobs require exact dispatch and branch guards")
+        expected[name] = runner
     if set(jobs) != set(expected):
         raise ValueError("PR workflow must contain repository-checks, linux, macos, linux-sanitizers only")
     for name, body in jobs.items():

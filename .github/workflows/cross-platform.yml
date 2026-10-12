@@ -107,3 +107,76 @@ jobs:
         run: alr -n exec -- python3 tests/test_external_shim_install.py -v
       - name: Qualify source installed and relocated consumers
         run: sh scripts/validate_clean_consumer.sh
+
+  # Branch-only numerical research. Existing production jobs remain untouched.
+  orb-r3-macos-numerics:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3-hosted-numerics' }}
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native research dependencies
+        run: brew install opencv pkg-config
+      - name: Record package identity
+        run: |
+          mkdir -p r3-evidence
+          brew info --json=v2 opencv > r3-evidence/homebrew-opencv.log
+      - name: Run numerical research (O0, O2, O3)
+        run: sh docs/research/run_orb_r3.sh r3-evidence
+      - name: Preserve focused evidence even after failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: orb-r3-macos-numerics-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            r3-evidence/**/*.log
+            r3-evidence/**/*.txt
+            r3-evidence/manifest.json
+  orb-r3-windows-numerics:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3-hosted-numerics' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+          msys2: true
+      - name: Select Ada toolchain
+        shell: bash
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      # Same two-stage full upgrade as Windows post-merge; no partial upgrade.
+      - name: Upgrade Alire-managed MSYS2 core
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 core upgrade failed: $LASTEXITCODE" }
+      - name: Complete Alire-managed MSYS2 full upgrade
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 full upgrade failed: $LASTEXITCODE" }
+      - name: Install managed native research dependencies
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -S --noconfirm --needed mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-python
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 dependency installation failed: $LASTEXITCODE" }
+          alr -n exec -- pacman -Dk
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 dependency consistency failed: $LASTEXITCODE" }
+      - name: Run managed MinGW64 numerical research (O0, O2, O3)
+        shell: pwsh
+        run: |
+          alr -n exec -- sh docs/research/run_orb_r3.sh r3-evidence
+          if ($LASTEXITCODE -ne 0) { throw "Numerical research failed: $LASTEXITCODE" }
+      - name: Preserve focused evidence even after failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: orb-r3-windows-numerics-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            r3-evidence/**/*.log
+            r3-evidence/**/*.txt
+            r3-evidence/manifest.json
