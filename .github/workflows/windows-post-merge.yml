@@ -23,10 +23,26 @@ jobs:
           msys2: true
       - name: Select Ada toolchain
         run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
-      - name: Install MSYS2 native dependencies
+      # MSYS2 supports full upgrades only. Keep the parent outside managed
+      # MSYS2 so a core runtime update can finish before a fresh invocation.
+      # https://www.msys2.org/docs/updating/ and /docs/ci/
+      - name: Upgrade Alire-managed MSYS2 core
+        shell: pwsh
         run: |
-          alr exec -- pacman -Sy --noconfirm --needed \
-            mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 core upgrade failed: $LASTEXITCODE" }
+      - name: Complete Alire-managed MSYS2 full upgrade
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 full upgrade failed: $LASTEXITCODE" }
+      - name: Install MSYS2 native dependencies
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -S --noconfirm --needed mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 native dependency installation failed: $LASTEXITCODE" }
+          alr -n exec -- pacman -Dk
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 package dependency consistency check failed: $LASTEXITCODE" }
       - name: Build and run with isolated native runtime
         run: sh scripts/test.sh
       - name: Inspect external Features DLL
