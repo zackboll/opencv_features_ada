@@ -69,15 +69,19 @@ case "$(uname -s)" in
     *) native_bin= ;;
 esac
 cp "$work/candidate/scripts/features_clean_consumer.adb" "$work/fixture.adb"
+# Canonicalize while sources exist so cygpath can expand Windows 8.3 aliases.
+# Native Alire/sh and Git Bash can expose different PATH list representations.
+set -- "$work/toolchain-path.txt" --remove "$work/candidate" \
+    --remove "$work/features_clean_consumer" --remove "$source_root" \
+    --remove "$work/prefix-a"
+case "$(uname -s)" in
+    MINGW*|MSYS*) set -- "$@" --windows ;;
+esac
+"$python" "$source_root/scripts/sanitize_consumer_path.py" "$@" \
+    > "$work/installed-toolchain-path.txt"
 # Preserve evidence, but make the precise build/source locations inaccessible.
 hide_consumer_sources "$work"
-tr ':' '\n' < "$work/toolchain-path.txt" | while IFS= read -r directory; do
-    case "$directory" in
-        "$work"/*|"$source_root"/*) ;;
-        *) printf '%s\n' "$directory" ;;
-    esac
-done > "$work/installed-toolchain-path.txt"
-PATH=$(paste -sd ':' "$work/installed-toolchain-path.txt"); export PATH
+PATH=$(cat "$work/installed-toolchain-path.txt"); export PATH
 unset OPENCV_CORE_ALIRE_PREFIX OPENCV_FEATURES_ALIRE_PREFIX ALIRE
 prefix_a="$work/prefix-a"
 test -f "$prefix_a/include/opencv_core_module_bridge.hpp"
