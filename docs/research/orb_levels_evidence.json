@@ -1,0 +1,209 @@
+{
+  "disposition": "SAFETY_GATE_NOT_ESTABLISHED",
+  "scope": "Linux local conditional numerical qualification only",
+  "upstream": [
+    {
+      "version": "4.1.0",
+      "commit": "371bba8f54560b374fbcd47e7e02f015ac4969ad",
+      "path": "modules/features2d/src/orb.cpp",
+      "url": "https://raw.githubusercontent.com/opencv/opencv/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/orb.cpp",
+      "sha256": "dee6e3b4ea60d8176914456722a9a24ae1314113f22f49330ed30f304e1626f6"
+    },
+    {
+      "version": "4.10.0",
+      "commit": "71d3237a093b60a27601c20e9ee6c3e52154e8b1",
+      "path": "modules/features2d/src/orb.cpp",
+      "url": "https://raw.githubusercontent.com/opencv/opencv/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/orb.cpp",
+      "sha256": "3874450ed3f9a779f2cf1a20daf544332898d5bcabed30a38071741a6ae5d203"
+    },
+    {
+      "version": "5.0.0",
+      "commit": "40738fb16ceddb5fb3fea747585f7ce6abb0605b",
+      "path": "modules/features/src/orb.cpp",
+      "url": "https://raw.githubusercontent.com/opencv/opencv/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/orb.cpp",
+      "sha256": "ac48243150ab9f011f3f122632df10f094597fe728aefcb711659c3f4833c7f9"
+    }
+  ],
+  "runs": [
+    {
+      "configuration": "4.1.0-clang++-19-O0-system-headers",
+      "sha256": "4b26155f1c49365f447765192a1f5c71510e0d3fc9ec6a845d0a672ea1337c87",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.1.0-clang++-19-O2-system-headers",
+      "sha256": "4b26155f1c49365f447765192a1f5c71510e0d3fc9ec6a845d0a672ea1337c87",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.1.0-clang++-19-O3-system-headers",
+      "sha256": "4b26155f1c49365f447765192a1f5c71510e0d3fc9ec6a845d0a672ea1337c87",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.1.0-g++-O0-system-headers",
+      "sha256": "f3c79af35e7fa6a01f8ac97f029a9e825ab86bb25ffe5887d1dd6434291c668d",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.1.0-g++-O2-system-headers",
+      "sha256": "f3c79af35e7fa6a01f8ac97f029a9e825ab86bb25ffe5887d1dd6434291c668d",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.1.0-g++-O3-system-headers",
+      "sha256": "f3c79af35e7fa6a01f8ac97f029a9e825ab86bb25ffe5887d1dd6434291c668d",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.1.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-clang++-19-O0-system-headers",
+      "sha256": "fe3b07ef4cf73d9acd79f1b23d8808af3c05f983cd77ee873438892e4976bc88",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-clang++-19-O2-system-headers",
+      "sha256": "fe3b07ef4cf73d9acd79f1b23d8808af3c05f983cd77ee873438892e4976bc88",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-clang++-19-O3-system-headers",
+      "sha256": "fe3b07ef4cf73d9acd79f1b23d8808af3c05f983cd77ee873438892e4976bc88",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-g++-O0-system-headers",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-g++-O2-system-headers",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "4.10.0-g++-O3-system-headers",
+      "sha256": "4f849cbb7ba9ffc0a89910d81da2eadfdf15756df334193fcdf276a9ca5c3a2c",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=4.10.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-clang++-19-O0-system-headers",
+      "sha256": "e6f807d388c89346a8cfbe405448cbc6c1020e9230af4ba4a478e82c7cb18568",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-clang++-19-O2-system-headers",
+      "sha256": "e6f807d388c89346a8cfbe405448cbc6c1020e9230af4ba4a478e82c7cb18568",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-clang++-19-O3-system-headers",
+      "sha256": "e6f807d388c89346a8cfbe405448cbc6c1020e9230af4ba4a478e82c7cb18568",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=Debian Clang 19.1.7 (3+b1) FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-g++-O0-system-headers",
+      "sha256": "9e2aa214748d85daaa81dd4f1bbdeedc0cae4d4e83abff0bacb67206b4024940",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-g++-O2-system-headers",
+      "sha256": "9e2aa214748d85daaa81dd4f1bbdeedc0cae4d4e83abff0bacb67206b4024940",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    },
+    {
+      "configuration": "5.0.0-g++-O3-system-headers",
+      "sha256": "9e2aa214748d85daaa81dd4f1bbdeedc0cae4d4e83abff0bacb67206b4024940",
+      "result": "PASS targets=151547 levels=8 native extractions=8",
+      "environment": [
+        "OpenCV=5.0.0 compiler=14.2.0 FLT_EVAL_METHOD=0 rounding=0",
+        "libstdc++=20250315",
+        "scale=0x1.333334p+0 factor=0x1.aaaaaap-1"
+      ]
+    }
+  ]
+}
