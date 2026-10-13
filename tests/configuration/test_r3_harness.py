@@ -109,7 +109,7 @@ class HarnessFailures(unittest.TestCase):
         reported = '-IC:/Users/runneradmin/AppData/Local/alire/cache/msys64/mingw64/bin/../include/opencv5'
         original = self.h.run
 
-        def run(label, command, required=True):
+        def run(label, command, required=True, environment=None):
             command = [str(x) for x in command]
             if label == 'preflight/opencv-compile' and fail:
                 return original(label, self.fake_compiler(
@@ -123,6 +123,7 @@ class HarnessFailures(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.with_suffix('.log').write_text('synthetic output\n')
             self.h.records.append(dict(label=label, command=command, required=required, exit_status=0))
+            self.h.records[-1]['environment'] = (self.h.env if environment is None else environment).copy()
             return 0, values.get(label, '')
 
         with patch.object(MODULE.platform, 'system', return_value='Windows'), \
@@ -154,3 +155,79 @@ class HarnessFailures(unittest.TestCase):
                          {key: 'PREREQUISITE_NOT_COMPLETED' for key in ('0', '2', '3')})
         self.assertFalse(any(r['label'].startswith('O') for r in data['invocations']))
         self.assertIn('stdlib.h', (self.root / 'preflight/opencv-compile.stderr.log').read_text())
+
+    def test_scoped_apple_warnings(self):
+        flags = MODULE.research_warnings('Darwin')
+        self.assertEqual(flags, ['-Wall', '-Wextra', '-Wpedantic', '-Werror',
+                                 '-Wno-error=c11-extensions'])
+        self.assertNotIn('-Wno-error=c11-extensions', MODULE.research_warnings('Windows'))
+        self.assertNotIn('-Wno-error=c11-extensions', MODULE.research_warnings('Linux'))
+
+    def test_windows_include_components(self):
+        env = {'C_INCLUDE_PATH': r'C:\MSYS\mingw64\include;D:\other\include',
+               'CPLUS_INCLUDE_PATH': 'c:/msys/mingw64/bin/../include;E:/Program Files/headers',
+               'CPATH': r'F:\keep', 'PATH': 'unchanged'}
+        before = env.copy()
+        child, native = MODULE.windows_include_environment(env, r'C:\MSYS\mingw64\bin\g++.exe')
+        self.assertEqual(native, r'c:\msys\mingw64\include')
+        self.assertEqual(child['C_INCLUDE_PATH'], r'D:\other\include')
+        self.assertEqual(child['CPLUS_INCLUDE_PATH'], 'E:/Program Files/headers')
+        self.assertEqual(child['CPATH'], env['CPATH'])
+        self.assertEqual(child['PATH'], env['PATH'])
+        self.assertEqual(env, before)
+
+    def test_only_duplicate_entries_removed(self):
+        env = {'C_INCLUDE_PATH': 'C:/msys/mingw64/include',
+               'CPLUS_INCLUDE_PATH': 'C:/msys/mingw64/include-extra;;D:/headers'}
+        child, _ = MODULE.windows_include_environment(env, 'C:/msys/mingw64/bin/g++.exe')
+        self.assertNotIn('C_INCLUDE_PATH', child)
+        self.assertEqual(child['CPLUS_INCLUDE_PATH'], env['CPLUS_INCLUDE_PATH'])
+
+    def test_same_corrected_environment_across_pipeline(self):
+        native = str(self.root / 'mingw64/include')
+        self.h.env['C_INCLUDE_PATH'] = native
+        self.h.env['CPLUS_INCLUDE_PATH'] = native + ';D:/keep'
+        self.exercise_pipeline()
+        records = self.assert_manifest(0)['invocations']
+        negative = next(r for r in records if r['label'] == 'preflight/include-environment-before')
+        self.assertEqual(negative['environment']['C_INCLUDE_PATH'], native)
+        for r in records:
+            if r['label'] == 'preflight/include-environment-after' or r['label'].startswith('O') or \
+                    r['label'].startswith('preflight/opencv'):
+                self.assertNotIn('C_INCLUDE_PATH', r['environment'])
+                self.assertEqual(r['environment']['CPLUS_INCLUDE_PATH'], 'D:/keep')
+
+    def test_subprocess_uses_explicit_child_without_parent_mutation(self):
+        parent = self.h.env.copy()
+        child = parent.copy()
+        child['CPLUS_INCLUDE_PATH'] = 'D:/controlled'
+        command = self.fake_compiler('import os\nprint(os.environ["CPLUS_INCLUDE_PATH"])\n')
+        self.assertEqual(self.h.run('positive', command, environment=child)[1].strip(), 'D:/controlled')
+        self.assertEqual(self.h.env, parent)
+        self.assert_manifest(0)
+
+    def test_apple_warning_commands_reach_subprocess(self):
+        command = [sys.executable, '-c', 'pass', *MODULE.research_warnings('Darwin')]
+        with patch.object(MODULE.subprocess, 'run', return_value=MODULE.subprocess.CompletedProcess(
+                command, 0, b'', b'_Atomic is a C11 extension\n')) as run:
+            self.h.run('apple-positive', command)
+        actual = run.call_args.args[0]
+        self.assertIn('-Werror', actual)
+        self.assertGreater(actual.index('-Wno-error=c11-extensions'), actual.index('-Werror'))
+        self.assertNotIn('-w', actual)
+        self.assertIn('_Atomic', (self.root / 'apple-positive.stderr.log').read_text())
+
+    def test_negative_positive_environment_streams(self):
+        command = self.fake_compiler('import os, sys\n'
+            'bad = "CPLUS_INCLUDE_PATH" in os.environ\n'
+            'print("stdlib.h missing" if bad else "preprocessed", file=sys.stderr)\n'
+            'sys.exit(1 if bad else 0)\n')
+        before = self.h.env.copy()
+        before['CPLUS_INCLUDE_PATH'] = 'C:/managed/include'
+        after = before.copy()
+        del after['CPLUS_INCLUDE_PATH']
+        self.assertEqual(self.h.run('before', command, False, environment=before)[0], 1)
+        self.assertEqual(self.h.run('after', command, environment=after)[0], 0)
+        self.assertIn('stdlib.h missing', (self.root / 'before.stderr.log').read_text())
+        self.assertIn('preprocessed', (self.root / 'after.stderr.log').read_text())
+        self.assert_manifest(0)

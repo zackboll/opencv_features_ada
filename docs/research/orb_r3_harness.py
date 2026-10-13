@@ -2,6 +2,7 @@
 """Focused subprocess evidence; prerequisite failures are not arithmetic failures."""
 import hashlib
 import json
+import ntpath
 import os
 from pathlib import Path
 import platform
@@ -22,6 +23,31 @@ def parse_pkg_flags(value):
     return shlex.split(value)
 
 
+def research_warnings(system):
+    flags = ['-Wall', '-Wextra', '-Wpedantic', '-Werror']
+    if system == 'Darwin':
+        flags.append('-Wno-error=c11-extensions')
+    return flags
+
+
+def windows_include_environment(environment, compiler):
+    """Remove only redundant native CRT entries, using Windows path semantics."""
+    native = ntpath.normcase(ntpath.normpath(ntpath.join(
+        ntpath.dirname(compiler), '..', 'include')))
+    child = environment.copy()
+    for key in ('C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH'):
+        if key not in child:
+            continue
+        entries = child[key].split(';')
+        kept = [entry for entry in entries
+                if ntpath.normcase(ntpath.normpath(entry)) != native]
+        if kept:
+            child[key] = ';'.join(kept)
+        else:
+            del child[key]
+    return child, native
+
+
 class Harness:
     def __init__(self, output):
         self.output = Path(output).resolve()
@@ -31,11 +57,12 @@ class Harness:
         self.first_failure = None
         self.modes = {str(n): 'PREREQUISITE_NOT_COMPLETED' for n in (0, 2, 3)}
 
-    def run(self, label, command, required=True):
+    def run(self, label, command, required=True, environment=None):
         path = self.output / label
         path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            result = subprocess.run([str(x) for x in command], env=self.env,
+            result = subprocess.run([str(x) for x in command],
+                                    env=self.env if environment is None else environment,
                                     capture_output=True, check=False)
             code, out, err = result.returncode, result.stdout, result.stderr
         except OSError as exc:
@@ -46,6 +73,9 @@ class Harness:
         path.with_suffix('.log').write_bytes(out + err)
         record = dict(label=label, command=[str(x) for x in command],
                       exit_status=code, required=required)
+        selected_env = self.env if environment is None else environment
+        record['include_environment'] = {key: selected_env.get(key) for key in
+                                        ('CPATH', 'C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH')}
         self.records.append(record)
         path.with_suffix('.status.log').write_text(json.dumps(record) + '\n')
         if code and required and self.first_failure is None:
@@ -178,12 +208,38 @@ class Harness:
         core = self.output / 'core.cpp'
         core.write_text('#include <opencv2/core.hpp>\nint main() { return cv::getBuildInformation().empty(); }\n')
         if windows:
+            inherited = self.env.copy()
+            self.env, native_include = windows_include_environment(self.env, compiler)
+            (self.output / 'compiler-include-environment.log').write_text(json.dumps(
+                dict(native_include=native_include, before={k: inherited.get(k) for k in
+                     ('C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH')}, after={k: self.env.get(k) for k in
+                     ('C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH')}), indent=2) + '\n')
+            cstdlib = self.output / 'cstdlib.cpp'
+            cstdlib.write_text('#include <cstdlib>\nint main() { return 0; }\n')
+            self.run('preflight/include-environment-before',
+                     [compiler, '-std=c++17', '-v', '-E', cstdlib], False, environment=inherited)
+            code, _ = self.run('preflight/include-environment-after',
+                               [compiler, '-std=c++17', '-v', '-E', cstdlib])
+            if code:
+                self.first_failure['classification'] = 'PREREQUISITE_FAILED'
+                raise RuntimeError('Corrected include environment still fails cstdlib preprocessing')
             transformed = [value for token in flags for value in
                            (['-isystem', token[2:]] if token.startswith('-I') else [token])]
             # Diagnostic A/B only. The real preflight and all probes use exact flags.
             for label, includes in [('original', flags), ('old-transformation', transformed)]:
                 self.run('preflight/include-order-' + label,
                          [compiler, *extra, '-std=c++17', '-v', *includes, '-E', core], False)
+        warnings = research_warnings(platform.system())
+        (self.output / 'warning-policy.log').write_text(json.dumps(warnings) + '\n')
+        if platform.system() == 'Darwin':
+            common = [compiler, *extra, '-std=c++17', *flags, '-c', core, '-o',
+                      self.output / 'warning-policy.o']
+            self.run('preflight/apple-warning-before',
+                     [*common, *research_warnings('Linux')], False)
+            code, _ = self.run('preflight/apple-warning-after', [*common, *warnings])
+            if code:
+                self.first_failure['classification'] = 'PREREQUISITE_FAILED'
+                raise RuntimeError('Scoped Apple warning policy still fails OpenCV header compilation')
         stages = [('plain', plain, [], [], False), ('limits', smoke, [], [], False),
                   ('opencv-compile', core, flags, [], True),
                   ('opencv-link', core, flags, libs, False)]
@@ -215,11 +271,13 @@ class Harness:
             successful = set()
             for name in SOURCES:
                 exe = directory / (name + suffix)
-                command = [compiler, *extra, '-std=c++17', f'-O{opt}', '-Wall', '-Wextra',
-                           '-Wpedantic', '-Werror', ROOT / 'docs/research' / (name + '.cpp'),
+                command = [compiler, *extra, '-std=c++17', f'-O{opt}', *warnings,
+                           ROOT / 'docs/research' / (name + '.cpp'),
                            *flags, *libs, '-o', exe]
                 code, _ = self.run(f'O{opt}/{name}-compile', command)
                 if code:
+                    if self.first_failure['label'] == f'O{opt}/{name}-compile':
+                        self.first_failure['classification'] = 'PREREQUISITE_FAILED'
                     self.skip(f'O{opt}/{name}', 'compilation/link prerequisite failed')
                 elif self.executable(f'O{opt}/{name}', exe):
                     successful.add(name)
@@ -238,6 +296,13 @@ class Harness:
                     tool = Path(compiler).parent / 'objdump.exe'
                     self.run(f'O{opt}/linkage', [tool, '-p', trace], False)
                     self.run(f'O{opt}/disassembly', [tool, '-d', trace], False)
+                    if opt == 3:
+                        text = (directory / 'orb_r3_trace.log').read_text(errors='replace')
+                        for line in text.splitlines():
+                            if line.startswith('LOADED ') and 'libopencv_features' in line.lower():
+                                native = line[len('LOADED '):]
+                                self.run('native/features-linkage', [tool, '-p', native], False)
+                                self.run('native/features-disassembly', [tool, '-d', native], False)
                 elif platform.system() == 'Darwin':
                     self.run(f'O{opt}/linkage', ['otool', '-L', trace], False)
                     self.run(f'O{opt}/disassembly', ['otool', '-tvV', trace], False)
