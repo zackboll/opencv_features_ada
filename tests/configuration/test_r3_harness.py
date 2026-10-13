@@ -95,3 +95,62 @@ class HarnessFailures(unittest.TestCase):
         self.assertFalse(self.h.check('independent', command[-1], self.root / 'absent'))
         self.assertFalse((self.root / 'independent.stderr.log').exists())
         self.assert_manifest(1)
+
+    def test_pkg_include_semantics(self):
+        self.assertEqual(MODULE.parse_pkg_flags('-I/opt/include -isystem /vendor/include'),
+                         ['-I/opt/include', '-isystem', '/vendor/include'])
+
+    def test_drive_paths_and_other_flags(self):
+        self.assertEqual(MODULE.parse_pkg_flags(
+            '-IC:/Program\\ Files/opencv -LD:/native/lib -lcore -pthread -DVALUE=2'),
+            ['-IC:/Program Files/opencv', '-LD:/native/lib', '-lcore', '-pthread', '-DVALUE=2'])
+
+    def exercise_pipeline(self, fail=False):
+        reported = '-IC:/Users/runneradmin/AppData/Local/alire/cache/msys64/mingw64/bin/../include/opencv5'
+        original = self.h.run
+
+        def run(label, command, required=True):
+            command = [str(x) for x in command]
+            if label == 'preflight/opencv-compile' and fail:
+                return original(label, self.fake_compiler(
+                    'import sys\nprint("cstdlib: fatal error: stdlib.h: No such file", file=sys.stderr)\nsys.exit(1)\n'))
+            values = {'package/cflags': reported, 'package/libs': '-LD:/native/lib -lopencv_core',
+                      'package/variable=libdir': str(self.root / 'mingw64/lib'),
+                      'package/variable=includedir': str(self.root / 'include')}
+            if '-o' in command:
+                Path(command[command.index('-o') + 1]).touch()
+            path = self.root / label
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.with_suffix('.log').write_text('synthetic output\n')
+            self.h.records.append(dict(label=label, command=command, required=required, exit_status=0))
+            return 0, values.get(label, '')
+
+        with patch.object(MODULE.platform, 'system', return_value='Windows'), \
+                patch.object(MODULE.shutil, 'which', return_value='pkg-config'), \
+                patch.object(self.h, 'run', side_effect=run):
+            if fail:
+                with self.assertRaisesRegex(RuntimeError, 'Preflight failed: opencv-compile'):
+                    self.h.execute()
+            else:
+                self.h.execute()
+        return reported
+
+    def test_reported_windows_flags_reach_all_compiles(self):
+        reported = self.exercise_pipeline()
+        data = self.assert_manifest(0)
+        for record in data['invocations']:
+            if record['label'] == 'preflight/opencv-compile' or record['label'].endswith('-compile'):
+                self.assertIn(reported, record['command'])
+                self.assertNotIn('-isystem', record['command'])
+        self.assertEqual(data['optimization_modes'], {key: 'EXECUTED' for key in ('0', '2', '3')})
+        self.assertEqual(sum(r['label'].endswith('/independent') for r in data['invocations']), 3)
+
+    def test_header_failure_is_prerequisite_and_finalizes(self):
+        self.exercise_pipeline(fail=True)
+        data = self.assert_manifest(1)
+        self.assertEqual(data['first_failure']['label'], 'preflight/opencv-compile')
+        self.assertEqual(data['first_failure']['classification'], 'PREREQUISITE_FAILED')
+        self.assertEqual(data['optimization_modes'],
+                         {key: 'PREREQUISITE_NOT_COMPLETED' for key in ('0', '2', '3')})
+        self.assertFalse(any(r['label'].startswith('O') for r in data['invocations']))
+        self.assertIn('stdlib.h', (self.root / 'preflight/opencv-compile.stderr.log').read_text())

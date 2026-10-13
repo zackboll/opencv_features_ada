@@ -14,6 +14,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCES = ('orb_r2_numerics', 'orb_r3_trace', 'orb_levels_probe')
 
 
+def parse_pkg_flags(value):
+    """pkg-config emits shell-escaped arguments, including forward-slash drive paths.
+
+    Do not change option classes, search order, colon characters or escaped spaces.
+    """
+    return shlex.split(value)
+
+
 class Harness:
     def __init__(self, output):
         self.output = Path(output).resolve()
@@ -76,7 +84,16 @@ class Harness:
         self.run('apple/xcode-select', ['xcode-select', '-p'], False)
         candidates = [self.env.get('DEVELOPER_DIR')]
         candidates += [str(p) for p in sorted(Path('/Applications').glob('Xcode*.app/Contents/Developer'))]
+        inventory = []
         for index, developer in enumerate(dict.fromkeys(candidates)):
+            if developer:
+                self.env['DEVELOPER_DIR'] = developer
+            else:
+                self.env.pop('DEVELOPER_DIR', None)
+            _, version = self.run(f'apple/inventory-{index}/version', ['xcrun', 'clang++', '--version'], False)
+            inventory.append((index, developer, 'Apple clang version 16.' in version))
+        # Investigate installed clang 16 first, always with its own SDK/libc++.
+        for index, developer, _ in sorted(inventory, key=lambda entry: not entry[2]):
             if developer:
                 self.env['DEVELOPER_DIR'] = developer
             else:
@@ -123,10 +140,8 @@ class Harness:
             if code:
                 raise RuntimeError('pkg-config failed: ' + option)
             return value.strip()
-        flags = shlex.split(pkg('--cflags'))
-        flags = [value for token in flags for value in
-                 (['-isystem', token[2:]] if token.startswith('-I') else [token])]
-        libs = shlex.split(pkg('--libs'))
+        flags = parse_pkg_flags(pkg('--cflags'))
+        libs = parse_pkg_flags(pkg('--libs'))
         pkg('--modversion')
         if windows:
             libdir = Path(pkg('--variable=libdir')).resolve()
@@ -155,10 +170,20 @@ class Harness:
                 self.run('preflight/frontend-imports', [tool, '-p', front], False)
             self.run('preflight/driver-imports', [tool, '-p', compiler], False)
         self.run('preflight/search', [compiler, *extra, '-v', '-E', '-x', 'c++', smoke], False)
+        (self.output / 'include-environment.log').write_text(json.dumps(
+            {key: self.env.get(key) for key in ('CPATH', 'C_INCLUDE_PATH',
+             'CPLUS_INCLUDE_PATH', 'OBJC_INCLUDE_PATH', 'SDKROOT', 'DEVELOPER_DIR')}, indent=2) + '\n')
         plain = self.output / 'plain.cpp'
         plain.write_text('int main() { return 0; }\n')
         core = self.output / 'core.cpp'
         core.write_text('#include <opencv2/core.hpp>\nint main() { return cv::getBuildInformation().empty(); }\n')
+        if windows:
+            transformed = [value for token in flags for value in
+                           (['-isystem', token[2:]] if token.startswith('-I') else [token])]
+            # Diagnostic A/B only. The real preflight and all probes use exact flags.
+            for label, includes in [('original', flags), ('old-transformation', transformed)]:
+                self.run('preflight/include-order-' + label,
+                         [compiler, *extra, '-std=c++17', '-v', *includes, '-E', core], False)
         stages = [('plain', plain, [], [], False), ('limits', smoke, [], [], False),
                   ('opencv-compile', core, flags, [], True),
                   ('opencv-link', core, flags, libs, False)]
@@ -169,6 +194,7 @@ class Harness:
                 command += ['-c']
             code, _ = self.run('preflight/' + name, [*command, source, *links, '-o', exe])
             if code:
+                self.first_failure['classification'] = 'PREREQUISITE_FAILED'
                 raise RuntimeError('Preflight failed: ' + name + '; see driver output/status')
             if not exe.is_file():
                 self.executable('preflight/' + name + '-missing-output', exe)
@@ -215,6 +241,24 @@ class Harness:
                 elif platform.system() == 'Darwin':
                     self.run(f'O{opt}/linkage', ['otool', '-L', trace], False)
                     self.run(f'O{opt}/disassembly', ['otool', '-tvV', trace], False)
+                    if opt == 3:
+                        # Capture the actual loaded Features dylib, not a guessed prefix.
+                        text = (directory / 'orb_r3_trace.log').read_text(errors='replace')
+                        for line in text.splitlines():
+                            if line.startswith('LOADED ') and '/libopencv_features.' in line:
+                                native = line[len('LOADED '):]
+                                self.run('native/features-linkage', ['otool', '-L', native], False)
+                                self.run('native/features-symbols', ['nm', '-u', native], False)
+                                # Index arithmetic neighborhoods alongside the full text disassembly.
+                                _, assembly = self.run('native/features-disassembly',
+                                                       ['otool', '-tvV', native], False)
+                                lines = assembly.splitlines()
+                                selected = set()
+                                for index, instruction in enumerate(lines):
+                                    if any(word in instruction for word in ('_pow', '_lrint', 'frint', 'fcvt')):
+                                        selected.update(range(max(0, index - 6), min(len(lines), index + 7)))
+                                (self.output / 'native/features-arithmetic.log').write_text(
+                                    '\n'.join(lines[index] for index in sorted(selected)) + '\n')
                 else:
                     self.run(f'O{opt}/linkage', ['ldd', trace], False)
 
