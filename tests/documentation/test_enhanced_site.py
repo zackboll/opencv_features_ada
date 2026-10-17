@@ -39,17 +39,36 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(config["security"]["external_hosts"], [])
         self.assertNotIn("external_types", config)
         self.assertNotIn("external_dependencies", config)
-        self.assertEqual(config["guides"]["mode"], "none")
+        self.assertEqual(config["guides"], {"mode": "markdown", "manifest": "docs/site-map.json"})
         self.assertEqual(config["sources"]["directories"], [enhance_docs.STAGE])
         self.assertEqual(config["gnatdoc"]["version"], "26.0.0")
 
     def test_asset_inventory_names_the_pinned_revision(self):
         manifest = json.loads((ROOT / enhance_docs.ASSETS).read_text())
         self.assertEqual(manifest["enhancer_revision"], support.PINNED_REVISION)
-        self.assertEqual(set(manifest["packaged_assets"]) | {"presentation.json"},
-                         set(manifest["added_files"]))
+        site_map = json.loads((ROOT / "docs/site-map.json").read_text())
+        expected = {"api/presentation.json", "index.html"} | set(manifest["packaged_assets"]) \
+            | {guide["path"] for guide in site_map["guides"]}
+        self.assertEqual(set(manifest["added_files"]), expected)
         config = tomllib.loads((ROOT / enhance_docs.CONFIG).read_text())
         self.assertEqual(manifest["public_packages"], sorted(config["sources"]["packages"]))
+        requirements = (ROOT / "docs/gnatdoc-guides-requirements.txt").read_text()
+        for name, version in manifest["guide_renderer"].items():
+            self.assertIn(f"{name}=={version} \\\n    --hash=sha256:", requirements)
+
+    def test_guides_match_the_site_map_and_real_examples(self):
+        site_map = json.loads((ROOT / "docs/site-map.json").read_text())
+        identities = [guide["id"] for guide in site_map["guides"]]
+        self.assertEqual(sorted(p.stem for p in (ROOT / "docs/guides").glob("*.md")),
+                         sorted(identities))
+        mains = (ROOT / "examples/opencv_features_examples.gpr").read_text()
+        for guide in site_map["guides"]:
+            if "example" in guide:
+                example = ROOT / guide["example"]
+                self.assertTrue(example.is_file(), guide)
+                self.assertIn(f'"{example.name}"', mains, "example is not a built main")
+                text = (ROOT / f"docs/guides/{guide['id']}.md").read_text()
+                self.assertIn("```ada\n" + example.read_text().strip("\n") + "\n```", text)
 
     def test_staging_copies_only_the_documented_specifications(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -66,6 +85,28 @@ class ProfileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaisesRegex(support.SupportError, "full commit SHA"):
                 support.install(Path(directory), "main", Path(directory) / "env")
+
+
+class SiteLinkTests(unittest.TestCase):
+    def test_relative_links_fragments_and_scripts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            (site / "api").mkdir()
+            (site / "guides").mkdir()
+            (site / "api/page.html").write_text(PAGE)
+            (site / "api/gnatdoc.css").write_text("body{}")
+            (site / "index.html").write_text('<a href="api/page.html#a1">x</a>')
+            (site / "guides/g.html").write_text('<a href="../api/page.html">x</a>'
+                                                '<script src="x.js" defer></script>')
+            (site / "guides/x.js").write_text("")
+            result = support.check_site_links(site)
+            self.assertEqual(result["errors"], [])
+            self.assertEqual(result["scripts"], {"guides/g.html": ["x.js"]})
+            for bad in ('<a href="../../outside.html">x</a>', '<a href="api/page.html#no">x</a>',
+                        '<a href="https://example.com/">x</a>', '<a href="missing.html">x</a>'):
+                with self.subTest(bad=bad):
+                    (site / "index.html").write_text(bad)
+                    self.assertTrue(support.check_site_links(site)["errors"])
 
 
 class CompareNativeTests(unittest.TestCase):
@@ -123,6 +164,10 @@ class EnhancedSiteMutationTests(unittest.TestCase):
         (self.root / "docs").mkdir(parents=True)
         shutil.copy(ROOT / enhance_docs.CONFIG, self.root / enhance_docs.CONFIG)
         shutil.copytree(ROOT / enhance_docs.STAGE, self.root / enhance_docs.STAGE)
+        for portal in ("docs/site-map.json", "docs/index.html"):
+            shutil.copy(ROOT / portal, self.root / portal)
+        shutil.copytree(ROOT / "docs/guides", self.root / "docs/guides")
+        shutil.copytree(ROOT / "examples/src", self.root / "examples/src")
         self.copy = Path(directory.name) / "site"
         shutil.copytree(self.site, self.copy)
         anchors = json.loads((ROOT / "docs/gnatdoc-native-anchors.json").read_text())
@@ -161,6 +206,19 @@ class EnhancedSiteMutationTests(unittest.TestCase):
                                     lambda t: t.replace(":= 500;", ":= 501;", 1)),
             "staged source comment": (self.root / enhance_docs.STAGE / "opencv-features.ads",
                                       lambda t: t.replace("--", "-- altered", 1)),
+            "rendered guide": (self.copy / "guides/binary-matching.html",
+                               lambda t: t.replace("Mutual_Nearest", "Mutual_Furthest", 1)),
+            "rendered portal home": (self.copy / "index.html",
+                                     lambda t: t.replace("<h1>", "<h1>Altered ", 1)),
+            "guide stylesheet": (self.copy / "assets/gnatdoc-guides.css",
+                                 lambda t: t + "\n/* x */\n"),
+            "guide source": (self.root / "docs/guides/ownership-lifecycle.md",
+                             lambda t: t.replace("limited", "unlimited", 1)),
+            "embedded example source": (self.root / "examples/src/orb_synthetic.adb",
+                                        lambda t: t.replace("Keypoints:", "Points:", 1)),
+            "guide API link": (self.copy / "guides/orb-extraction.html",
+                               lambda t: re.sub(r'(href="\.\./api/[0-9a-f]{64}\.html#)[0-9a-f]{8}',
+                                                r"\g<1>00000000", t, count=1)),
         }
         for label, (path, change) in mutations.items():
             with self.subTest(mutation=label):

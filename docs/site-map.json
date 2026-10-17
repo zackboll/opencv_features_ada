@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "home": "index.html",
+  "stylesheet": "assets/gnatdoc-guides.css",
+  "guides": [
+    {"id": "getting-started", "label": "Getting started", "path": "guides/getting-started.html"},
+    {"id": "orb-extraction", "label": "ORB feature extraction", "path": "guides/orb-extraction.html",
+     "example": "examples/src/orb_synthetic.adb"},
+    {"id": "binary-matching", "label": "Binary matching", "path": "guides/binary-matching.html",
+     "example": "examples/src/orb_match_synthetic.adb"},
+    {"id": "candidate-correspondences", "label": "Candidate correspondences",
+     "path": "guides/candidate-correspondences.html"},
+    {"id": "ownership-lifecycle", "label": "Ownership and lifecycle",
+     "path": "guides/ownership-lifecycle.html"},
+    {"id": "platform-compatibility", "label": "Platform compatibility",
+     "path": "guides/platform-compatibility.html"},
+    {"id": "limitations-roadmap", "label": "Limitations and roadmap",
+     "path": "guides/limitations-roadmap.html"}
+  ]
+}

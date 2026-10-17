@@ -1,25 +1,39 @@
 {
+  "added_files": [
+    "api/gnatdoc-navigation.js",
+    "api/gnatdoc-theme.css",
+    "api/presentation.json",
+    "assets/gnatdoc-guides.css",
+    "guides/binary-matching.html",
+    "guides/candidate-correspondences.html",
+    "guides/getting-started.html",
+    "guides/limitations-roadmap.html",
+    "guides/orb-extraction.html",
+    "guides/ownership-lifecycle.html",
+    "guides/platform-compatibility.html",
+    "index.html"
+  ],
   "byte_idempotent": true,
   "dry_run": {
     "declaration_snippets": 38,
-    "files": 9,
-    "html_pages": 5,
+    "files": 18,
+    "html_pages": 13,
     "linked_external_types": 0,
     "linked_local_types": 47,
     "linked_types": 47,
-    "links": 103,
+    "links": 248,
     "mode": "dry-run",
     "public_packages": 4,
     "unrendered_renderer_exceptions": 0
   },
   "enhance": {
     "declaration_snippets": 38,
-    "files": 9,
-    "html_pages": 5,
+    "files": 18,
+    "html_pages": 13,
     "linked_external_types": 0,
     "linked_local_types": 47,
     "linked_types": 47,
-    "links": 103,
+    "links": 248,
     "mode": "enhanced",
     "public_packages": 4,
     "unrendered_renderer_exceptions": 0
@@ -33,7 +47,16 @@
     "api/gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
     "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
     "api/index.html": "448e29550cbad33cc75e03195d8f75a3f3b051c38241b2f20af867e2dc444ee7",
-    "api/presentation.json": "4cd20816b68e07d6915146c784a40d894da6e3dba2d587efeb9ecdda486ef3c4"
+    "api/presentation.json": "dd136e25357e204d40a0c2f856fc6b391232f5b6c1f06089778287b5edf02169",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "guides/binary-matching.html": "79cb0953f4be5e6fe9925fb952bc33674ac76983b1d6afe1d68f3d0f5e6ec202",
+    "guides/candidate-correspondences.html": "a2154f34cfc96e618be2d4536ac1d2c46ebe4b14b2cf49f270e5ae3e819857e3",
+    "guides/getting-started.html": "c40063db5dba967270ad3d72cc234d09d9f5ffcbe77601f7245ac713a836076f",
+    "guides/limitations-roadmap.html": "cee5558287424f62c72c02536ee025ec0a463f66523a7a04b781bde2e6c56fd9",
+    "guides/orb-extraction.html": "b9d4ca2ed2729cd95303e62050d708328e5f1b51441c36b2ddc5424345745025",
+    "guides/ownership-lifecycle.html": "d922c13dedc8e1ff9019e9b87c4365a4bb28a8aba03158365cc24a817834ae74",
+    "guides/platform-compatibility.html": "3a446ef8c9bcac22552eae88412ba9e3594fd19112d00561000846ca041cf4f3",
+    "index.html": "31c286befe39a58e784de45d0b078ca1f3d4b858dc2b300fa86ff64a5933271a"
   },
   "enhancer": {
     "revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
@@ -64,6 +87,15 @@
     }
   },
   "pristine_unchanged": true,
+  "site_links": {
+    "errors": [],
+    "pages": 13,
+    "scripts": {
+      "api/index.html": [
+        "gnatdoc-navigation.js"
+      ]
+    }
+  },
   "staged_specifications": [
     "opencv-features.ads",
     "opencv-features-orb.ads",
@@ -72,12 +104,12 @@
   ],
   "verify": {
     "declaration_snippets": 38,
-    "files": 9,
-    "html_pages": 5,
+    "files": 18,
+    "html_pages": 13,
     "linked_external_types": 0,
     "linked_local_types": 47,
     "linked_types": 47,
-    "links": 103,
+    "links": 248,
     "mode": "verified",
     "public_packages": 4,
     "unrendered_renderer_exceptions": 0

@@ -19,6 +19,7 @@ syntax_highlighting = true
 # manifests, so no OpenCV Core URL can be generated.
 type_links = true
 [guides]
-mode = "none"
+mode = "markdown"
+manifest = "docs/site-map.json"
 [security]
 external_hosts = []

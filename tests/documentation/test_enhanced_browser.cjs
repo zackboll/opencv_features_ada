@@ -198,6 +198,80 @@ async function noJavaScript(browser, anchors) {
   await context.close();
 }
 
+const GUIDES = ['Getting started', 'ORB feature extraction', 'Binary matching',
+                'Candidate correspondences', 'Ownership and lifecycle',
+                'Platform compatibility', 'Limitations and roadmap'];
+
+async function portal(browser, scheme, anchors) {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(String(error)));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.goto(url('../index.html'));
+  check(`${scheme} portal: home page heading`, (await page.textContent('h1')) === 'OpenCV Features for Ada');
+  const navigation = await page.$$eval('header nav a', (links) => links.map((a) => a.textContent));
+  check(`${scheme} portal: navigation lists Home, API Reference and every guide`,
+        JSON.stringify(navigation) === JSON.stringify(['Home', 'API Reference', ...GUIDES]), navigation);
+  const entries = await page.$$eval('[data-package-entry]', (links) => links.map((a) => a.textContent));
+  check(`${scheme} portal: package directory lists the four packages`,
+        JSON.stringify(entries) === JSON.stringify(PACKAGES), entries);
+  const background = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
+  check(`${scheme} portal: themed background`, scheme === 'dark' ? background === 'rgb(20, 27, 38)'
+        : background === 'rgb(255, 255, 255)', background);
+  check(`${scheme} portal: home and guides run no scripts`, (await page.$$('script')).length === 0);
+  if (scheme === 'light') {
+    await page.click('header nav a:text-is("API Reference")');
+    await page.waitForSelector('#package-navigation:not([hidden])');
+    check('portal: API Reference opens the enhanced package index',
+          await frameHeading(page, PACKAGES[0]) === PACKAGES[0]);
+    await page.goBack();
+    await page.click('header nav a:text-is("ORB feature extraction")');
+    check('portal: guide navigation opens the guide', (await page.textContent('h1')) === 'ORB feature extraction');
+    const example = await page.$eval('pre code', (c) => c.textContent);
+    check('guide: embedded Ada example is the real orb_synthetic.adb',
+          example.includes('procedure ORB_Synthetic is') && example.includes('end ORB_Synthetic;'));
+    const masked = Object.entries(anchors.declarations).filter(([identity]) =>
+      identity.startsWith('OpenCV.Features.ORB.Detect_And_Compute|')).map(([, v]) => v.anchor);
+    await page.click('main a:text-is("masked overload")');
+    await page.waitForFunction(() => location.hash.length > 1);
+    const landed = await page.evaluate(() => {
+      const h = document.getElementById(location.hash.slice(1));
+      return { id: h && h.id, text: h && h.textContent, target: h && h.matches(':target'),
+               code: h && h.nextElementSibling.textContent };
+    });
+    check('guide: api: overload link lands on the masked Detect_And_Compute section',
+          masked.includes(landed.id) && landed.text === 'Detect_And_Compute' && landed.target &&
+          landed.code.includes('Image, Mask'), landed);
+    await page.goBack();
+    await page.keyboard.press('Tab');
+    const skip = await page.evaluate(() => {
+      const e = document.activeElement, s = getComputedStyle(e);
+      return { text: e.textContent, position: s.position, outline: s.outlineStyle };
+    });
+    check('guide: first Tab focuses a visible skip link', skip.text === 'Skip to content' &&
+          skip.position === 'static' && skip.outline === 'solid', skip);
+  }
+  check(`${scheme} portal: no page or console errors`, errors.length === 0, errors);
+  await context.close();
+}
+
+async function mobilePortal(browser, scheme) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme,
+                                             isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  for (const guide of ['../index.html', '../guides/binary-matching.html', '../guides/orb-extraction.html',
+                       '../guides/platform-compatibility.html']) {
+    await page.goto(url(guide));
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      pre: Array.from(document.querySelectorAll('pre')).every((p) => getComputedStyle(p).overflowX === 'auto'),
+    }));
+    check(`${scheme} mobile: ${guide} has no horizontal page overflow`, layout.overflow <= 0 && layout.pre, layout);
+  }
+  await context.close();
+}
+
 (async () => {
   const anchors = JSON.parse(fs.readFileSync(path.join(__dirname, '../../docs/gnatdoc-native-anchors.json')));
   const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
@@ -211,6 +285,8 @@ async function noJavaScript(browser, anchors) {
       await desktop(browser, scheme);
       await declarations(browser, scheme, anchors);
       await mobile(browser, scheme, anchors);
+      await portal(browser, scheme, anchors);
+      await mobilePortal(browser, scheme);
     }
     await bookmarks(browser);
     await noJavaScript(browser, anchors);
