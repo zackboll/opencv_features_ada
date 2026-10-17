@@ -12,7 +12,7 @@ evidence.
 | Item | Value |
 | --- | --- |
 | Starting SHA (`main`) | `7be0f44da70e54a4b2336b3e56b239324f8e781e` (merge of #20 after #18 and #19) |
-| Tested SHA | recorded in the follow-up commit below |
+| Tested SHA | `6e4f224c43367bf5a5bf9be4b7c2e88c41007050` (full qualification); this record was added in the following commit |
 | Alire | `alr 2.1.1` |
 | Compiler / project tools | `gnat_native=16.1.0` (`GNAT 16.1.0`), `gprbuild=26.0.1` (`GPRBUILD 26.0.0 (2026-04-15)`) |
 | Generator | `gnatdoc_bin=26.0.0` (`GNATdoc 26.0.0 (20260415)`) |
@@ -133,6 +133,27 @@ byte-identical, as were their (empty) GNATdoc logs, and both equal the hosted
 | `api/f8c4f9ff….html` (`OpenCV.Features.Matching`) | `b213b4ded5f7a4fb2c5effd458651838a0b074843ec762fc914f05924f0fd81c` |
 | `api/0276ad65….html` (`OpenCV.Features.Correspondences`) | `8528f405aa2c9fb936d426a026781ff1b720172f3715258edab904c7e68f448b` |
 | `api/gnatdoc.css` | `e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e` |
+
+## Qualification of the tested SHA
+
+On `6e4f224` with a clean working tree:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | PASS (17 ABI entries, 67 registrations, CI topology) |
+| `python3 -m unittest discover -s tests/configuration -v` | 83 tests OK |
+| `python3 -m unittest discover -s tests/documentation -v` (no site) | 59 tests OK, 25 skipped |
+| `sh scripts/generate_docs.sh` (strict) | PASS: 4 packages, 38 declarations and sections, 0 warnings, 127/127, both baselines 0, no stale entries |
+| Documentation tests with the real site and `FEATURES_DOCS_END_TO_END=1` | 59 tests OK, none skipped |
+| Regeneration into a new directory | byte-identical site and log |
+| `git diff --check`; `git diff --check origin/main...HEAD` | clean; clean |
+| `scripts/check_doc_source_integrity.py` from the merge base | PASS: 7 documentation paths, production tokens and bytes unchanged |
+| `sh scripts/run_profile_tests.sh`; `sh -n scripts/*.sh` | PASS; OK |
+| `sh scripts/test.sh` (OpenCV 4.10.0) | AUnit 67 run / 67 passed, 0 failures, 0 errors; sanitizer drivers PASS |
+| Examples `orb_synthetic`, `orb_match_synthetic` | built and ran (393 keypoints; 121 ratio-accepted correspondences) |
+
+Hosted CI results for the pushed head are reported in the pull request, not
+here.
 
 ## Reproduction
 
