@@ -84,11 +84,17 @@ reproduces. They are also authoring rules for DOC-002 and DOC-003:
 
 1. A declaration owns the contiguous comment-only lines directly above it.
    A blank line breaks attachment; comments after a declaration are ignored.
-2. If the line after `package X is` is a comment, that block is the package
-   description **and** the leading comment of an adjacent first declaration.
-   Otherwise the nearest comment block above the `package` keyword is used.
-   Recommended layout: package description directly above `package`, a blank
-   line after `is`, and the SPDX line separated by blank lines.
+2. The first comment block after `package X is` is the package description
+   when it starts on the next line (then it is **also** the leading comment of
+   an adjacent first declaration) or when a blank line follows it, even if a
+   block above `package` exists. Only when the first block after `is` is a
+   declaration's own leading block is the nearest block above the `package`
+   keyword used; that block may be separated from `package` by blank lines,
+   but not by code such as a context clause. Recommended layout: SPDX line
+   first in the file, then context clauses, the package description directly
+   above `package`, and a blank line after `is` with no floating comment
+   block before the first declaration. (Found while measuring DOC-002: a
+   separated SPDX block after `is` became the package description.)
 3. `@param`, `@return`, `@field`, `@enum` and `@exception` tags render into the
    Parameters, Return Value, Record fields, Enumeration Literal and Raised
    exceptions groups. Never put comments inside a declaration: the native

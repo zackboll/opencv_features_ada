@@ -7,9 +7,10 @@ visible construct fails closed so that coverage is never silently skipped.
 
 The comment model reproduces the GNATdoc 26.0.0 ``--style leading`` behaviour
 observed in docs/gnatdoc-foundation.md: a declaration owns the contiguous
-comment-only lines directly above it; the package description is the block
-directly after ``package X is`` when present, otherwise the nearest block
-above the ``package`` keyword.
+comment-only lines directly above it. The package description is the first
+comment block after ``package X is`` when it starts on the next line or is not
+the leading block of a declaration; otherwise it is the nearest block above
+the ``package`` keyword, separated from it only by blank lines.
 """
 from __future__ import annotations
 
@@ -423,6 +424,16 @@ def parse(path: Path, root: Path) -> Specification:
         declaration.comment_start, declaration.comment_lines = _block_above(
             lines, declaration.line)
     start, block = _block_below(lines, is_token.line)
+    if start is None:
+        # The first block after blank lines is still the description unless
+        # it is the leading block of the declaration that directly follows.
+        current = is_token.line + 1
+        while current <= len(lines) and not lines[current - 1].strip():
+            current += 1
+        if current <= len(lines) and _comment_text(lines[current - 1]) is not None:
+            floating, floating_block = _block_below(lines, current - 1)
+            if all(d.comment_start != floating for d in declarations):
+                start, block = floating, floating_block
     if start is None:
         current = header.line - 1
         while current >= 1 and not lines[current - 1].strip():

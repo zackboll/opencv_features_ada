@@ -114,10 +114,27 @@ class CommentModelTests(unittest.TestCase):
 
     def test_block_above_package_used_when_is_is_followed_by_blank_line(self):
         spec = parse_text("with Ada.Text_IO;\n\n--  Demo description.\n\npackage Demo is\n\n"
-                          "   --  SPDX-License-Identifier: Apache-2.0\n\n"
                           "   --  Enumeration.\n   type E is (A, B);\nend Demo;\n")
         self.assertEqual(spec.description_lines, ["Demo description."])
         self.assertEqual(spec.declarations[0].comment_lines, ["Enumeration."])
+
+    def test_floating_block_after_is_overrides_block_above_package(self):
+        spec = parse_text("--  Above.\npackage Demo is\n\n   --  SPDX-License-Identifier: Apache-2.0\n\n"
+                          "   --  Second floating.\n\n   --  Enumeration.\n   type E is (A, B);\n"
+                          "end Demo;\n")
+        self.assertEqual(spec.description_lines, ["SPDX-License-Identifier: Apache-2.0"])
+        self.assertEqual(spec.declarations[0].comment_lines, ["Enumeration."])
+
+    def test_block_separated_from_package_by_code_is_not_a_description(self):
+        spec = parse_text("--  SPDX-License-Identifier: Apache-2.0\nwith Ada.Text_IO;\n"
+                          "package Demo is\n\n   --  Enumeration.\n   type E is (A, B);\nend Demo;\n")
+        self.assertIsNone(spec.description_start)
+
+    def test_spdx_first_line_and_description_above_package(self):
+        spec = parse_text("--  SPDX-License-Identifier: Apache-2.0\n\nprivate with System;\n\n"
+                          "--  Demo description.\npackage Demo is\n\n   --  Enumeration.\n"
+                          "   type E is (A, B);\nend Demo;\n")
+        self.assertEqual(spec.description_lines, ["Demo description."])
 
     def test_blank_line_breaks_declaration_attachment(self):
         spec = parse_text("package Demo is\n\n   --  Detached.\n\n   type E is (A, B);\nend Demo;\n")
