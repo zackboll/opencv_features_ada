@@ -1,0 +1,83 @@
+name: Ada API Documentation
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-gnatdoc:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Record checkout
+        run: git rev-parse HEAD
+      - name: Install native dependencies for Core configuration
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ pkg-config libopencv-dev
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+      - name: Select Ada toolchain and install GNATdoc 26.0.0
+        run: |
+          alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+          alr toolchain
+          alr -n install --prefix="$RUNNER_TEMP/gnatdoc-26.0.0" gnatdoc_bin=26.0.0
+          echo "GNATDOC_PREFIX=$RUNNER_TEMP/gnatdoc-26.0.0" >> "$GITHUB_ENV"
+      - name: Resolve indexed Core and generate crate configuration (no compilation)
+        run: |
+          alr -n build --stop-after=pre-build
+          alr -n show --solve | grep -E 'opencv_core'
+      - name: Documentation tooling unit tests
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Generate native site and run Features-owned checks
+        run: sh scripts/generate_docs.sh
+      - name: Mutation tests against the generated site
+        env:
+          FEATURES_DOCS_API: ${{ github.workspace }}/_site/api
+          FEATURES_DOCS_LOG: ${{ github.workspace }}/obj/docs/gnatdoc.log
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Qualify deterministic regeneration in a separate clean directory
+        run: |
+          cp obj/docs/gnatdoc.log "$RUNNER_TEMP/gnatdoc-first.log"
+          sh scripts/generate_docs.sh "$RUNNER_TEMP/docs-second"
+          diff -r _site "$RUNNER_TEMP/docs-second"
+          cmp "$RUNNER_TEMP/gnatdoc-first.log" obj/docs/gnatdoc.log
+          (cd _site/api && sha256sum *)
+      - name: Documentation-only source integrity (docs/* branches)
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'docs/')
+        run: |
+          base=$(git merge-base "${{ github.event.pull_request.base.sha }}" HEAD)
+          python3 scripts/check_doc_source_integrity.py "$base" HEAD
+      - name: Coverage and warning summary
+        if: always()
+        run: |
+          if [ -f obj/docs/coverage.json ] && [ -f obj/docs/warnings.json ]; then
+            python3 scripts/check_gnatdoc.py markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
+          git diff --exit-code
+          git diff --check
+      - name: Upload native site for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: features-api-${{ github.event.pull_request.head.sha || github.sha }}
+          path: _site/
+          if-no-files-found: error
+      - name: Upload diagnostics and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnatdoc-diagnostics-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            obj/docs/gnatdoc.log
+            obj/docs/*.json
+          if-no-files-found: ignore

@@ -1,0 +1,180 @@
+{
+  "declarations": {
+    "OpenCV.Features.Binary_Descriptor_Norm|type|type Binary_Descriptor_Norm is (Hamming, Hamming_2)": {
+      "anchor": "38f4246b8c0869b73ae3f749a372b059fdb3138b56e621cc09ffa269f41cd26e",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Correspondences.From_Matches|function|function From_Matches (Query : Feature_Set; Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) return Point_Correspondence_Array": {
+      "anchor": "03ccdc4f988bc32277f1066c066b9b162ffa08056c614c5850fb9096e6b0c2e9",
+      "page": "0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html"
+    },
+    "OpenCV.Features.Correspondences.Point_Correspondence_Array|type|type Point_Correspondence_Array is array (Positive range <>) of Point_Correspondence": {
+      "anchor": "5de82a187d2c126663d1077fe44237dcc70ad09e375541e2c5602d91342e28c5",
+      "page": "0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html"
+    },
+    "OpenCV.Features.Correspondences.Point_Correspondence|type|type Point_Correspondence is record Query_Index : Positive; Train_Index : Positive; Query_Point : OpenCV.Float32_Point; Train_Point : OpenCV.Float32_Point; Distance : Matching.Binary_Descriptor_Distance; end record": {
+      "anchor": "93782fcd49354f1820192e1e677d565f28c56724d59ef757b6f897987b822bc2",
+      "page": "0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html"
+    },
+    "OpenCV.Features.Count|function|function Count (Features : Feature_Set) return Natural": {
+      "anchor": "d6e2bf5390c27bab14a9ce314f8f3834d311ff5e4abd589e01f670eb2a0ffabf",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Descriptor_Copy|function|function Descriptor_Copy (Features : Feature_Set) return OpenCV.Core.Mat": {
+      "anchor": "0a0d51397b8b8058bd3dafc5c2b29871abd49294e81b6f536bed493746bb73df",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Descriptor_Row|function|function Descriptor_Row (Features : Feature_Set; Index : Positive) return Natural": {
+      "anchor": "72a8798c1b7a86c0fce4d60e76cec0487c60c8fa80e1b16db1d873d09908b306",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Feature_Set|type|type Feature_Set is limited private": {
+      "anchor": "c1e8394f0eb7dc3e964296735d17770b8e79546010658e9b50dccf5c04a35acf",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Is_Empty|function|function Is_Empty (Features : Feature_Set) return Boolean": {
+      "anchor": "d72b56b53993fcf0565b9cfd40e31ed3150a59548bff175629745500043a56e8",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Keypoint_Array|type|type Keypoint_Array is array (Positive range <>) of Keypoint": {
+      "anchor": "56ef4787cce1aa9a2e089c09a6e9eada0ccedbd2e7349bdfe5646a8a21e8f52a",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Keypoints|function|function Keypoints (Features : Feature_Set) return Keypoint_Array": {
+      "anchor": "0a6468df11810f0877086c7c03ef22c55d056db56622d50625a404675cc1bbaa",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Keypoint|type|type Keypoint is record Position : OpenCV.Float32_Point; Size : OpenCV.Float32_Value; Angle_Degrees : OpenCV.Float32_Value; Response : OpenCV.Float32_Value; Octave : OpenCV.Int32_Value; Class_Id : OpenCV.Int32_Value; end record": {
+      "anchor": "cfdc5b6aecc026bcb0caf7768b83d99553b3c7f202573293f6b1b76936139a06",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Matching.Binary_Descriptor_Distance|type|type Binary_Descriptor_Distance is range 0 .. 256": {
+      "anchor": "72d1532e7792592ba2e2de4f9a4127dfc532d6f78db1b4276332ca6718daeb4b",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Binary_Neighbor|type|type Binary_Neighbor is record Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record": {
+      "anchor": "4d1b33d4e4d90bd353d248ebcc33146a4efa13e030977de79cb07d6e118d3781",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Brute_Force_KNN_2|function|function Brute_Force_KNN_2 (Query : Feature_Set; Train : Feature_Set) return Two_Nearest_Match_Array": {
+      "anchor": "8e0182c12a07d9a21b770d55c59ca5205bf054a470314f9e5e4865a634ed85c1",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Brute_Force_Match|function|function Brute_Force_Match (Query : Feature_Set; Train : Feature_Set; Mode : Matching_Mode := Nearest) return Descriptor_Match_Array": {
+      "anchor": "8713ca64d6b3b79ce04f8462e6771c19044e6f6d92062e351f0b917a24503c0b",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Brute_Force_Radius_Match|function|function Brute_Force_Radius_Match (Query : Feature_Set; Train : Feature_Set; Maximum_Distance : Binary_Descriptor_Distance) return Descriptor_Match_Array": {
+      "anchor": "c362b300693c5dc149a00db89cd5f61a61826a104d636a92284a8fbbe7c3d879",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Descriptor_Match_Array|type|type Descriptor_Match_Array is array (Positive range <>) of Descriptor_Match": {
+      "anchor": "9b31f45c5c8ff423ab15be2fb2ab3c7920d0f03efbb1bfefd9eb08e89e94a909",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Descriptor_Match|type|type Descriptor_Match is record Query_Index : Positive; Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record": {
+      "anchor": "346ae6a7608b8567879553b0e1635ea3c96087a41bbe491c0b9eff34b04bd1c4",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Filter_By_Ratio|function|function Filter_By_Ratio (Candidates : Two_Nearest_Match_Array; Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array": {
+      "anchor": "982e840270c5c1fa2ae2cd2210a52506a750e68ff578de1511cf38b73bb9c37d",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Matching_Mode|type|type Matching_Mode is (Nearest, Mutual_Nearest)": {
+      "anchor": "6f12d379580218bf63e9df362a9b484a3c0cf2ecd04f0c73b7f44b3246ed48b6",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Passes_Ratio_Test|function|function Passes_Ratio_Test (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value) return Boolean": {
+      "anchor": "3158e9d41767d3ba101f56becbf134e5f73353865ad3dc1334695082d892f618",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Two_Nearest_Match_Array|type|type Two_Nearest_Match_Array is array (Positive range <>) of Two_Nearest_Match": {
+      "anchor": "028960085fab3cf74d53b9b6a3836c219cd4171ab2e91a4397c4120089870767",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Matching.Two_Nearest_Match|type|type Two_Nearest_Match is record Query_Index : Positive; Nearest : Binary_Neighbor; Second_Nearest : Binary_Neighbor; end record": {
+      "anchor": "154f2fd90623c791f16444fb54be334ca0be36f8aba07e22d3813db1cb52c0db",
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    "OpenCV.Features.Native_Backend|function|function Native_Backend return String": {
+      "anchor": "4728c65875619be0562056858417348ac98ee1e4636e59095c50b680c6b8b506",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Native_Version|function|function Native_Version return String": {
+      "anchor": "0e21b0e249b4da4b21912bc3f9294273d34ee57659b9b6179a7eb0128d7a7ac9",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.ORB.Close|procedure|procedure Close (Self : in out Detector)": {
+      "anchor": "c38ce55b4e519023044d5c6edb93c901d95b92afd4f829eef4bdfa0b3f9dbe73",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Configuration|type|type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record": {
+      "anchor": "02e4cf0e0223787c71c6beae9c39fd9e8afd992e4f58f1010d4d56d496705ba3",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Create|function|function Create (Parameters : Configuration := (others => <>)) return Detector": {
+      "anchor": "f62e99d5b086dd32101acce55b148aa8af610cfa4770b76dec943ebaa97bfa2f",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set": {
+      "anchor": "22f828a1a3f4d9ecc057ea73e2b4e84f87c4ebf78c8c5493f586c59450da342d",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set": {
+      "anchor": "07eb80b590b7f97f4c088474add72fc7d2b3f9a09f745f293468ca8cf358c2df",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Detector|type|type Detector is tagged limited private": {
+      "anchor": "f4314b0abccfb7f63bc3e099aa214a2b08985cac7490e6c97d49f0cf580a8cbe",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Is_Ready|function|function Is_Ready (Self : Detector) return Boolean": {
+      "anchor": "0d7240e2d312bb3475db055cfb6e32b7b3efa78819a0987cb399ed84724698a0",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Parameters|function|function Parameters (Self : Detector) return Configuration": {
+      "anchor": "213f1936fac8b97692614d3ed13f14d06a2d2739527eb404ac5e8b84f1fe5497",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Score_Kind|type|type Score_Kind is (Harris_Score, FAST_Score)": {
+      "anchor": "71f2a9ce16f2713f9880a2d9d3266f80558aa45ad63e2bb57e573ae4470ed3b8",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Tuple_Size|type|type Tuple_Size is (Two_Samples, Three_Samples, Four_Samples)": {
+      "anchor": "231f8948b27bb72b516f1328bea1d1b6b05906b4fbb2e538d62ab711329c7c4e",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.Point|function|function Point (Features : Feature_Set; Index : Positive) return Keypoint": {
+      "anchor": "07ba432d694eb59b2c0ffe8110b6ac6472af30068588b99aa3dd14aacb7484ad",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    },
+    "OpenCV.Features.Required_Norm|function|function Required_Norm (Features : Feature_Set) return Binary_Descriptor_Norm": {
+      "anchor": "905a581599965ef10629ed0d114ef459aa71f93c8c46bce60acb89145532fd78",
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+    }
+  },
+  "generator": "GNATdoc 26.0.0 (20260415)",
+  "packages": {
+    "OpenCV.Features": {
+      "page": "8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+      "source": "src/opencv-features.ads"
+    },
+    "OpenCV.Features.Correspondences": {
+      "page": "0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+      "source": "src/opencv-features-correspondences.ads"
+    },
+    "OpenCV.Features.Matching": {
+      "page": "f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+      "source": "src/opencv-features-matching.ads"
+    },
+    "OpenCV.Features.ORB": {
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+      "source": "src/opencv-features-orb.ads"
+    }
+  },
+  "schema_version": 1,
+  "stylesheet_sha256": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+  "tagged_types": [
+    "OpenCV.Features.ORB.Detector 71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html#f4314b0abccfb7f63bc3e099aa214a2b08985cac7490e6c97d49f0cf580a8cbe"
+  ]
+}
