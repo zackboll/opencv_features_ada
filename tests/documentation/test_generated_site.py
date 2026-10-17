@@ -129,9 +129,13 @@ class GeneratedSiteTests(unittest.TestCase):
         elements = check.coverage_elements(specs, pages, check.match_sections(specs, pages))
         count = next(e for e in elements if e["identity"].startswith("OpenCV.Features.Count|")
                      and e["identity"].endswith("|description"))
+        declaration = next(d for d in specs["OpenCV.Features"].declarations
+                           if d.name == "Count")
+        expected = ("without an attached source block" if declaration.comment_start is None
+                    else "differs from attached source")
         self.assertTrue(count["rendered"])
         self.assertFalse(count["documented"])
-        self.assertIn("without an attached source block", count["reason"])
+        self.assertIn(expected, count["reason"])
 
     def test_misrendered_prose_is_not_credited_and_is_a_new_gap(self):
         self.edit(self.page(), "<p>Explicit deep copy:", "<p>Altered deep copy:")
@@ -153,12 +157,37 @@ class GeneratedSiteTests(unittest.TestCase):
     def test_new_and_unclassified_warnings_are_rejected(self):
         log = Path(self.temporary.name) / "gnatdoc.log"
         original = self.log.read_text()
-        log.write_text(original + "opencv-features.ads:25:13: warning: invented warning\n")
+        spec = source.specifications(ROOT)["OpenCV.Features"]
+        declaration = next(d for d in spec.declarations if d.name == "Count")
+        name = next(t for t in source.code(spec.tokens)
+                    if t.line >= declaration.line and t.text == "Count")
+        log.write_text(original + f"opencv-features.ads:{name.line}:{name.column}: "
+                       "warning: invented warning\n")
         with self.assertRaisesRegex(check.CheckError, "new GNATdoc warnings"):
             check.check_warnings(ROOT, log, ROOT / check.WARNINGS, False, False, None)
         log.write_text(original + "gnatdoc: something unexpected\n")
         with self.assertRaisesRegex(check.CheckError, "unclassified"):
             check.check_warnings(ROOT, log, ROOT / check.WARNINGS, False, False, None)
+
+
+class CreditTests(unittest.TestCase):
+    def test_every_credit_reason(self):
+        cases = (
+            (("", "Attached prose here.", 3, False, True), "no rendered prose"),
+            (("Rendered prose here.", "", 3, False, False),
+             "rendered prose without an attached source block"),
+            (("Shared prose here.", "Shared prose here.", 3, True, True),
+             "source block is shared by the package description and a declaration"),
+            (("Rendered prose here.", "Other prose here.", 3, False, True),
+             "rendered prose differs from attached source"),
+            (("Too short", "Too short", 3, False, True), "fewer than 3 words besides SPDX"),
+        )
+        for arguments, reason in cases:
+            with self.subTest(reason=reason):
+                self.assertEqual(check._credit(*arguments),
+                                 {"documented": False, "reason": reason})
+        self.assertEqual(check._credit("Three words here.", "Three words here.", 3, False, True),
+                         {"documented": True})
 
 
 class SourceInventoryTests(unittest.TestCase):
