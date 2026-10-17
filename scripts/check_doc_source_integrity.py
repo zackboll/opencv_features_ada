@@ -38,10 +38,13 @@ DOCUMENTATION = (
     ".github/workflows/documentation.yml",
     "scripts/check_doc_source_integrity.py",
     "scripts/check_gnatdoc.py",
+    "scripts/enhance_docs.py",
+    "scripts/gnatdoc_enhancer_support.py",
     "scripts/gnatdoc_native.py",
     "scripts/gnatdoc_source.py",
     "scripts/preflight_gnatdoc_enhancer.py",
     "scripts/generate_docs.sh",
+    "scripts/install_gnatdoc_enhancer.py",
     "tests/documentation/*",
 )
 

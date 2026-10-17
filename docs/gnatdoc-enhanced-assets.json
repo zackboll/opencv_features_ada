@@ -1,0 +1,24 @@
+{
+  "added_files": [
+    "gnatdoc-navigation.js",
+    "gnatdoc-theme.css",
+    "presentation.json"
+  ],
+  "enhancer_revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
+  "enhancer_version": "0.1.0.dev0",
+  "packaged_assets": {
+    "gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
+    "gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371"
+  },
+  "public_packages": [
+    "OpenCV.Features",
+    "OpenCV.Features.Correspondences",
+    "OpenCV.Features.Matching",
+    "OpenCV.Features.ORB"
+  ],
+  "scripts": {
+    "index.html": [
+      "gnatdoc-navigation.js"
+    ]
+  }
+}
