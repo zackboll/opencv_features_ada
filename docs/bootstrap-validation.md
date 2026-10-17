@@ -108,6 +108,28 @@ all of the following before Windows qualification can be claimed:
 If that run fails, record the first failing stage and retain `install.log`.
 Do not report Windows qualification from this section.
 
+## Task 013-W3 — indexed Core source PATH exclusion
+
+Merged main `a62484ccc0242944005455f7b20728f99da96614` ran Windows
+[39045824241](https://github.com/zackboll/opencv_features_ada/actions/runs/39045824241),
+job `117434219628`. AUnit was 67/67. DLL/import checks, external GPRinstall
+regressions, and the source, installed, and relocated consumers passed. The
+final source-path audit failed. Artifact `12105542473` shows the indexed Core
+checkout recorded in `core-source.txt`:
+
+`C:\Users\runneradmin\AppData\Local\alire\cache\builds\opencv_core_0.5.0_f8aef00c\f0441d76a402296da21d8c1fdb7cdf8741f80dbc21a43c18aead6e61e003889c`
+
+Its `lib` child is the first entry of the GPRls `PATH =` diagnostic at lines
+228 and 2582 of both project logs. It is absent from the GPRbuild logs and
+installed GPR metadata. The previous sanitizer removed the candidate, source
+consumer, repository, and prefix A, but not this separately resolved Core root.
+This is inherited PATH text, not an OpenCV algorithm or ABI defect.
+
+The validator now reads that recorded root verbatim and passes it to the
+existing component-aware sanitizer before hiding sources. The audit still
+rejects the Core root if it survives. Linux consumer results do not qualify
+Windows. The next post-merge Windows run must pass the same final audit.
+
 ## Task 007 — installation research and local qualification
 
 Start/main and Task 006 merge: `7bac60fcc776918615985fa2cc89e5b8bfe426c7`;
