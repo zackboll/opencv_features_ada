@@ -68,8 +68,45 @@ examples built and ran (393 keypoints; nearest 406, mutual 218, ratio-accepted
 `f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. This is one Debian 12/OpenCV 4.6.0
 host run, not an AArch64 or Yocto sysroot qualification.
 
-Windows Core 0.5.0 qualification is **WINDOWS_POST_MERGE_PENDING**. Earlier
-Windows results were Core 0.4.1 and are not reused as 0.5.0 evidence.
+Windows Core 0.5.0 qualification of merged main
+`eb4af534d837221879ac6a56d7e0866e98a1d3dc` is **WINDOWS_CORE_050_FAILED**,
+not pending. Run
+[39006138286](https://github.com/zackboll/opencv_features_ada/actions/runs/39006138286)
+resolved indexed Core 0.5.0, completed both MSYS2 upgrades, passed 67/67
+AUnit, resolved the Features and Core-shim DLLs, passed external GPRinstall
+regressions, and passed the source consumer. The following `alr exec -- sh -c`
+step failed with `unexpected EOF while looking for matching '"'`. Installed
+and relocated consumers did not run. Earlier Windows results were Core 0.4.1
+and are not reused as 0.5.0 evidence.
+
+## Task 013-W1 — Windows consumer installer correction
+
+This correction stays on `0.1.0-dev` and does not change the release version.
+It moves the resolved Core/Features `gprinstall` commands from an escaped
+`sh -c` payload into `scripts/install_resolved_consumer.sh`. The validator
+invokes that file with `alr -n exec -- sh`. The Windows failure artifact also
+retains `install.log`, which exists before installed-consumer logs.
+
+Linux qualification after removing Alire caches, OpenCV 4.10.0/features2d,
+indexed `opencv_core=0.5.0`: configuration discovery passed, AUnit was 67/67,
+both synthetic examples and both ASan/UBSan variants passed, and source,
+installed, and relocated consumers passed at
+`/tmp/features-consumer.O9JCEhqu`. These Linux results do not qualify Windows.
+
+After this correction merges to main, the automatic Windows workflow must show
+all of the following before Windows qualification can be claimed:
+
+1. Indexed Core 0.5.0 resolution, with no Features Git pin.
+2. Native AUnit 67 run / 67 passed.
+3. Features and Core-shim DLL and import-library linkage.
+4. External GPRinstall regressions.
+5. Source consumer success.
+6. Installed consumer success.
+7. Relocated consumer success.
+8. Source-path and linker-metadata audits.
+
+If that run fails, record the first failing stage and retain `install.log`.
+Do not report Windows qualification from this section.
 
 ## Task 007 — installation research and local qualification
 

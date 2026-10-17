@@ -56,10 +56,17 @@ def check_clean_consumer(root: Path) -> None:
         check(re.search(r"^unset [^\n]*\b" + setting + r"\b", validator, re.MULTILINE),
               f"consumer validator must unset inherited {setting}")
     for operation in ("alr -n init --bin", "alr -n with opencv_features --use=",
-                      "gprinstall -f -p -r", "mv \"$prefix_a\" \"$prefix\"",
+                      "install_resolved_consumer.sh", "mv \"$prefix_a\" \"$prefix\"",
                       "check_consumer_install.py"):
         check(operation in validator, f"missing consumer stage: {operation}")
     check("with opencv_core --use" not in validator, "do not manually select Core")
+    check("sh -c" not in validator, "do not pass quoted scripts through alr exec")
+    installer = (root / "scripts/install_resolved_consumer.sh").read_text()
+    check('grep -E \'^version *= *"0\\.5\\.0"\'' in installer,
+          "resolved Core manifest must be version 0.5.0")
+    check("gprinstall -f -p -r" in installer, "installer must recursively install projects")
+    check("alr -n exec -- sh" in validator and "install_resolved_consumer.sh" in validator,
+          "installer must run through alr exec as a script file")
     cross = (root / ".github/workflows/cross-platform.yml").read_text()
     for job in ("linux", "macos"):
         block = re.search(r"^  " + job + r":\n(.*?)(?=^  \S|\Z)",
