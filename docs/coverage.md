@@ -1,5 +1,11 @@
 # Features binding coverage
 
+Task 013-W1 changes only the consumer installer invocation and its checks.
+**67 AUnit registrations and 17 native exports remain unchanged.** Crate
+versions remain `0.1.0-dev`. The new configuration cases reject a wrong Core
+version, a missing manifest, a workspace pin, and each failed GPRinstall
+without treating a Linux mock as Windows qualification.
+
 Task 012 changes the production dependency only. **67 AUnit registrations and
 17 native exports remain unchanged.** Indexed `opencv_core ~0.5.0` replaces
 the Core 0.4.1 Git pin. Configuration discovery remains the existing static

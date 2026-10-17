@@ -81,6 +81,7 @@ jobs:
             ${{ steps.consumer.outputs.evidence-directory }}/installed-projects.log
             ${{ steps.consumer.outputs.evidence-directory }}/installed-build.log
             ${{ steps.consumer.outputs.evidence-directory }}/installed-resolution.log
+            ${{ steps.consumer.outputs.evidence-directory }}/install.log
             ${{ steps.consumer.outputs.evidence-directory }}/relocated-projects.log
             ${{ steps.consumer.outputs.evidence-directory }}/relocated-build.log
             ${{ steps.consumer.outputs.evidence-directory }}/relocated-resolution.log
