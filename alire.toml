@@ -11,14 +11,12 @@ tags = ["opencv", "computer-vision", "binding", "ada"]
 project-files = ["opencv_features.gpr"]
 
 [[depends-on]]
-opencv_core = "~0.4.0"
+opencv_core = "~0.5.0"
 opencv = "*"
 pkg_config = "*"
 
-# Bootstrap source pin, not a vendored copy. Review/remove for publication.
-# Pins are repeated in tests/examples because each is its own Alire root.
-[[pins]]
-opencv_core = { url = "https://github.com/zackboll/opencv_core_ada.git", commit = "386c5360ac51f2b62e522853d94290aec4ee14a0" }
+# Core resolves from the Alire community index. Do not reintroduce a Git pin.
+# tests/ and examples/ are separate Alire roots and pin only this crate by path.
 
 [depends-on.'case(os)'.windows]
 mingw_w64_gcc = "*"

@@ -79,13 +79,16 @@ def main() -> None:
     check({"opencv_core", "opencv", "pkg_config"} <= dependencies, "missing production dependency")
     check(not dependencies & {"aunit", "gnatprove", "gnatcov", "opencv_imgproc", "opencv_geometry", "opencv_calib3d"},
           "production dependency boundary changed")
-    commits = [m["pins"][0]["opencv_core"]["commit"] for m in manifests]
-    check(len(set(commits)) == 1 and re.fullmatch(r"[0-9a-f]{40}", commits[0]) is not None,
-          "Core pins must be the same full commit in all three roots")
-    check(any(group.get("opencv_core") == "~0.4.0" for group in production["depends-on"]),
-          "retain the Core production compatibility constraint")
-    check(commits[0] in (ROOT / "scripts/validate_clean_consumer.sh").read_text(),
-          "consumer must assert the same actual resolved Core commit")
+    core = next(group["opencv_core"] for group in production["depends-on"] if "opencv_core" in group)
+    check(core == "~0.5.0", "production Core dependency must be the indexed 0.5.0 constraint")
+    for manifest in manifests:
+        pins = manifest.get("pins", [])
+        check(all("opencv_core" not in pin for pin in pins),
+              "do not pin Core; resolve opencv_core from the Alire index")
+    features_pins = [pin.get("opencv_features", {}).get("path")
+                     for pin in manifests[1].get("pins", []) + manifests[2].get("pins", [])
+                     if "opencv_features" in pin]
+    check(features_pins == ["..", ".."], "tests and examples must path-pin this Features crate")
     header = (ROOT / "cpp/opencv_features_shim.h").read_text()
     ada = (ROOT / "src/internal/opencv-features-internal-c_api.ads").read_text()
     cpp = (ROOT / "cpp/opencv_features_shim.cpp").read_text()
@@ -105,7 +108,7 @@ def main() -> None:
     for path in list((ROOT / "src").rglob("*.ads")) + list((ROOT / "src").rglob("*.adb")):
         check("pragma Import" not in path.read_text() or "/internal/" in path.as_posix(),
               f"C import leaked into public Ada: {path}")
-    print(f"PASS: manifests, shared Core pin, {len(declared)} ABI declarations/imports, pure-Ada correspondences, ownership layout, {len(registrations)} AUnit registrations, CI topology")
+    print(f"PASS: manifests, indexed Core ~0.5.0, {len(declared)} ABI declarations/imports, pure-Ada correspondences, ownership layout, {len(registrations)} AUnit registrations, CI topology")
 
 if __name__ == "__main__":
     try:

@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: Apache-2.0
-# Three distinct proofs, not public-index resolution. Keep evidence on failure.
+# Three distinct proofs. Core comes from the Alire index, not a Features Git pin.
 # Run directly (not inside alr exec): sh scripts/validate_clean_consumer.sh [source]
 set -eu
 source_root=$(CDPATH= cd -- "${1:-$(dirname -- "$0")/..}" && pwd)
@@ -49,13 +49,23 @@ alr -n exec -- sh "$work/candidate/scripts/run_native.sh" bin/features_clean_con
     > "$work/source-run.log" 2>&1
 cat "$work/source-run.log"
 grep -Fx 'opencv_features clean consumer ok' "$work/source-run.log"
-echo 'SOURCE-PINNED consumer PASS (not an Alire index test)'
+echo 'SOURCE consumer PASS (Core from Alire index, not a Features Git pin)'
 alr -n printenv > "$work/resolved-environment.log"
+alr -n show --solve > "$work/resolved-solution.log" 2>&1 || true
 alr -n exec -- sh -c '
     set -eu
     printf "Resolved Core source: %s\n" "$OPENCV_CORE_ALIRE_PREFIX"
-    git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD
-    test "$(git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD)" = 386c5360ac51f2b62e522853d94290aec4ee14a0
+    case "$OPENCV_CORE_ALIRE_PREFIX" in
+        "$1/candidate"*|"$1/unavailable-candidate"*|"$1/features_clean_consumer"*|"$1/unavailable-source-consumer"*)
+            echo "error: Core resolved through a Features workspace pin" >&2
+            exit 1 ;;
+    esac
+    manifest="$OPENCV_CORE_ALIRE_PREFIX/alire.toml"
+    [ -f "$manifest" ] || { echo "error: resolved Core has no manifest" >&2; exit 1; }
+    grep -E "^version *= *\"0\\.5\\.0\"" "$manifest"
+    if git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse --verify HEAD >/dev/null 2>&1; then
+        git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD
+    fi
     printf "%s\n" "$OPENCV_CORE_ALIRE_PREFIX" > "$1/core-source.txt"
     printf "%s\n" "$PATH" > "$1/toolchain-path.txt"
     gprinstall -f -p -r --prefix="$1/prefix-a" -P "$OPENCV_CORE_ALIRE_PREFIX/opencv_core.gpr"

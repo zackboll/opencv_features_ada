@@ -18,7 +18,9 @@ not invent a starting commit. Use a normal feature branch only when there is
 a clean existing repository. No commit/push/PR is authorized by this task
 unless the user separately requests one.
 
-The default Core pin is `7956981a7881ce9121115f8cb65909aeb9edc439` (Core 0.4.0).
+Historical Task 001 pin: `7956981a7881ce9121115f8cb65909aeb9edc439` (Core 0.4.0).
+Current production resolution is indexed `opencv_core ~0.5.0`; see
+`docs/build-and-platforms.md`. Do not restore the pin.
 Read the resolved Core source and authoritative module bridge before changing
 interop. Use the other OpenCV repositories as architectural evidence, but
 keep Features' actual Mat-dependent ownership needs distinct from Geometry.

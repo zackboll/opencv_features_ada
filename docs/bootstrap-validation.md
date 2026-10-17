@@ -1,5 +1,76 @@
 # Bootstrap validation record
 
+## Task 012 — indexed OpenCV Core 0.5.0
+
+Starting fetched `origin/main`: `495e385f91022735d5c52ba766f8d25164c7a900`
+(PR #13 merge). No open pull requests. Branch
+`feature/012-upstream-core-050` was created from that commit. Unrelated
+worktrees, including Task 008B, Task 010 and R1/R2/R3D/R3E, were not modified.
+
+The previous production dependency was a Git pin of Core 0.4.1
+(`386c5360ac51f2b62e522853d94290aec4ee14a0`) under constraint `~0.4.0`.
+All three Alire roots dropped that pin. Production now depends on
+`opencv_core = "~0.5.0"`. Tests and examples still path-pin this Features
+crate only. Version remains `0.1.0-dev`. Public Features API, the 17-entry C
+ABI, the fixed-eight-level ORB profile and the 67 AUnit registrations are
+unchanged.
+
+Community index `stable-1.4.0` contains `opencv_core` 0.5.0 with origin
+`git+https://github.com/zackboll/opencv_core_ada.git` commit
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f` (annotated tag `0.5.0`).
+`alr update` selected `opencv_core=0.5.0` with no Features pin. The shared
+Alire checkout matched that tag for every tracked file except `alire.toml`,
+which Alire rewrites while preserving `version = "0.5.0"` and the origin
+commit. The module-bridge header blob is unchanged from the historical pin:
+`a49cdc08d9b8bbbe33a77c7efd51dc57c6a273a9`.
+
+### Host Linux evidence
+
+Host: Debian 13 x86_64, Alire 2.1.1, system GNAT 14.2.0 used by the build,
+system g++ 14.2.0, native OpenCV **4.10.0 / features2d**. No sibling Core
+checkout was present. Commands and results:
+
+| Command | Result |
+| --- | --- |
+| `alr update` / `alr show --solve` | `opencv_core=0.5.0`, `opencv=4.10.0`, `pkg_config=1.8.1`; no Core pin |
+| `alr -n build` | PASS |
+| `alr test` | PASS: Total Tests Run 67, Successful Tests 67, Failed Assertions 0, Unexpected Errors 0; production and fault-injection raw boundary drivers PASS |
+| both synthetic examples | PASS on OpenCV 4.10.0 / features2d |
+| `alr -n exec -- sh scripts/run_sanitizers.sh` | PASS for production and fault-injection ASan/UBSan; no reported sanitizer error |
+| `python3 scripts/check_repository.py` | PASS: indexed Core ~0.5.0, 17 ABI, 67 registrations |
+| `python3 -m unittest discover -s tests/configuration -v` | 76 tests, OK |
+| `sh scripts/run_profile_tests.sh` | PASS |
+| `sh scripts/validate_clean_consumer.sh` | source, installed and relocated consumers PASS; evidence `/tmp/features-consumer.10JUbXDA` |
+
+The source consumer resolved Core at the shared `opencv_core_0.5.0_f8aef00c`
+checkout and printed `version = "0.5.0"`. Installed and relocated `ldd` /
+`readelf` NEEDED entries are system `libopencv_features2d.so.410` and
+`libopencv_core.so.410`, plus libstdc++. Runtime lookup was prefix-only.
+The Ada Core implementation in that link is the installed indexed 0.5.0
+archive, not the removed 0.4.1 pin. AArch64/Yocto cross support is preserved
+in Core and was not executed here.
+
+### Debian 12 / GNAT 12 evidence
+
+A fresh Debian 12 (bookworm) container, not the host toolchain, installed
+GNAT 12.2.0 (`gnat-12 12.2.0-14+deb12u1`), g++ 12.2.0, GPRbuild 2023.0.0-3
+(binary banner `GPRBUILD Pro 18.0w`), pkg-config and `libopencv-dev`. Alire
+2.1.1 selected the external GNAT/GPRbuild. Native OpenCV was **4.6.0 /
+features2d**. The tree was copied into the container and its Alire caches were
+removed before resolution.
+
+`alr show --solve` selected `opencv_core=0.5.0` and `opencv=4.6.0` with no
+Core pin. `alr -n build` passed. `alr test` passed: Total Tests Run 67,
+Successful Tests 67, Failed Assertions 0, Unexpected Errors 0, including the
+Linux raw boundary driver and installed-link metadata check. Both synthetic
+examples built and ran (393 keypoints; nearest 406, mutual 218, ratio-accepted
+121, radius 89). The resolved Core manifest was version 0.5.0, origin commit
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. This is one Debian 12/OpenCV 4.6.0
+host run, not an AArch64 or Yocto sysroot qualification.
+
+Windows Core 0.5.0 qualification is **WINDOWS_POST_MERGE_PENDING**. Earlier
+Windows results were Core 0.4.1 and are not reused as 0.5.0 evidence.
+
 ## Task 007 — installation research and local qualification
 
 Start/main and Task 006 merge: `7bac60fcc776918615985fa2cc89e5b8bfe426c7`;
