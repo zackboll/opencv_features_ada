@@ -155,4 +155,3 @@ Source `src/opencv-features-orb.ads`; native page `71007168ac326a7bdd4e866a08abe
 | `Parameters` | function subprogram | Self : in Detector<br>return Configuration | none | gap | `213f1936fac8…` | in Self: limited private type OpenCV.Features.ORB.Detector |
 | `Detect_And_Compute` | function subprogram | Self : in Detector<br>Image : in OpenCV.Core.Mat<br>return Feature_Set | 10 line(s) | yes | `22f828a1a3f4…` | in Self: limited private type OpenCV.Features.ORB.Detector; in Image: Core-owned native matrix wrapper; result: limited private type OpenCV.Features.Feature_Set |
 | `Detect_And_Compute` | function subprogram | Self : in Detector<br>Image : in OpenCV.Core.Mat<br>Mask : in OpenCV.Core.Mat<br>return Feature_Set | none | gap | `07eb80b590b7…` | in Self: limited private type OpenCV.Features.ORB.Detector; in Image: Core-owned native matrix wrapper; in Mask: Core-owned native matrix wrapper; result: limited private type OpenCV.Features.Feature_Set |
-
