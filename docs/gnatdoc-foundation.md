@@ -18,7 +18,8 @@ Initial measurements are in [gnatdoc-initial-inventory.md](gnatdoc-initial-inven
 | Rendered-versus-documented coverage report with a gap ceiling | established |
 | Deterministic regeneration in separate clean directories | established locally; CI job added |
 | Documentation-only source-integrity check (`docs/*` branches) | established |
-| Shared enhancer compatibility preflight (optional, offline) | passes with staged public specifications; not integrated (DOC-004) |
+| Shared enhancer compatibility preflight (optional, offline) | passes with staged public specifications |
+| Shared enhancer presentation copy, tamper and Chromium checks | established by DOC-004; see [integration](gnatdoc-enhancer-integration.md) |
 | Complete public documentation | not established: 11/127 elements documented |
 | Hosted CI for this workflow | pending until the PR runs; not claimed here |
 

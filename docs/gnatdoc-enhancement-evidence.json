@@ -1,0 +1,85 @@
+{
+  "byte_idempotent": true,
+  "dry_run": {
+    "declaration_snippets": 38,
+    "files": 9,
+    "html_pages": 5,
+    "linked_external_types": 0,
+    "linked_local_types": 47,
+    "linked_types": 47,
+    "links": 103,
+    "mode": "dry-run",
+    "public_packages": 4,
+    "unrendered_renderer_exceptions": 0
+  },
+  "enhance": {
+    "declaration_snippets": 38,
+    "files": 9,
+    "html_pages": 5,
+    "linked_external_types": 0,
+    "linked_local_types": 47,
+    "linked_types": 47,
+    "links": 103,
+    "mode": "enhanced",
+    "public_packages": 4,
+    "unrendered_renderer_exceptions": 0
+  },
+  "enhanced_site": {
+    "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "012aaa628d6b4129e052898498d25a0cab89a5e097e3e86310ae43b028009b4e",
+    "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "0bbed1ee3d46b70c345365a15ee34e8e8978c54e7ef94f386562f9e1e693a80c",
+    "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "f51630dc3e8018bcc96ff7841e289d20e40440670cdf148774d6d4361606f6b6",
+    "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "52797715e3c7b757c82b1da0766b01eab54f9f4ecde21826d45dd216767188ee",
+    "api/gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
+    "api/gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
+    "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "api/index.html": "448e29550cbad33cc75e03195d8f75a3f3b051c38241b2f20af867e2dc444ee7",
+    "api/presentation.json": "4cd20816b68e07d6915146c784a40d894da6e3dba2d587efeb9ecdda486ef3c4"
+  },
+  "enhancer": {
+    "revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
+    "version": "0.1.0.dev0"
+  },
+  "fresh_enhancement_identical": true,
+  "inventory": {
+    "native_declaration_sections": 38,
+    "project": "OpenCV Features Ada",
+    "public_packages": [
+      "OpenCV.Features",
+      "OpenCV.Features.Correspondences",
+      "OpenCV.Features.Matching",
+      "OpenCV.Features.ORB"
+    ]
+  },
+  "native_comparison": {
+    "added_files": [
+      "gnatdoc-navigation.js",
+      "gnatdoc-theme.css",
+      "presentation.json"
+    ],
+    "errors": [],
+    "scripts": {
+      "index.html": [
+        "gnatdoc-navigation.js"
+      ]
+    }
+  },
+  "pristine_unchanged": true,
+  "staged_specifications": [
+    "opencv-features.ads",
+    "opencv-features-orb.ads",
+    "opencv-features-matching.ads",
+    "opencv-features-correspondences.ads"
+  ],
+  "verify": {
+    "declaration_snippets": 38,
+    "files": 9,
+    "html_pages": 5,
+    "linked_external_types": 0,
+    "linked_local_types": 47,
+    "linked_types": 47,
+    "links": 103,
+    "mode": "verified",
+    "public_packages": 4,
+    "unrendered_renderer_exceptions": 0
+  }
+}

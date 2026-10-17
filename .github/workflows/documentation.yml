@@ -53,6 +53,30 @@ jobs:
           diff -r _site "$RUNNER_TEMP/docs-second"
           cmp "$RUNNER_TEMP/gnatdoc-first.log" obj/docs/gnatdoc.log
           (cd _site/api && sha256sum *)
+      - name: Install the pinned shared enhancer (documentation-only)
+        run: |
+          git clone --quiet https://github.com/zackboll/ada-gnatdoc-enhancer.git "$RUNNER_TEMP/ada-gnatdoc-enhancer"
+          python3 scripts/install_gnatdoc_enhancer.py --checkout "$RUNNER_TEMP/ada-gnatdoc-enhancer" --venv "$RUNNER_TEMP/gnatdoc-enhancer"
+      - name: Enhance an isolated copy of the native site and verify it
+        run: python3 scripts/enhance_docs.py --venv "$RUNNER_TEMP/gnatdoc-enhancer"
+      - name: Enhanced-site mutation tests
+        env:
+          FEATURES_DOCS_API: ${{ github.workspace }}/_site/api
+          FEATURES_DOCS_LOG: ${{ github.workspace }}/obj/docs/gnatdoc.log
+          FEATURES_ENHANCED_SITE: ${{ github.workspace }}/_site-enhanced
+          FEATURES_ENHANCER_VENV: ${{ runner.temp }}/gnatdoc-enhancer
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Chromium qualification of the enhanced site
+        run: |
+          npm install --prefix "$RUNNER_TEMP/doc-browser" --no-package-lock playwright@1.64.1
+          "$RUNNER_TEMP/doc-browser/node_modules/.bin/playwright" install --with-deps chromium
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/doc-browser/node_modules/playwright"
+          export DOC_URL=http://127.0.0.1:8072/api/index.html
+          python3 -m http.server 8072 --bind 127.0.0.1 --directory _site-enhanced &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 "$DOC_URL" --output /dev/null
+          BROWSER_REPORT=obj/docs/browser.json node tests/documentation/test_enhanced_browser.cjs
       - name: Documentation-only source integrity (docs/* branches)
         if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'docs/')
         run: |
@@ -71,6 +95,12 @@ jobs:
         with:
           name: features-api-${{ github.event.pull_request.head.sha || github.sha }}
           path: _site/
+          if-no-files-found: error
+      - name: Upload enhanced site for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: features-api-enhanced-${{ github.event.pull_request.head.sha || github.sha }}
+          path: _site-enhanced/
           if-no-files-found: error
       - name: Upload diagnostics and reports
         if: always()
