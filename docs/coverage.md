@@ -1,5 +1,11 @@
 # Features binding coverage
 
+Task 012 changes the production dependency only. **67 AUnit registrations and
+17 native exports remain unchanged.** Indexed `opencv_core ~0.5.0` replaces
+the Core 0.4.1 Git pin. Configuration discovery remains the existing static
+suite; it does not replace the native consumer runs in
+`bootstrap-validation.md`.
+
 Task 008A-W2 adds **2 toolchain-backed installed-link metadata tests**:
 actual predecessor GPRinstall leakage, and corrected source/install/relocated
 linking for static-PIC and relocatable Ada libraries with an external fixture

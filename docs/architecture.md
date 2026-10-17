@@ -153,7 +153,10 @@ built Windows libraries: these describe the GPRinstall library, not compilation
 ownership. `Externally_Built` keeps compilation in MSYS2. Required import
 artifacts fail installation if missing; no static archive substitution is
 allowed. Core's immutable 0.4.1 source pin supplies the same installation
-contract while remaining the sole production Ada library dependency.
+contract while remaining the sole production Ada library dependency. Task 012
+replaces that source pin with indexed `opencv_core ~0.5.0`. The bridge header
+blob is unchanged (`a49cdc08d9b8bbbe33a77c7efd51dc57c6a273a9`); Features still
+does not vendor or modify Core.
 
 Task 008A-W2 makes the imported shim library project own Features shim search
 paths. GPRbuild uses its declared `Library_Dir`; GPRinstall rewrites that

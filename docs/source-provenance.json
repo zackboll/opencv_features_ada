@@ -2,11 +2,26 @@
   "prepared_for": "zackboll/opencv_features_ada",
   "prepared_date_user_timezone": "2026-10-03 America/New_York",
   "method": "Reviewed selected live GitHub files; blob IDs below identify the retrieved content. Not an exhaustive repository snapshot.",
-  "core_pin": {
+  "core_dependency": {
     "repo": "zackboll/opencv_core_ada",
-    "commit": "386c5360ac51f2b62e522853d94290aec4ee14a0",
-    "manifest_version": "0.4.1",
-    "qualification": "Task 008A; original bootstrap reference blobs below remain historical source-review evidence"
+    "resolution": "Alire community index, no Features Git or path pin",
+    "constraint": "~0.5.0",
+    "resolved_version": "0.5.0",
+    "index_origin_commit": "f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f",
+    "release_tag": "0.5.0",
+    "bridge_header_blob": "a49cdc08d9b8bbbe33a77c7efd51dc57c6a273a9",
+    "historical_pins": [
+      {
+        "commit": "7956981a7881ce9121115f8cb65909aeb9edc439",
+        "manifest_version": "0.4.0",
+        "role": "original bootstrap source pin"
+      },
+      {
+        "commit": "386c5360ac51f2b62e522853d94290aec4ee14a0",
+        "manifest_version": "0.4.1",
+        "role": "Task 008A source pin, replaced by indexed 0.5.0"
+      }
+    ]
   },
   "references": [
     {

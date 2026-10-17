@@ -1,11 +1,10 @@
 # Navigation-oriented roadmap
 
-Task 007 addresses the oldest installed/clean-consumer gap with separate
-source-pinned, installed-prefix and fresh relocated-prefix proofs. See
-[qualification details](installed-consumer-validation.md). Linux baseline passes
-without production packaging changes; Linux/macOS PR CI executes the validator
-and Windows remains post-merge only. Index resolution/pin removal, release
-tarballs, version bump, tag/release/index submission remain deferred.
+Task 012 replaces the Core 0.4.1 Git pin with indexed `opencv_core ~0.5.0`.
+Linux source, installed and relocated consumers were qualified against that
+resolution. Features remains **0.1.0-dev**: release tarballs, a version bump,
+tagging and submitting Features to the Alire index remain deferred. Windows
+Core 0.5.0 qualification is post-merge only and is not claimed here.
 
 ## 001 — qualify the bootstrap
 

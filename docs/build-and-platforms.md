@@ -1,25 +1,18 @@
 # Build and platform notes
 
-## Dependencies and source pins
+## Dependencies
 
-Production Ada dependency: `opencv_core ~0.4.0`. The native/system crates
-are `opencv` and `pkg_config`; the Windows selector adds `mingw_w64_gcc`.
-The native OpenCV Alire external-package model uses `*`; configuration
-performs the actual native semantic-version check.
+Production Ada dependency: indexed `opencv_core ~0.5.0`. The native/system
+crates are `opencv` and `pkg_config`; the Windows selector adds
+`mingw_w64_gcc`. The native OpenCV Alire external-package model uses `*`;
+configuration performs the actual native semantic-version check.
 
-Core is pinned to immutable commit `386c5360ac51f2b62e522853d94290aec4ee14a0`
-(annotated release 0.4.1) in all three manifests. Task 008A qualifies this
-revision and its corrected Windows GPRinstall contract without depending on
-acceptance of Alire-index PR #2208. Source-pinned development is retained.
-The pin is not transitive configuration: tests and examples are separate
-roots, so their pins are explicit too.
-
-To use an existing sibling checkout for local development, replace the Core
-pin in each manifest with a path appropriate to that manifest. From the
-Features root, a sibling Core is `../opencv_core_ada`; from `tests/` and
-`examples/`, it is `../../opencv_core_ada`. Do not mix different Core
-revisions or OpenCV installations in one process. Update the consistency
-check intentionally when moving off the bootstrap SHA pin.
+Core is not Git-pinned. `alr update` resolves `opencv_core` 0.5.0 from the
+community index (index origin commit
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`, release tag `0.5.0`). Tests and
+examples are separate Alire roots: each path-pins this Features crate and
+inherits the indexed Core dependency. Do not recreate a Core Git pin or point
+the manifests at a sibling checkout when index resolution fails.
 
 AUnit 26 is used only by the test crate. GNATprove/GNATcov are not introduced
 merely to populate a template; add them in a separate justified test-only

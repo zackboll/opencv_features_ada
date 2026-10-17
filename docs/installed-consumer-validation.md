@@ -5,9 +5,10 @@ not a release, index submission, algorithm extension or compatibility promise.
 
 ## Three separate claims
 
-1. **Source-pinned external consumer:** a fresh `alr init --bin` application
-   adds `opencv_features --use=<candidate>`. Features' bootstrap Core pin
-   resolves normally; no sibling Core checkout is selected manually.
+1. **Index-resolved external consumer:** a fresh `alr init --bin` application
+   adds `opencv_features --use=<candidate>`. Core resolves as indexed
+   `opencv_core` 0.5.0; no Features Git pin and no sibling Core checkout are
+   selected manually.
 2. **Installed-prefix consumer:** Core and Features are recursively installed
    with real projects and `gprinstall -f -p -r --prefix=... -P ...`.
    A separate non-Alire GPR application builds/runs against installed projects
@@ -16,10 +17,11 @@ not a release, index submission, algorithm extension or compatibility promise.
    absolute prefix B, verify A is absent (no symlink), then compile/link/run a
    new application with no reused consumer objects.
 
-**Alire public-index consumption is not tested.** Bare `alr with opencv_features`
-is not documented as resolving from the index. Task 008A pins Core 0.4.1 to
-`386c5360ac51f2b62e522853d94290aec4ee14a0`; the production constraint stays
-`~0.4.0`. No unmerged public-index entry is required.
+**Features itself is not an indexed release.** Bare `alr with opencv_features`
+is not documented as resolving from the community index. Core is: the
+production constraint is `opencv_core = "~0.5.0"`, and the consumer qualifier
+checks that the resolved manifest is version 0.5.0 and is not a Features
+workspace pin. Version remains **0.1.0-dev**.
 
 ## Reproduce
 

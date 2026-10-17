@@ -6,14 +6,13 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 `OpenCV.Features.ORB`, `OpenCV.Features.Matching`, and
 `OpenCV.Features.Correspondences`.
 
-**Version: 0.1.0-dev. This is a bootstrap, not a qualified release.**
+**Version: 0.1.0-dev. This is not a release.**
 ORB, binary BF one-best/KNN2/radius matching, pure-Ada ratio filtering and owned
-2-D correspondence conversion, 67 registered AUnit cases, build scripts, and CI
-workflows are included. Local qualification passes all 67
-native AUnit cases locally on Linux/OpenCV 4.10.0. Broader qualification is
-still outstanding. See
-[the validation record](docs/bootstrap-validation.md) before treating the
-binding as operational. No CI badges imply success.
+2-D correspondence conversion are included. The native AUnit inventory is 67
+cases. Local Linux qualification against indexed OpenCV Core 0.5.0 and native
+OpenCV 4.10.0 is recorded in
+[the validation record](docs/bootstrap-validation.md). That record is not a
+cross-platform release claim. No CI badges imply success.
 
 ## Start here
 
@@ -21,7 +20,7 @@ With Alire, an Ada 2022 toolchain, a C++17 compiler, pkg-config, and native
 OpenCV development packages available:
 
 ```sh
-unzip opencv_features_ada_bootstrap.zip
+git clone https://github.com/zackboll/opencv_features_ada.git
 cd opencv_features_ada
 alr -n build
 alr test
@@ -37,28 +36,26 @@ sudo apt-get update
 sudo apt-get install -y build-essential pkg-config libopencv-dev
 ```
 
-The bootstrap pins Core 0.4.0 to commit
-`7956981a7881ce9121115f8cb65909aeb9edc439`. Alire fetches it; no sibling
-checkout is required and Core is not bundled. The same source pin appears
-in the production, tests, and examples manifests because they are separate
-Alire roots. Review/remove the development pin when preparing an Alire
-index release. [Dependency and platform notes](docs/build-and-platforms.md).
+Production Ada dependency: indexed `opencv_core ~0.5.0`. Alire resolves it from
+the community index; no sibling checkout and no Core Git pin are required. The
+tests and examples crates path-pin this Features crate only. Native OpenCV and
+pkg-config remain system packages. Version stays **0.1.0-dev**; this repository
+is not an Alire release. [Dependency and platform notes](docs/build-and-platforms.md).
 
-The first agent task is [Task 001: validate the bootstrap](docs/tasks/001-validate-bootstrap.md).
-The native ORB build/test baseline was established in Task 002. Task 007 adds
-[source-pinned, installed and relocated consumer qualification](docs/installed-consumer-validation.md).
-With system OpenCV/pkg-config prerequisites above, run the tested validator:
+Task 007 added
+[installed and relocated consumer qualification](docs/installed-consumer-validation.md).
+With the system OpenCV/pkg-config prerequisites above, run:
 
 ```sh
 sh scripts/validate_clean_consumer.sh
 ```
 
-It builds a fresh source-pinned Alire application, recursively installs resolved
-Core and Features into an isolated prefix, then builds/runs separate installed
-GPR consumers before and after relocation. Installed consumers use
-`with "opencv_features";` and prefix-only lookup, not Alire source pins.
-This is not bare public-index or release qualification; the Core bootstrap pin
-and version **0.1.0-dev** remain unchanged.
+It builds a fresh Alire application that path-pins this crate while resolving
+Core from the index, recursively installs resolved Core and Features into an
+isolated prefix, then builds and runs separate installed GPR consumers before
+and after relocation. Installed consumers use `with "opencv_features";` and
+prefix-only lookup. This is consumer qualification, not a Features index
+release.
 
 ## Included API
 
@@ -320,13 +317,12 @@ real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.
 instruments the actual Features shim for CPU-only ASan/UBSan qualification.
 See `docs/orb-source-review.md` for pinned upstream source-derived bounds.
 
-Cross-platform CI is configured for Linux and macOS on PRs and main.
-Windows/MSYS2 runs only on main pushes in a separate post-merge workflow,
-never on PRs or manual dispatch. A separate manual
-workflow builds native OpenCV 4.1.0, 4.10.0, and 5.0.0. These are intended
-qualification targets, not successful runs claimed by this bootstrap.
-The setup-alire action currently follows its `latest` ref, matching the
-reference setup; pin action commits as part of CI hardening.
+Cross-platform CI runs Linux and macOS on pull requests and on main.
+Windows/MSYS2 runs only on pushes to main, never on pull requests or manual
+dispatch. A separate manual workflow builds native OpenCV 4.1.0, 4.10.0, and
+5.0.0; those jobs are targets, not results claimed by this tree. Windows
+qualification of indexed Core 0.5.0 has not been run and is not inferred from
+earlier Core 0.4.1 runs.
 
 ## Navigation direction and exclusions
 
@@ -343,20 +339,6 @@ broader matching is deferred.
 No homography, PnP, DTED reader, camera
 calibration, image loading, optical flow, GPU path, or navigation estimator
 is implemented here. [Roadmap](docs/roadmap.md).
-
-## Repository initialization
-
-The ZIP contains files only: no `.git`, remote, credentials, artifacts from
-the other repositories, or compiled binaries. After reviewing the bootstrap:
-
-```sh
-git init -b main
-git add .
-git commit -m "Bootstrap thick OpenCV Features binding for Ada"
-```
-
-Create/configure a remote separately. Nothing in the bootstrap automatically
-creates repositories, commits, pushes, opens PRs, merges, tags, or publishes.
 
 ## License
 
