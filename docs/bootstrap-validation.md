@@ -11,9 +11,10 @@ The previous production dependency was a Git pin of Core 0.4.1
 (`386c5360ac51f2b62e522853d94290aec4ee14a0`) under constraint `~0.4.0`.
 All three Alire roots dropped that pin. Production now depends on
 `opencv_core = "~0.5.0"`. Tests and examples still path-pin this Features
-crate only. Version remains `0.1.0-dev`. Public Features API, the 17-entry C
-ABI, the fixed-eight-level ORB profile and the 67 AUnit registrations are
-unchanged.
+crate only. At the close of Task 012 the version was `0.1.0-dev`. The 0.1.0
+source candidate changes that version without changing the public Features API,
+the 17-entry C ABI, the fixed-eight-level ORB profile, or the 67 AUnit
+registrations.
 
 Community index `stable-1.4.0` contains `opencv_core` 0.5.0 with origin
 `git+https://github.com/zackboll/opencv_core_ada.git` commit
@@ -65,11 +66,82 @@ Successful Tests 67, Failed Assertions 0, Unexpected Errors 0, including the
 Linux raw boundary driver and installed-link metadata check. Both synthetic
 examples built and ran (393 keypoints; nearest 406, mutual 218, ratio-accepted
 121, radius 89). The resolved Core manifest was version 0.5.0, origin commit
-`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. This is one Debian 12/OpenCV 4.6.0
-host run, not an AArch64 or Yocto sysroot qualification.
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. This Debian 12/OpenCV 4.6.0 host run is historical Task 012 evidence, not the
+0.1.0 source-candidate qualification and not an AArch64 or Yocto sysroot run.
 
-Windows Core 0.5.0 qualification is **WINDOWS_POST_MERGE_PENDING**. Earlier
-Windows results were Core 0.4.1 and are not reused as 0.5.0 evidence.
+Windows Core 0.5.0 qualification of merged main
+`eb4af534d837221879ac6a56d7e0866e98a1d3dc` is **WINDOWS_CORE_050_FAILED**.
+Run
+[39006138286](https://github.com/zackboll/opencv_features_ada/actions/runs/39006138286)
+resolved indexed `opencv_core` 0.5.0 without a Git pin, completed both MSYS2
+full upgrades, passed 67/67 AUnit, resolved `libopencv_features-500.dll` and
+`libopencv_core_shim.dll`, and passed external GPRinstall regressions. The
+source consumer passed. The next `alr exec -- sh -c` step failed with
+`unexpected EOF while looking for matching '"'`; installed and relocated
+consumers did not run. Earlier Windows results were Core 0.4.1 and are not
+reused as 0.5.0 evidence.
+
+## Task 013 — 0.1.0 source candidate
+
+Starting fetched `origin/main`: `eb4af534d837221879ac6a56d7e0866e98a1d3dc`
+(PR #14 merge). No tags or GitHub releases existed. Branch
+`release/0.1.0-source` was created from that commit. Existing Task 008B,
+Task 010 and Task 011 research worktrees were left in place and were not
+merged.
+
+The three crate versions changed from `0.1.0-dev` to `0.1.0`. Crate names,
+`opencv_core = "~0.5.0"`, native dependencies, the Windows dependency case,
+test/example path pins, Ada 2022 switches and GPR projects are unchanged.
+The public API, 17-entry C ABI, fixed eight-level ORB profile and matcher
+behavior are unchanged.
+
+The merged consumer qualifier passed its source consumer on Windows, then
+`alr exec -- sh -c` failed while parsing the escaped Core 0.5.0 version
+check. The candidate moves that step to `scripts/install_resolved_consumer.sh`.
+This is a packaging correction, not an algorithm change. It has not received
+a new Windows run.
+
+### Host Linux candidate evidence
+
+Host: Debian 13 x86_64, Alire 2.1.1, community index `stable-1.4.0`, system
+GNAT 14.2.0, GPRbuild 26.0.1 through Alire, g++ 14.2.0, Python 3.13.5, native
+OpenCV **4.10.0 / features2d**. Alire caches were removed before resolution.
+Resolved Core manifest: `version = "0.5.0"`, `commit =
+f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`.
+
+| Command | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | PASS: version 0.1.0, indexed Core ~0.5.0, 17 ABI, 67 registrations |
+| `python3 -m unittest discover -s tests/configuration` | 77 tests, OK |
+| `sh scripts/run_profile_tests.sh` | PASS |
+| clean `alr -n build` | PASS; `opencv_core=0.5.0`, `opencv=4.10.0` |
+| `alr test` | PASS: Total Tests Run 67, Successful Tests 67, Failed Assertions 0, Unexpected Errors 0; production and fault-injection raw boundary PASS on 4.10.0 |
+| both synthetic examples | PASS: 393 keypoints; nearest 406, mutual 218, ratio-accepted 121, radius 89 |
+| `alr -n exec -- sh scripts/run_sanitizers.sh` | PASS for production and fault-injection ASan/UBSan; no reported sanitizer error |
+| `sh scripts/validate_clean_consumer.sh` | source, installed and relocated consumers PASS; evidence `/tmp/features-consumer.rSQBCsOG` |
+
+Native linkage in that consumer is system `libopencv_features2d.so.410` and
+`libopencv_core.so.410`. The Ada Core archive is the installed indexed 0.5.0
+release.
+
+### Debian 12 / GNAT 12 candidate evidence
+
+A fresh Debian 12 container, not the host toolchain, installed GNAT 12.2.0,
+g++ 12.2.0, GPRbuild 2023.0.0-3 (binary banner `GPRBUILD Pro 18.0w`),
+pkg-config and `libopencv-dev`. Alire 2.1.1 selected external GNAT 12.2.0.
+Native OpenCV was **4.6.0 / features2d**. Generated host caches were excluded
+from the copied tree.
+
+`alr show --solve` selected `opencv_core=0.5.0` and `opencv=4.6.0` with no
+Core pin. The resolved manifest was version 0.5.0, origin commit
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. `alr -n build` passed. `alr test`
+passed: Total Tests Run 67, Successful Tests 67, Failed Assertions 0,
+Unexpected Errors 0, including both raw boundary drivers on 4.6.0. Both
+synthetic examples matched the host counts above. This is one Debian
+12/OpenCV 4.6.0 run, not an AArch64 or Yocto qualification.
+
+The manual OpenCV 4.1.0/4.10.0/5.0.0 matrix and a repeated Windows run are
+not claimed by this section.
 
 ## Task 007 — installation research and local qualification
 

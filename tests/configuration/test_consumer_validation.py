@@ -83,6 +83,27 @@ class ConsumerValidationTests(unittest.TestCase):
         self.assertEqual((self.work / "inventory.raw").read_text(), "partial evidence\n")
         self.assertFalse((self.work / "inventory").exists())
 
+    def test_core_version_check_is_not_an_escaped_alr_exec_payload(self):
+        script = (ROOT / "scripts/validate_clean_consumer.sh").read_text()
+        installer = (ROOT / "scripts/install_resolved_consumer.sh").read_text()
+        self.assertIn('sh "$work/candidate/scripts/install_resolved_consumer.sh"', script)
+        self.assertNotIn("sh -c", script)
+        self.assertNotIn("\\\\", installer)
+        self.assertIn('grep -E \'^version *= *"0\\.5\\.0"\'', installer)
+        manifest = self.work / "alire.toml"
+        manifest.write_text('name = "opencv_core"\nversion = "0.4.1"\n')
+        (self.work / "opencv_core.gpr").write_text("project OpenCV_Core is\nend OpenCV_Core;\n")
+        (self.work / "candidate").mkdir()
+        (self.work / "candidate/opencv_features.gpr").write_text(
+            "project OpenCV_Features is\nend OpenCV_Features;\n")
+        result = subprocess.run(
+            ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(self.work)],
+            capture_output=True, text=True,
+            env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(self.work)})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("unexpected EOF", result.stdout + result.stderr)
+        self.assertFalse((self.work / "core-source.txt").exists())
+
     def test_qualifier_uses_checked_helpers(self):
         script = (ROOT / "scripts/validate_clean_consumer.sh").read_text()
         self.assertIn('hide_consumer_sources "$work"', script)

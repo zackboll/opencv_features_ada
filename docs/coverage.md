@@ -1,9 +1,10 @@
 # Features binding coverage
 
-Task 012 changes the production dependency only. **67 AUnit registrations and
-17 native exports remain unchanged.** Indexed `opencv_core ~0.5.0` replaces
-the Core 0.4.1 Git pin. Configuration discovery remains the existing static
-suite; it does not replace the native consumer runs in
+The 0.1.0 source candidate changes crate versions and the Windows consumer
+installer only. **67 AUnit registrations and 17 native exports remain
+unchanged.** Indexed `opencv_core ~0.5.0` remains the production dependency.
+Configuration discovery checks the release version and the unescaped Core
+manifest assertion; it does not replace the native consumer runs in
 `bootstrap-validation.md`.
 
 Task 008A-W2 adds **2 toolchain-backed installed-link metadata tests**:
