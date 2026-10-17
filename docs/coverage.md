@@ -1,5 +1,12 @@
 # Features binding coverage
 
+Task 013-W3 adds the recorded indexed Core source root to the existing
+consumer PATH removals. **67 AUnit registrations and 17 native exports remain
+unchanged.** Crate versions remain `0.1.0-dev` and Core remains indexed
+`~0.5.0`. The source-path auditor is unchanged: a surviving Core path in a
+GPRls diagnostic still fails. Configuration fixtures are not Windows
+qualification. See `bootstrap-validation.md`.
+
 Task 013-W1 changes only the consumer installer invocation and its checks.
 **67 AUnit registrations and 17 native exports remain unchanged.** Crate
 versions remain `0.1.0-dev`. The new configuration cases reject a wrong Core

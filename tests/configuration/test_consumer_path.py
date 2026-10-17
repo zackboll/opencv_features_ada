@@ -1,5 +1,6 @@
 """Value-based PATH fixtures; not native Windows certification."""
 from pathlib import Path
+import os
 import posixpath
 import sys
 import subprocess
@@ -15,6 +16,10 @@ import test_consumer_install
 WORK = "C:/Users/runneradmin/AppData/Local/Temp/features-consumer.gBsRjJm7"
 ROOTS = [WORK + "/candidate", WORK + "/features_clean_consumer",
          "D:/a/opencv_features_ada", WORK + "/prefix-a"]
+# Realistic indexed checkout, not a hardcoded release or runner identity.
+CORE = ("C:/Users/runneradmin/AppData/Local/alire/cache/builds/"
+        "opencv_core_0.5.0_f8aef00c/"
+        "f0441d76a402296da21d8c1fdb7cdf8741f80dbc21a43c18aead6e61e003889c")
 GNAT = "C:/alire/toolchains/gnat_native/bin"
 GPR = "C:/alire/toolchains/gprbuild/bin"
 MSYS = "C:/alire/cache/msys64/mingw64/bin"
@@ -36,6 +41,10 @@ def shell_fixture(path):
 
 def clean(value):
     return sanitize(value, ROOTS, True, canonical_fixture, shell_fixture)
+
+
+def clean_indexed_core(value):
+    return sanitize(value, ROOTS + [CORE], True, canonical_fixture, shell_fixture)
 
 
 class ConsumerPathTests(unittest.TestCase):
@@ -102,6 +111,68 @@ class ConsumerPathTests(unittest.TestCase):
                                     "--remove", "/tmp/candidate"], text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout, "/opt/gnat/bin:/usr/bin\n")
+
+    def test_indexed_core_root_and_lib_are_removed(self):
+        sibling = CORE + "b/lib"
+        similar = ("C:/Users/runneradmin/AppData/Local/alire/cache/builds/"
+                   "opencv_core_0.5.0_f8aef00c_other/lib")
+        unrelated = "C:/independent/opencv_core_0.5.0/lib"
+        native = ";".join([CORE, CORE + "/lib", sibling, similar, unrelated, GNAT, GPR, MSYS])
+        self.assertEqual(clean_indexed_core(native),
+                         ":".join(map(shell_fixture, [sibling, similar, unrelated, GNAT, GPR, MSYS])))
+        shell = ":".join([shell_fixture(CORE + "/lib"), shell_fixture(GNAT),
+                          shell_fixture(sibling), shell_fixture(MSYS)])
+        self.assertEqual(clean_indexed_core(shell),
+                         ":".join(map(shell_fixture, [GNAT, sibling, MSYS])))
+
+    def test_indexed_core_windows_case_slashes_and_short_parent(self):
+        mixed = (CORE + "/lib").upper().replace("/", "\\")
+        short = (CORE + "/lib").replace("runneradmin", "RUNNER~1").replace("/", "\\")
+        retained = ":".join(map(shell_fixture, [GNAT, GPR, MSYS]))
+        self.assertEqual(clean_indexed_core(mixed + ";" + GNAT + ";" + GPR + ";" + MSYS), retained)
+        self.assertEqual(clean_indexed_core(short + ";" + GNAT + ";" + GPR + ";" + MSYS), retained)
+
+    def test_validator_passes_recorded_core_source_to_sanitizer(self):
+        root = Path(__file__).resolve().parents[2]
+        script = (root / "scripts/validate_clean_consumer.sh").read_text()
+        start = script.index('test -s "$work/core-source.txt"')
+        finish = script.index('> "$work/installed-toolchain-path.txt"')
+        fragment = script[start:script.index("\n", finish)]
+        self.assertIn('IFS= read -r core_source < "$work/core-source.txt"', fragment)
+        self.assertIn('--remove "$core_source"', fragment)
+        self.assertLess(script.index("sanitize_consumer_path.py"), script.index("hide_consumer_sources"))
+        self.assertIn('MINGW*|MSYS*) set -- "$@" --windows', script)
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            core = work / "alire/builds/opencv_core_0.5.0_f8aef00c/indexed-checkout"
+            (core / "lib").mkdir(parents=True)
+            for name in ("candidate", "features_clean_consumer", "prefix-a"):
+                (work / name).mkdir()
+            (work / "core-source.txt").write_bytes(str(core).encode() + b"\n")
+            (work / "toolchain-path.txt").write_text(":".join([
+                str(core), str(core / "lib"), str(core) + "b/lib",
+                "/opt/gnat/bin", "/opt/gprbuild/bin", "/mingw64/bin"]) + "\n")
+            env = os.environ.copy()
+            env.update(work=str(work), python=sys.executable, source_root=str(root))
+            result = subprocess.run(
+                ["sh", "-eu", "-c", fragment, "fixture"],
+                capture_output=True, text=True, env=env)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            retained = (work / "installed-toolchain-path.txt").read_text().rstrip("\n").split(":")
+            self.assertEqual(retained, [str(core) + "b/lib", "/opt/gnat/bin",
+                                        "/opt/gprbuild/bin", "/mingw64/bin"])
+
+    def test_core_source_read_preserves_windows_backslashes(self):
+        recorded = (r"C:\Users\runneradmin\AppData\Local\alire\cache\builds"
+                    r"\opencv_core_0.5.0_f8aef00c\indexed-checkout")
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "core-source.txt"
+            source.write_bytes(recorded.encode() + b"\n")
+            fragment = 'test -s "$1"; IFS= read -r core_source < "$1"; test -n "$core_source"; printf "%s" "$core_source"'
+            result = subprocess.run(["sh", "-eu", "-c", fragment, "fixture", str(source)],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, recorded)
 
 
 class PathAuditTests(unittest.TestCase):
