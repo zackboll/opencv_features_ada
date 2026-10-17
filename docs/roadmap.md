@@ -1,10 +1,13 @@
 # Navigation-oriented roadmap
 
-Task 012 replaces the Core 0.4.1 Git pin with indexed `opencv_core ~0.5.0`.
-Linux source, installed and relocated consumers were qualified against that
-resolution. Features remains **0.1.0-dev**: release tarballs, a version bump,
-tagging and submitting Features to the Alire index remain deferred. Windows
-Core 0.5.0 qualification is post-merge only and is not claimed here.
+Version **0.1.0** is the first source-release candidate. It depends on indexed
+`opencv_core ~0.5.0` and keeps the fixed eight-level ORB profile. Tagging,
+a GitHub release, and an Alire index submission remain outside this candidate.
+Windows Core 0.5.0 qualification on
+`eb4af534d837221879ac6a56d7e0866e98a1d3dc` is `WINDOWS_CORE_050_FAILED`:
+indexed resolution and 67/67 AUnit passed, then consumer installation failed.
+That post-merge evidence is not release qualification. Configurable ORB levels,
+RANSAC, homography, PnP, and navigation estimation remain deferred.
 
 ## 001 — qualify the bootstrap
 

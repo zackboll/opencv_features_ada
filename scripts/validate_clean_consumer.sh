@@ -52,25 +52,8 @@ grep -Fx 'opencv_features clean consumer ok' "$work/source-run.log"
 echo 'SOURCE consumer PASS (Core from Alire index, not a Features Git pin)'
 alr -n printenv > "$work/resolved-environment.log"
 alr -n show --solve > "$work/resolved-solution.log" 2>&1 || true
-alr -n exec -- sh -c '
-    set -eu
-    printf "Resolved Core source: %s\n" "$OPENCV_CORE_ALIRE_PREFIX"
-    case "$OPENCV_CORE_ALIRE_PREFIX" in
-        "$1/candidate"*|"$1/unavailable-candidate"*|"$1/features_clean_consumer"*|"$1/unavailable-source-consumer"*)
-            echo "error: Core resolved through a Features workspace pin" >&2
-            exit 1 ;;
-    esac
-    manifest="$OPENCV_CORE_ALIRE_PREFIX/alire.toml"
-    [ -f "$manifest" ] || { echo "error: resolved Core has no manifest" >&2; exit 1; }
-    grep -E "^version *= *\"0\\.5\\.0\"" "$manifest"
-    if git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse --verify HEAD >/dev/null 2>&1; then
-        git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD
-    fi
-    printf "%s\n" "$OPENCV_CORE_ALIRE_PREFIX" > "$1/core-source.txt"
-    printf "%s\n" "$PATH" > "$1/toolchain-path.txt"
-    gprinstall -f -p -r --prefix="$1/prefix-a" -P "$OPENCV_CORE_ALIRE_PREFIX/opencv_core.gpr"
-    gprinstall -f -p -r --prefix="$1/prefix-a" -P "$1/candidate/opencv_features.gpr"
-' sh "$work" > "$work/install.log" 2>&1 || { cat "$work/install.log"; exit 1; }
+alr -n exec -- sh "$work/candidate/scripts/install_resolved_consumer.sh" "$work" \
+    > "$work/install.log" 2>&1 || { cat "$work/install.log"; exit 1; }
 cat "$work/install.log"
 cp "$work/candidate/config/opencv_features_install.gpr" "$work/build-time-install.gpr"
 driver=$(sed -n 's/^[ ]*Cxx_Driver := "\(.*\)";/\1/p' "$work/build-time-install.gpr")

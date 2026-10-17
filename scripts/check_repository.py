@@ -40,7 +40,7 @@ def check_correspondences(root: Path) -> None:
           re.search(r"\bPoint\s*\(Train,", source) is not None,
           "correspondences must use public accessors for both feature sets")
 
-def check_clean_consumer(root: Path) -> None:
+def check_clean_consumer(root: Path, manifests: list) -> None:
     fixture = (root / "scripts/features_clean_consumer.adb").read_text()
     fixture = re.sub(r"--[^\n]*", "", fixture)
     contexts = set(re.findall(r"^with\s+([\w.]+)\s*;", fixture, re.IGNORECASE | re.MULTILINE))
@@ -56,10 +56,22 @@ def check_clean_consumer(root: Path) -> None:
         check(re.search(r"^unset [^\n]*\b" + setting + r"\b", validator, re.MULTILINE),
               f"consumer validator must unset inherited {setting}")
     for operation in ("alr -n init --bin", "alr -n with opencv_features --use=",
-                      "gprinstall -f -p -r", "mv \"$prefix_a\" \"$prefix\"",
+                      "install_resolved_consumer.sh", "mv \"$prefix_a\" \"$prefix\"",
                       "check_consumer_install.py"):
         check(operation in validator, f"missing consumer stage: {operation}")
     check("with opencv_core --use" not in validator, "do not manually select Core")
+    check("install_resolved_consumer.sh" in validator,
+          "consumer install must use a script file, not an escaped sh -c payload")
+    check("sh -c" not in validator, "do not pass quoted scripts through alr exec")
+    installer = (root / "scripts/install_resolved_consumer.sh").read_text()
+    check('grep -E \'^version *= *"0\\.5\\.0"\'' in installer,
+          "resolved Core manifest must be version 0.5.0")
+    check("gprinstall -f -p -r" in installer, "installer must recursively install projects")
+    names = [manifest["name"] for manifest in manifests]
+    check(names == ["opencv_features", "opencv_features_tests", "opencv_features_examples"],
+          "crate identities must stay independent")
+    check(all(manifest["version"] == "0.1.0" for manifest in manifests),
+          "release manifests must be version 0.1.0")
     cross = (root / ".github/workflows/cross-platform.yml").read_text()
     for job in ("linux", "macos"):
         block = re.search(r"^  " + job + r":\n(.*?)(?=^  \S|\Z)",
@@ -99,7 +111,7 @@ def main() -> None:
     check(all(re.search(r"\b" + n + r"\s*\(", cpp) for n in declared), "missing C++ export")
     check_bridge_ownership(ROOT)
     check_correspondences(ROOT)
-    check_clean_consumer(ROOT)
+    check_clean_consumer(ROOT, manifests)
     check_workflows(ROOT / ".github/workflows")
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()

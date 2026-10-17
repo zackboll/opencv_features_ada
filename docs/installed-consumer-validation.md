@@ -1,7 +1,8 @@
 # Installed and clean-consumer qualification (Task 007)
 
-Version remains **0.1.0-dev**. This is packaging/integration qualification,
-not a release, index submission, algorithm extension or compatibility promise.
+The source candidate version is **0.1.0**. This document records packaging and
+integration qualification. It is not a tag, GitHub release, Alire index
+submission, algorithm extension, or compatibility promise.
 
 ## Three separate claims
 
@@ -17,11 +18,13 @@ not a release, index submission, algorithm extension or compatibility promise.
    absolute prefix B, verify A is absent (no symlink), then compile/link/run a
    new application with no reused consumer objects.
 
-**Features itself is not an indexed release.** Bare `alr with opencv_features`
-is not documented as resolving from the community index. Core is: the
-production constraint is `opencv_core = "~0.5.0"`, and the consumer qualifier
-checks that the resolved manifest is version 0.5.0 and is not a Features
-workspace pin. Version remains **0.1.0-dev**.
+**Features 0.1.0 is a source candidate, not an indexed release.** Bare
+`alr with opencv_features` is not documented as resolving from the community
+index. Core is: the production constraint is `opencv_core = "~0.5.0"`, and the
+consumer qualifier checks that the resolved manifest is version 0.5.0 and is
+not a Features workspace pin. The version check lives in
+`scripts/install_resolved_consumer.sh` so `alr exec` does not reparse escaped
+quotes. Windows run 39006138286 failed before that correction.
 
 ## Reproduce
 
@@ -153,6 +156,6 @@ before merge. No Windows PR CI or merge to obtain evidence is authorized.
 The manual 4.1/4.10/5.0 matrix is not dispatched: these changes concern consumer
 qualification, not version-dependent native algorithm/link changes.
 
-Release/index submission, pin removal, version/tag/release changes, release
-tarballs and semantic-version policy remain deferred. This does not establish
-arbitrary cross-platform or future OpenCV safety.
+Release tagging, GitHub publication, and Alire index submission remain later
+gates. This record does not establish arbitrary cross-platform or future
+OpenCV safety.
