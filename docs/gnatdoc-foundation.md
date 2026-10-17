@@ -212,7 +212,10 @@ artifacts. It has `contents: read` only and does **not** deploy GitHub Pages.
 
 `scripts/preflight_gnatdoc_enhancer.py` is optional and offline with respect to
 Features: it is not a build or generation dependency. Evidence:
-[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json).
+[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json), recorded on
+the DOC-001 sources; its page hashes are those of that site. It was rerun with
+the same outcome on the fully documented sources (see the
+[enhancer integration](gnatdoc-enhancer-integration.md#reconciliation-with-the-fully-documented-api-doc-007)).
 
 - Pinned revision `478d0bbff0be1b9141b5ad39f07a71f0386d86e9` (reviewed merge of
   enhancer PR #5) was exported with `git archive` and installed non-editably in
