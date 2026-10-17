@@ -180,3 +180,71 @@ jobs:
             r3-evidence/**/*.log
             r3-evidence/**/*.txt
             r3-evidence/manifest.json
+
+  # Branch-only installed-ORB correspondence. R3 numerical jobs stay on their branch.
+  orb-r3e-macos-native:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3e-native-correspondence' }}
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native research dependencies
+        run: brew install opencv pkg-config
+      - name: Record installed ORB correspondence
+        run: sh docs/research/run_orb_r3e.sh r3e-evidence
+      - name: Preserve focused evidence even after failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: orb-r3e-macos-native-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            r3e-evidence/**/*.log
+            r3e-evidence/**/*.txt
+            r3e-evidence/manifest.json
+  orb-r3e-windows-native:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3e-native-correspondence' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+          msys2: true
+      - name: Select Ada toolchain
+        shell: bash
+        run: alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+      - name: Upgrade Alire-managed MSYS2 core
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 core upgrade failed: $LASTEXITCODE" }
+      - name: Complete Alire-managed MSYS2 full upgrade
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -Syu --noconfirm
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 full upgrade failed: $LASTEXITCODE" }
+      - name: Install managed native research dependencies
+        shell: pwsh
+        run: |
+          alr -n exec -- pacman -S --noconfirm --needed mingw-w64-x86_64-opencv mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-python
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 dependency installation failed: $LASTEXITCODE" }
+          alr -n exec -- pacman -Dk
+          if ($LASTEXITCODE -ne 0) { throw "MSYS2 dependency consistency failed: $LASTEXITCODE" }
+      - name: Record installed ORB correspondence
+        shell: pwsh
+        run: |
+          alr -n exec -- sh docs/research/run_orb_r3e.sh r3e-evidence
+          if ($LASTEXITCODE -ne 0) { throw "Native correspondence research failed: $LASTEXITCODE" }
+      - name: Preserve focused evidence even after failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: orb-r3e-windows-native-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            r3e-evidence/**/*.log
+            r3e-evidence/**/*.txt
+            r3e-evidence/manifest.json

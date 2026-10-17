@@ -164,18 +164,24 @@ def check_topology(cross_text, windows_text, compatibility_text):
             jobs[current].append((level, line.strip()))
     expected = {"repository-checks": "ubuntu-24.04", "linux": "ubuntu-24.04",
                 "macos": "macos-14", "linux-sanitizers": "ubuntu-24.04"}
-    research = {"orb-r3-macos-numerics": "macos-14",
-                "orb-r3-windows-numerics": "windows-latest"}
-    guard = "${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/011-r3-hosted-numerics' }}"
-    for name, runner in research.items():
+    research = {
+        "orb-r3-macos-numerics": ("macos-14", "refs/heads/research/011-r3-hosted-numerics"),
+        "orb-r3-windows-numerics": ("windows-latest", "refs/heads/research/011-r3-hosted-numerics"),
+        "orb-r3e-macos-native": ("macos-14", "refs/heads/research/011-r3e-native-correspondence"),
+        "orb-r3e-windows-native": ("windows-latest", "refs/heads/research/011-r3e-native-correspondence"),
+    }
+    for name, (runner, ref) in research.items():
         if name not in jobs:
             continue
         body = jobs[name]
         level = min(indent for indent, _ in body)
         guards = [line[len("if:"):].strip() for indent, line in body
                   if indent == level and line.startswith("if:")]
+        guard = "${{ github.event_name == 'workflow_dispatch' && github.ref == '" + ref + "' }}"
         if guards != [guard]:
-            raise ValueError("R3 research jobs require exact dispatch and branch guards")
+            raise ValueError("research jobs require exact dispatch and branch guards")
+        if name.startswith("orb-r3e-") and "orb-r3-hosted-numerics" in "".join(line for _, line in body):
+            raise ValueError("R3E jobs must not reuse the R3 numerical branch guard")
         expected[name] = runner
     if set(jobs) != set(expected):
         raise ValueError("PR workflow must contain repository-checks, linux, macos, linux-sanitizers only")
