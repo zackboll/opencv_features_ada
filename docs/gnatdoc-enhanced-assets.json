@@ -1,14 +1,28 @@
 {
   "added_files": [
-    "gnatdoc-navigation.js",
-    "gnatdoc-theme.css",
-    "presentation.json"
+    "api/gnatdoc-navigation.js",
+    "api/gnatdoc-theme.css",
+    "api/presentation.json",
+    "assets/gnatdoc-guides.css",
+    "guides/binary-matching.html",
+    "guides/candidate-correspondences.html",
+    "guides/getting-started.html",
+    "guides/limitations-roadmap.html",
+    "guides/orb-extraction.html",
+    "guides/ownership-lifecycle.html",
+    "guides/platform-compatibility.html",
+    "index.html"
   ],
   "enhancer_revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
   "enhancer_version": "0.1.0.dev0",
+  "guide_renderer": {
+    "markdown-it-py": "3.0.0",
+    "mdurl": "0.1.2"
+  },
   "packaged_assets": {
-    "gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
-    "gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371"
+    "api/gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
+    "api/gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c"
   },
   "public_packages": [
     "OpenCV.Features",
@@ -17,7 +31,7 @@
     "OpenCV.Features.ORB"
   ],
   "scripts": {
-    "index.html": [
+    "api/index.html": [
       "gnatdoc-navigation.js"
     ]
   }

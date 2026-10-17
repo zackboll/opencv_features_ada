@@ -56,8 +56,8 @@ jobs:
       - name: Install the pinned shared enhancer (documentation-only)
         run: |
           git clone --quiet https://github.com/zackboll/ada-gnatdoc-enhancer.git "$RUNNER_TEMP/ada-gnatdoc-enhancer"
-          python3 scripts/install_gnatdoc_enhancer.py --checkout "$RUNNER_TEMP/ada-gnatdoc-enhancer" --venv "$RUNNER_TEMP/gnatdoc-enhancer"
-      - name: Enhance an isolated copy of the native site and verify it
+          python3 scripts/install_gnatdoc_enhancer.py --checkout "$RUNNER_TEMP/ada-gnatdoc-enhancer" --venv "$RUNNER_TEMP/gnatdoc-enhancer" --with-guides
+      - name: Enhance an isolated copy of the native site with guides and verify it
         run: python3 scripts/enhance_docs.py --venv "$RUNNER_TEMP/gnatdoc-enhancer"
       - name: Enhanced-site mutation tests
         env:

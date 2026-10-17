@@ -66,11 +66,13 @@ def stage_public_sources(destination: Path, root: Path = ROOT) -> list[str]:
     return specs
 
 
-def install(checkout: Path, revision: str, environment: Path) -> Path:
+def install(checkout: Path, revision: str, environment: Path,
+            requirements: Path | None = None) -> Path:
     """Install the exact revision into a new virtual environment.
 
     Returns the gnatdoc-enhancer executable. Writes a provenance record with
     the installed file hashes, each proven equal to the revision's Git blob.
+    ``requirements`` optionally installs hash-pinned guide renderer wheels.
     """
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise SupportError("the enhancer revision must be a full commit SHA")
@@ -102,12 +104,29 @@ def install(checkout: Path, revision: str, environment: Path) -> Path:
     installed = package_hashes(package)
     if installed != expected:
         raise SupportError("installed enhancer differs from the reviewed revision")
+    renderer = {}
+    if requirements is not None:
+        run(str(python), "-m", "pip", "install", "--quiet", "--no-deps", "--require-hashes",
+            "--only-binary=:all:", "-r", str(requirements))
+        renderer = installed_renderer(environment)
     tool = environment / "bin/gnatdoc-enhancer"
     version = run(str(tool), "--version").stdout.strip()
     (environment / PROVENANCE).write_text(json.dumps(
-        {"revision": revision, "version": version, "files": installed},
-        indent=2, sort_keys=True) + "\n")
+        {"revision": revision, "version": version, "files": installed,
+         "guide_renderer": renderer}, indent=2, sort_keys=True) + "\n")
     return tool
+
+
+def installed_renderer(environment: Path) -> dict[str, str]:
+    """Installed Markdown renderer distributions, if any."""
+    output = run(str(environment / "bin/python"), "-I", "-c",
+                 "import importlib.metadata as m,json\n"
+                 "r={}\n"
+                 "for n in ('markdown-it-py','mdurl'):\n"
+                 "  try: r[n]=m.version(n)\n"
+                 "  except m.PackageNotFoundError: pass\n"
+                 "print(json.dumps(r))").stdout
+    return json.loads(output)
 
 
 def installed_package(environment: Path) -> Path:
@@ -128,6 +147,8 @@ def verified_tool(environment: Path, revision: str = PINNED_REVISION) -> tuple[P
         raise SupportError(f"installed enhancer {record['revision']} is not {revision}")
     if package_hashes(installed_package(environment)) != record["files"]:
         raise SupportError("installed enhancer files changed after installation")
+    if installed_renderer(environment) != record.get("guide_renderer", {}):
+        raise SupportError("installed guide renderer changed after installation")
     return environment / "bin/gnatdoc-enhancer", record
 
 
@@ -218,3 +239,32 @@ def compare_native(pristine: Path, enhanced: Path) -> dict:
         errors.append(f"unresolved local links {unresolved}")
     return {"errors": errors, "added_files": sorted(after - before),
             "scripts": {k: v for k, v in scripts.items() if v}}
+
+
+def check_site_links(site: Path) -> dict:
+    """Resolve every local reference of every HTML page under a site root.
+
+    Relative paths may climb only to the site root; external URLs, missing
+    files and missing fragments are reported. Scripts are listed per page.
+    """
+    errors, scripts = [], {}
+    root = site.resolve()
+    pages = sorted(p for p in site.rglob("*.html"))
+    for path in pages:
+        page = collect(path)
+        relative = path.relative_to(site).as_posix()
+        if page.scripts:
+            scripts[relative] = page.scripts
+        for reference in page.references:
+            if re.match(r"^[a-z][a-z0-9+.-]*:|^//", reference, re.I):
+                errors.append(f"{relative}: external URL {reference}")
+                continue
+            target, _, fragment = reference.partition("#")
+            target = target.split("?", 1)[0]
+            destination = (path.parent / target).resolve() if target else path.resolve()
+            if not destination.is_relative_to(root) or not destination.is_file():
+                errors.append(f"{relative}: unresolved {reference}")
+            elif fragment and destination.suffix == ".html" and \
+                    fragment not in collect(destination).ids:
+                errors.append(f"{relative}: unresolved fragment {reference}")
+    return {"errors": errors, "pages": len(pages), "scripts": scripts}
