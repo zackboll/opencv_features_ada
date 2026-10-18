@@ -41,10 +41,11 @@ jobs:
         run: python3 -m unittest discover -s tests/documentation -v
       - name: Generate native site and run Features-owned checks
         run: sh scripts/generate_docs.sh
-      - name: Mutation tests against the generated site
+      - name: Mutation and strict-qualification tests against the generated site
         env:
           FEATURES_DOCS_API: ${{ github.workspace }}/_site/api
           FEATURES_DOCS_LOG: ${{ github.workspace }}/obj/docs/gnatdoc.log
+          FEATURES_DOCS_END_TO_END: "1"
         run: python3 -m unittest discover -s tests/documentation -v
       - name: Qualify deterministic regeneration in a separate clean directory
         run: |

@@ -1,10 +1,13 @@
 # Shared GNATdoc enhancer integration (DOC-004)
 
 DOC-004 adopts the reviewed shared `ada-gnatdoc-enhancer` for a presentation
-copy of the native Features API site. It is stacked on the DOC-001 foundation
-(`docs/001-gnatdoc-foundation`). The native site, its checks and baselines are
-unchanged and remain the authority; the enhancer is a documentation-only tool,
-never a production or Alire dependency.
+copy of the native Features API site. It was first qualified on the DOC-001
+foundation and has been reconciled with `main` at
+`6ab853a52fd2d72dd30924f7d7ec675134a86ade` (DOC-007), which carries the complete
+DOC-002/DOC-003 comments and the DOC-006 strict checks. The native site, its
+checks and its empty baselines are unchanged by this integration and remain the
+authority; the enhancer is a documentation-only tool, never a production or
+Alire dependency.
 
 ## Pinned tool and provenance
 
@@ -23,13 +26,14 @@ modules and assets equal the commit's Git blobs. It records the installed
 hashes; `scripts/enhance_docs.py` re-checks them, the revision and version, and
 the packaged assets against `docs/gnatdoc-enhanced-assets.json` before every
 run. Enhancer `main` later merged PR #6 (`4c75e86`, generic-instance
-summaries); it is not adopted because it has not been authorized for this
-campaign, and Features has no public generic instance.
+summaries) and PR #7 (`f52dcfe`, authored guides and portal); neither is
+adopted because neither has been authorized for this integration, and Features
+has no public generic instance. The installer rejects any other revision.
 
 ## Pipeline
 
 ```sh
-sh scripts/generate_docs.sh                       # native _site + Features checks
+sh scripts/generate_docs.sh                       # native _site + strict Features checks
 git clone https://github.com/zackboll/ada-gnatdoc-enhancer.git /tmp/enhancer
 python3 scripts/install_gnatdoc_enhancer.py --checkout /tmp/enhancer --venv /tmp/gnatdoc-enhancer --with-guides
 python3 scripts/enhance_docs.py --venv /tmp/gnatdoc-enhancer   # writes _site-enhanced
@@ -61,7 +65,7 @@ qualification uses. This does not change the enhancer or any production file.
    and the pristine tree hashes are rechecked at the end.
 2. Inventory reports exactly the four packages and 38 sections; a dry run leaves
    the copy unchanged; enhance and `verify` pass (47 local type links, 0
-   external).
+   external, on the fully documented sources).
 3. Re-enhancing is byte-idempotent; a fresh enhancement of another pristine copy
    is byte-identical.
 4. An independent HTML comparison requires unchanged native `h1`/`h4` text and
@@ -89,8 +93,9 @@ staging and the offline profile.
 ## Chromium qualification
 
 `tests/documentation/test_enhanced_browser.cjs` drives the real enhanced site
-over HTTP. Locally: Chromium 156.0.8078.4, Playwright 1.64.1, Node v20.19.2,
-**39/39 assertions passed** ([evidence](gnatdoc-browser-qualification.json)):
+over HTTP. Locally, on the fully documented site: Chromium 156.0.8078.4,
+Playwright 1.64.1, Node v20.19.2, **39/39 assertions passed**
+([evidence](gnatdoc-browser-qualification.json)):
 
 - light and dark color schemes at 1280x900: exact four-package index, default
   package frame, `?package=` bookmark via `replaceState`, `aria-current`,
@@ -120,10 +125,73 @@ It still has `contents: read` only and does not deploy GitHub Pages.
 
 ## Evidence at this head
 
-[gnatdoc-enhancement-evidence.json](gnatdoc-enhancement-evidence.json) records
-the enhancer operations, comparison and enhanced file hashes for the DOC-001
-sources. Enhanced page hashes change whenever documentation comments change;
-the checks, not these hashes, are the gate.
+[gnatdoc-enhancement-evidence.json](gnatdoc-enhancement-evidence.json) is the
+`scripts/enhance_docs.py` report for the complete site, the API reference with
+the DOC-005 portal and guides, generated from the sources of `main` `c4af751`
+(127/127 documented, 0 GNATdoc warnings). It records the enhancer operations,
+the native comparison, the site-wide link check and the hashes of all 18
+enhanced files. Enhanced page hashes change whenever documentation comments or
+guides change; the checks, not these hashes, are the gate. The hashes can be
+checked independently against the `features-api-enhanced-<sha>` artifact that
+CI uploads.
+
+## Reconciliation with the fully documented API (DOC-007)
+
+PR #21 was first qualified at `349641978a56da22a3d0cd504a2c71dcb1d6368c`, on the
+DOC-001 sources (11/127 documented, 110 warnings). DOC-007 merged `main`
+`6ab853a` normally (no rebase). Only `docs/gnatdoc-foundation.md` conflicted:
+its gate table keeps both the DOC-004 enhancer rows and the 127/127 row that is
+enforced strictly since DOC-006. The workflow merged cleanly and keeps the
+strict generation, the `FEATURES_DOCS_END_TO_END=1` test step and the enhancer
+steps. No script, test, profile or asset inventory needed a change.
+
+Everything was then remeasured from a fresh native generation; nothing was
+carried over from the DOC-001 run:
+
+| Measure | DOC-001 sources (`3496419`) | `main` `6ab853a` sources |
+| --- | --- | --- |
+| Native coverage / GNATdoc warnings | 11/127 / 110 (ceiling baselines) | 127/127 / 0 (empty baselines, strict) |
+| Enhancer inventory | 4 packages, 38 sections | 4 packages, 38 sections |
+| Type links (all local) / external | 47 / 0 | 47 / 0 |
+| Links reported by the enhancer | 103 | 103 |
+| Enhanced-site mutations rejected | 13/13 | 13/13 |
+| Chromium assertions | 39/39 | 39/39 |
+
+The link counts are unchanged because the enhancer links type names in the
+native declaration code, which DOC-002/DOC-003 did not change; they were
+measured again rather than assumed. An independent count over the enhanced
+HTML (not the enhancer's report) found 47 `type-reference` links: 37 to a
+heading on the same page and 10 to another Features package page (`Features`
+11, `ORB` 12, `Matching` 20, `Correspondences` 4). Each one resolves to an `h4`
+whose text equals the linked type name, and no link leaves the four Features
+pages. Of the 103 references (`href`/`src`, including stylesheets and the
+script), 88 carry fragments and all resolve.
+
+Enhanced-site files whose bytes changed with the comments:
+
+| File | DOC-001 sources | `main` `6ab853a` sources |
+| --- | --- | --- |
+| `api/8aee7d25….html` (`OpenCV.Features`) | `f51630dc3e8018bcc96ff7841e289d20e40440670cdf148774d6d4361606f6b6` | `80651b0ac77b5848aa56f53cfe6419fd75a32f89ed5499dffc5e297ff8e27844` |
+| `api/71007168….html` (`OpenCV.Features.ORB`) | `0bbed1ee3d46b70c345365a15ee34e8e8978c54e7ef94f386562f9e1e693a80c` | `bce6ea7d3fdbfbbc8c3a74c09918b363eeef3f6f1b594e4cce183a8954b351e7` |
+| `api/f8c4f9ff….html` (`OpenCV.Features.Matching`) | `52797715e3c7b757c82b1da0766b01eab54f9f4ecde21826d45dd216767188ee` | `1dcd90fd69b427fc4a2f0dad8394c3b6d04a33f01a6d88f306ab74d39389b30f` |
+| `api/0276ad65….html` (`OpenCV.Features.Correspondences`) | `012aaa628d6b4129e052898498d25a0cab89a5e097e3e86310ae43b028009b4e` | `12d49d3c4eb2e0aed99619ee1e3ec5b2d1cb3065f7cd809af8176b53a549f4cd` |
+| `api/presentation.json` | `4cd20816b68e07d6915146c784a40d894da6e3dba2d587efeb9ecdda486ef3c4` | `ba74d5839ef8a8be1167e9de3191eaaaecb7fc6e74cdeb5c2360e5ecf253efc9` |
+
+Unchanged: `api/index.html` (`448e2955…`), the native `api/gnatdoc.css`
+(`e86c483e…`) and both packaged assets. The pristine native pages equal the
+fingerprints in [gnatdoc-strict-qualification.md](gnatdoc-strict-qualification.md).
+The DOC-001 reports remain in Git history
+(`3496419:docs/gnatdoc-enhancement-evidence.json` and
+`3496419:docs/gnatdoc-browser-qualification.json`). In the browser report only
+the `Create` fragment's scroll offset changed (19.25 to 18.875 px).
+
+`scripts/preflight_gnatdoc_enhancer.py` was also rerun against the fully
+documented site. It passed with 0 failures: the unstaged layout still fails
+closed on `src/internal`; the conservative profile (56 links) and the local
+type-link profile (103 links, 47 type links) both passed every check; and all
+11 mutations were rejected. Its reviewed DOC-001 record,
+[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json), is kept
+unchanged as historical evidence.
 
 ## Developer portal and guides (DOC-005)
 

@@ -15,12 +15,12 @@ Initial measurements are in [gnatdoc-initial-inventory.md](gnatdoc-initial-inven
 | Source-backed public declaration inventory (API freeze for doc changes) | established |
 | Observed native anchor manifest, link/fragment and file-inventory validation | established |
 | Line-independent warning baseline with region classification | established |
-| Rendered-versus-documented coverage report with a gap ceiling | established |
+| Rendered-versus-documented coverage report with an exact gap baseline (empty, strict since DOC-006) | established |
 | Deterministic regeneration in separate clean directories | established locally; CI job added |
 | Documentation-only source-integrity check (`docs/*` branches) | established |
 | Shared enhancer compatibility preflight (optional, offline) | passes with staged public specifications |
 | Shared enhancer presentation copy, tamper and Chromium checks | established by DOC-004; see [integration](gnatdoc-enhancer-integration.md) |
-| Complete public documentation | not established: 11/127 elements documented |
+| Complete public documentation | established by DOC-002/DOC-003: 127/127; enforced strictly since DOC-006 |
 | Hosted CI for this workflow | pending until the PR runs; not claimed here |
 
 ## Toolchain and provenance
@@ -149,19 +149,20 @@ groups must equal the source members exactly.
 
 ## Baseline policy
 
-The warning and coverage baselines are **ceilings** of stable, line-free
-identities. A new warning or gap fails. Resolved entries are reported as
-*stale* and fail only with `--strict`. This is deliberate: DOC-002 and DOC-003
-are independent comment-only PRs from `main` that cannot edit these files, and
-a strict ratchet would turn `main` red when they merge. After they merge, a
-small reviewed change should remove the stale entries and CI can then use
-`--strict`. `--capture` writes a baseline only when the file is absent; it
-never overwrites. The declaration inventory and anchor manifest are exact,
-not ceilings.
+The warning and coverage baselines hold stable, line-free identities. A new
+warning or gap always fails; a resolved entry is reported as *stale* and fails
+with `--strict`. During DOC-002 and DOC-003 the baselines were ceilings, because
+those independent comment-only PRs could not edit these files. Since DOC-006
+both baselines are **empty** and `scripts/generate_docs.sh` runs the checker
+with `--strict`, so any undocumented public element, any GNATdoc warning and
+any baseline entry fail (see [strict qualification](gnatdoc-strict-qualification.md)).
+`--capture` writes a baseline only when the file is absent; it never
+overwrites. The declaration inventory and anchor manifest are exact.
 
-Warnings: 110 raw, 108 public and 2 private-part (`ORB.Finalize`). The log's
-diagnostics must all be `file:line:column: warning:` lines in the four
-specifications; anything else fails as unclassified.
+Warnings at DOC-001: 110 raw, 108 public and 2 private-part (`ORB.Finalize`);
+since DOC-002/DOC-003: 0. The log's diagnostics must all be
+`file:line:column: warning:` lines in the four specifications; anything else
+fails as unclassified.
 
 ## Determinism and fingerprints
 
@@ -211,7 +212,10 @@ artifacts. It has `contents: read` only and does **not** deploy GitHub Pages.
 
 `scripts/preflight_gnatdoc_enhancer.py` is optional and offline with respect to
 Features: it is not a build or generation dependency. Evidence:
-[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json).
+[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json), recorded on
+the DOC-001 sources; its page hashes are those of that site. It was rerun with
+the same outcome on the fully documented sources (see the
+[enhancer integration](gnatdoc-enhancer-integration.md#reconciliation-with-the-fully-documented-api-doc-007)).
 
 - Pinned revision `478d0bbff0be1b9141b5ad39f07a71f0386d86e9` (reviewed merge of
   enhancer PR #5) was exported with `git archive` and installed non-editably in

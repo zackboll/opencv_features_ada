@@ -46,4 +46,8 @@ alr -n exec -- "$gnatdoc" -P docs_api.gpr --backend html --generate public \
 if grep -Ei '(^|[[:space:]])(error:|fatal:|ignore file due to)' "$log"; then
     echo 'error: incomplete GNATdoc generation' >&2; exit 1
 fi
-python3 scripts/check_gnatdoc.py all --api "$output/api" --log "$log"
+# Strict: the gap and warning baselines are exact (empty), so stale entries
+# fail as well as new gaps, new warnings, inventory and anchor changes.
+python3 scripts/check_gnatdoc.py all --strict \
+    --api "$output/api" \
+    --log "$log"
