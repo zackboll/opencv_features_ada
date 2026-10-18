@@ -206,7 +206,10 @@ GNATdoc 26.0.0, runs the tooling unit tests, generates and checks the site, runs
 the mutation tests against it, regenerates into a separate directory with
 `diff -r` and log comparison, runs source integrity on `docs/*` PRs, writes the
 coverage/warning tables to the step summary and uploads the site and reports as
-artifacts. It has `contents: read` only and does **not** deploy GitHub Pages.
+artifacts. Its build job has `contents: read` only. Since DOC-009 a separate
+job deploys the qualified enhanced site to GitHub Pages, from `main` only and
+once the site meets the publication requirements; see
+[GitHub Pages publication](github-pages.md).
 
 ## Shared enhancer compatibility preflight
 

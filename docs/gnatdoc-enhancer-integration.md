@@ -128,7 +128,10 @@ certification (no screen-reader, contrast-audit or zoom testing).
 The documentation workflow clones the enhancer, installs the pinned revision,
 runs `enhance_docs.py`, the mutation tests and the Chromium script (Playwright
 1.64.1 with its bundled Chromium), and uploads `_site-enhanced` with the reports.
-It still has `contents: read` only and does not deploy GitHub Pages.
+That job still has `contents: read` only. DOC-009 adds a separate job that
+publishes the same `_site-enhanced` to GitHub Pages, from `main` only and once
+it meets the publication requirements; see
+[GitHub Pages publication](github-pages.md).
 
 ## Evidence at this head
 
@@ -234,6 +237,8 @@ pinned enhancer have no `<title>` element (the portal home keeps the one in
 `docs/index.html`, and the native GNATdoc API pages have none either). That is
 an upstream presentation gap, not something Features patches in generated
 output; it stays open and should be resolved before the site is published.
+DOC-009 makes a `<title>` on every page a deployment requirement
+([GitHub Pages publication](github-pages.md#page-titles-current-finding)).
 
 ## Reconciliation of the portal and guides with the fully documented API (DOC-008)
 

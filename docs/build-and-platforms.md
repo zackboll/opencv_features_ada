@@ -115,5 +115,7 @@ missing transitive `<cstdint>` include. G-API is not part of this ORB profile.
 
 Before release, test `alr build`, `alr test`, examples, all target backends,
 compiler/runtime dependencies, `gprinstall`/clean consumer linkage, and source
-package contents. No release automation or automatically publishing workflow
-is included.
+package contents. No release automation is included. The only publishing
+workflow deploys the documentation site to GitHub Pages, from `main` and once
+the site meets its publication requirements
+([GitHub Pages publication](github-pages.md)).
