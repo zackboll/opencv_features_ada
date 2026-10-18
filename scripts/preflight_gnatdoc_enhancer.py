@@ -23,15 +23,18 @@ The pristine native site is never modified; every operation uses copies.
 from __future__ import annotations
 
 import argparse
-import hashlib
-import html.parser
 import json
 import re
 import shutil
 import subprocess
 import sys
-import venv
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from gnatdoc_enhancer_support import (  # noqa: E402
+    SupportError as PreflightError, compare_native, install, public_specifications,
+    run, sha256, tree_hashes)
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = """schema_version = 1
@@ -53,69 +56,6 @@ mode = "none"
 [security]
 external_hosts = []
 """
-
-
-class PreflightError(RuntimeError):
-    pass
-
-
-def run(*command: str, cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
-    result = subprocess.run(command, cwd=cwd, capture_output=True, text=True)
-    if check and result.returncode != 0:
-        raise PreflightError(f"{' '.join(command)} failed:\n{result.stdout}{result.stderr}")
-    return result
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def tree_hashes(directory: Path) -> dict[str, str]:
-    return {p.relative_to(directory).as_posix(): sha256(p)
-            for p in sorted(directory.rglob("*")) if p.is_file()}
-
-
-def public_specifications() -> list[str]:
-    text = (ROOT / "docs_api.gpr").read_text()
-    block = re.search(r"for Source_Files use\s*\((.*?)\);", text, re.S)
-    if block is None:
-        raise PreflightError("docs_api.gpr has no explicit Source_Files list")
-    return re.findall(r'"([^"]+\.ads)"', block[1])
-
-
-def install(checkout: Path, revision: str, workspace: Path) -> tuple[Path, dict]:
-    resolved = run("git", "-C", str(checkout), "rev-parse", f"{revision}^{{commit}}").stdout.strip()
-    if resolved != revision:
-        raise PreflightError(f"{revision} resolves to {resolved}; pass a full commit SHA")
-    source = workspace / "enhancer-source"
-    source.mkdir()
-    archive = subprocess.run(["git", "-C", str(checkout), "archive", revision],
-                             check=True, capture_output=True).stdout
-    subprocess.run(["tar", "-x", "-C", str(source)], input=archive, check=True)
-    environment = workspace / "venv"
-    venv.EnvBuilder(with_pip=True).create(environment)
-    python = environment / "bin/python"
-    run(str(python), "-m", "pip", "install", "--quiet", "--no-deps", str(source))
-    package = Path(run(str(python), "-I", "-c",
-                       "import ada_gnatdoc_enhancer,os;"
-                       "print(os.path.dirname(ada_gnatdoc_enhancer.__file__))").stdout.strip())
-    listed = run("git", "-C", str(checkout), "ls-tree", "-r", "--name-only", revision,
-                 "src/ada_gnatdoc_enhancer").stdout.split()
-    expected = {}
-    for path in listed:
-        blob = subprocess.run(["git", "-C", str(checkout), "show", f"{revision}:{path}"],
-                              check=True, capture_output=True).stdout
-        expected[path.removeprefix("src/ada_gnatdoc_enhancer/")] = hashlib.sha256(blob).hexdigest()
-    installed = {name: digest for name, digest in tree_hashes(package).items()
-                 if "__pycache__" not in name}
-    if installed != expected:
-        raise PreflightError("installed enhancer differs from the reviewed revision")
-    version = run(str(environment / "bin/gnatdoc-enhancer"), "--version").stdout.strip()
-    return environment / "bin/gnatdoc-enhancer", {
-        "revision": revision, "version": version, "installed_files": len(installed),
-        "installed_equals_revision": True,
-        "assets": {name: digest for name, digest in installed.items()
-                   if name.startswith("assets/")}}
 
 
 def project(workspace: Path, name: str, site: Path, specs: list[str], type_links: bool) -> Path:
@@ -146,87 +86,6 @@ def enhancer(tool: Path, command: str, root: Path, *extra: str, check: bool = Tr
     result = run(str(tool), command, "--source-root", str(root), "--config",
                  "docs/gnatdoc-enhance.toml", "--site", "_site", *extra, check=check)
     return json.loads(result.stdout) if result.returncode == 0 else result
-
-
-class _Collect(html.parser.HTMLParser):
-    def __init__(self):
-        super().__init__(convert_charrefs=True)
-        self.ids, self.references, self.scripts, self.headings, self.code = [], [], [], [], []
-        self._heading = None
-        self._code = None
-
-    def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
-        if "id" in attrs:
-            self.ids.append(attrs["id"])
-        self.references += [attrs[k] for k in ("href", "src") if attrs.get(k) is not None]
-        if tag == "script":
-            self.scripts.append(attrs.get("src"))
-        if tag in ("h1", "h4"):
-            self._heading = (tag, attrs.get("id"), [])
-        if tag == "code" and self._code is None:
-            self._code = []
-
-    def handle_endtag(self, tag):
-        if self._heading and tag == self._heading[0]:
-            self.headings.append((self._heading[0], self._heading[1], "".join(self._heading[2])))
-            self._heading = None
-        if tag == "code" and self._code is not None:
-            self.code.append("".join(self._code))
-            self._code = None
-
-    def handle_data(self, data):
-        if self._heading:
-            self._heading[2].append(data)
-        if self._code is not None:
-            self._code.append(data)
-
-
-def _collect(path: Path) -> _Collect:
-    collector = _Collect()
-    collector.feed(path.read_text(encoding="utf-8"))
-    return collector
-
-
-def compare_native(pristine: Path, enhanced: Path) -> dict:
-    errors = []
-    before = {p.name for p in pristine.iterdir()}
-    after = {p.name for p in enhanced.iterdir()}
-    if before - after:
-        errors.append(f"removed native files {sorted(before - after)}")
-    if sha256(pristine / "gnatdoc.css") != sha256(enhanced / "gnatdoc.css"):
-        errors.append("native gnatdoc.css changed")
-    external, unresolved, scripts = [], [], {}
-    for name in sorted(after):
-        if not name.endswith(".html"):
-            continue
-        page = _collect(enhanced / name)
-        scripts[name] = page.scripts
-        for reference in page.references:
-            if re.match(r"^[a-z][a-z0-9+.-]*:|^//", reference, re.I):
-                external.append(f"{name}: {reference}")
-                continue
-            target, _, fragment = reference.partition("#")
-            target = target.split("?", 1)[0] or name
-            if not (enhanced / target).is_file():
-                unresolved.append(f"{name}: {reference}")
-            elif fragment and target.endswith(".html") and \
-                    fragment not in _collect(enhanced / target).ids:
-                unresolved.append(f"{name}: {reference}")
-        if name in before:
-            native = _collect(pristine / name)
-            for label, ok in (("headings", native.headings == page.headings),
-                              ("ids", set(native.ids) <= set(page.ids)),
-                              ("hrefs", set(native.references) <= set(page.references)),
-                              ("code text", native.code == page.code)):
-                if not ok:
-                    errors.append(f"{name}: native {label} not preserved")
-    if external:
-        errors.append(f"external URLs {external}")
-    if unresolved:
-        errors.append(f"unresolved local links {unresolved}")
-    return {"errors": errors, "added_files": sorted(after - before),
-            "scripts": {k: v for k, v in scripts.items() if v}}
 
 
 MUTATIONS = (
@@ -281,7 +140,11 @@ def preflight(checkout: Path, revision: str, site: Path, workspace: Path) -> dic
         raise PreflightError(f"{workspace} must not exist")
     workspace.mkdir(parents=True)
     pristine_hashes = tree_hashes(site)
-    tool, provenance = install(checkout, revision, workspace)
+    tool = install(checkout, revision, workspace / "venv")
+    record = json.loads((workspace / "venv/gnatdoc-enhancer-provenance.json").read_text())
+    provenance = {"revision": revision, "version": record["version"],
+                  "installed_files": len(record["files"]), "installed_equals_revision": True,
+                  "assets": {k: v for k, v in record["files"].items() if k.startswith("assets/")}}
     specs = public_specifications()
     report = {"enhancer": provenance, "staged_public_specifications": specs,
               "pristine_site": pristine_hashes}

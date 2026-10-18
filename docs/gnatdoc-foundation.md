@@ -18,7 +18,8 @@ Initial measurements are in [gnatdoc-initial-inventory.md](gnatdoc-initial-inven
 | Rendered-versus-documented coverage report with an exact gap baseline (empty, strict since DOC-006) | established |
 | Deterministic regeneration in separate clean directories | established locally; CI job added |
 | Documentation-only source-integrity check (`docs/*` branches) | established |
-| Shared enhancer compatibility preflight (optional, offline) | passes with staged public specifications; not integrated (DOC-004) |
+| Shared enhancer compatibility preflight (optional, offline) | passes with staged public specifications |
+| Shared enhancer presentation copy, tamper and Chromium checks | established by DOC-004; see [integration](gnatdoc-enhancer-integration.md) |
 | Complete public documentation | established by DOC-002/DOC-003: 127/127; enforced strictly since DOC-006 |
 | Hosted CI for this workflow | pending until the PR runs; not claimed here |
 
@@ -211,7 +212,10 @@ artifacts. It has `contents: read` only and does **not** deploy GitHub Pages.
 
 `scripts/preflight_gnatdoc_enhancer.py` is optional and offline with respect to
 Features: it is not a build or generation dependency. Evidence:
-[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json).
+[gnatdoc-enhancer-preflight.json](gnatdoc-enhancer-preflight.json), recorded on
+the DOC-001 sources; its page hashes are those of that site. It was rerun with
+the same outcome on the fully documented sources (see the
+[enhancer integration](gnatdoc-enhancer-integration.md#reconciliation-with-the-fully-documented-api-doc-007)).
 
 - Pinned revision `478d0bbff0be1b9141b5ad39f07a71f0386d86e9` (reviewed merge of
   enhancer PR #5) was exported with `git archive` and installed non-editably in
