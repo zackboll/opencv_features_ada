@@ -4,7 +4,7 @@
     "playwright": "1.64.1",
     "node": "v20.19.2"
   },
-  "url": "http://127.0.0.1:PORT/api/index.html",
+  "url": "http://127.0.0.1:8072/api/index.html",
   "passed": 64,
   "failed": 0,
   "assertions": [
@@ -26,7 +26,7 @@
     {
       "name": "light: default package is bookmarked with replaceState",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/index.html?package=OpenCV.Features"
+      "detail": "http://127.0.0.1:8072/api/index.html?package=OpenCV.Features"
     },
     {
       "name": "light: aria-current marks the selected package",
@@ -46,17 +46,17 @@
     {
       "name": "navigation: package click pushes a ?package bookmark",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/index.html?package=OpenCV.Features.ORB"
+      "detail": "http://127.0.0.1:8072/api/index.html?package=OpenCV.Features.ORB"
     },
     {
       "name": "history: Back restores the previous package and URL",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/index.html?package=OpenCV.Features"
+      "detail": "http://127.0.0.1:8072/api/index.html?package=OpenCV.Features"
     },
     {
       "name": "history: Forward returns to ORB",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/index.html?package=OpenCV.Features.ORB"
+      "detail": "http://127.0.0.1:8072/api/index.html?package=OpenCV.Features.ORB"
     },
     {
       "name": "search: filters the package list",
@@ -276,7 +276,7 @@
     {
       "name": "dark: default package is bookmarked with replaceState",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/index.html?package=OpenCV.Features"
+      "detail": "http://127.0.0.1:8072/api/index.html?package=OpenCV.Features"
     },
     {
       "name": "dark: aria-current marks the selected package",
@@ -435,7 +435,7 @@
     {
       "name": "no JavaScript: native package link loads the page into the frame",
       "pass": true,
-      "detail": "http://127.0.0.1:18475/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+      "detail": "http://127.0.0.1:8072/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
     },
     {
       "name": "no JavaScript: tagged-type link keeps its native fragment",
