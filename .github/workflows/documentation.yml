@@ -8,10 +8,14 @@ permissions:
   contents: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded pull-request runs are cancelled; runs on main queue instead, so
+  # that a GitHub Pages deployment in progress always completes.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   native-gnatdoc:
     runs-on: ubuntu-24.04
+    outputs:
+      publication_ready: ${{ steps.pages.outputs.publication_ready }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,6 +107,33 @@ jobs:
           name: features-api-enhanced-${{ github.event.pull_request.head.sha || github.sha }}
           path: _site-enhanced/
           if-no-files-found: error
+      - name: Qualify the Pages artifact under the project-site prefix
+        id: pages
+        run: |
+          python3 scripts/check_pages_site.py --github-output "$GITHUB_OUTPUT"
+          mkdir "$RUNNER_TEMP/pages-root"
+          cp -R _site-enhanced "$RUNNER_TEMP/pages-root/opencv_features_ada"
+          diff -r _site-enhanced "$RUNNER_TEMP/pages-root/opencv_features_ada"
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/doc-browser/node_modules/playwright"
+          export PAGES_URL=http://127.0.0.1:8076/opencv_features_ada/
+          python3 -m http.server 8076 --bind 127.0.0.1 --directory "$RUNNER_TEMP/pages-root" &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 "$PAGES_URL" --output /dev/null
+          BROWSER_REPORT=obj/docs/pages-browser.json node tests/documentation/test_pages_browser.cjs
+          DOC_URL="${PAGES_URL}api/index.html" BROWSER_REPORT=obj/docs/pages-prefix-browser.json \
+            node tests/documentation/test_enhanced_browser.cjs
+      - name: Report the Pages publication gate
+        if: steps.pages.outputs.publication_ready != 'true'
+        env:
+          BLOCKERS: ${{ steps.pages.outputs.blockers }}
+        run: echo "::warning title=GitHub Pages deployment blocked::$BLOCKERS"
+      - name: Upload the qualified enhanced site as the GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site-enhanced/
+      - name: Verify the uploaded Pages archive is byte-identical to the qualified site
+        run: python3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/artifact.tar" --report obj/docs/pages-archive.json
       - name: Upload diagnostics and reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -112,3 +143,26 @@ jobs:
             obj/docs/gnatdoc.log
             obj/docs/*.json
           if-no-files-found: ignore
+  deploy-pages:
+    # Publication is allowed only from a successful push to main whose
+    # artifact meets every publication requirement. Pull requests and manual
+    # dispatches never deploy; the github-pages environment also accepts
+    # main only.
+    needs: native-gnatdoc
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.native-gnatdoc.outputs.publication_ready == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy the qualified Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
