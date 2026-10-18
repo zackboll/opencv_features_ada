@@ -12,8 +12,9 @@ Run after scripts/generate_docs.sh. The pristine native site (default
    obj/docs/enhancer-sources (discovery is recursive; src/internal is never
    published) and runs inventory, a dry run, enhance and verify;
 3. requires byte-idempotent re-enhancement, an identical fresh second
-   enhancement, preserved native identities, resolved local links, no
-   external URL and exactly the inventoried added files and scripts;
+   enhancement, preserved native identities, resolved local links on every
+   page (API, portal and guides), no external URL and exactly the
+   inventoried added files, packaged assets, renderer and scripts;
 4. confirms the pristine native site is unchanged.
 """
 from __future__ import annotations
@@ -46,8 +47,10 @@ def enhance(environment: Path, native: Path, output: Path, root: Path = ROOT) ->
     if provenance["version"] != manifest["enhancer_version"]:
         raise EnhanceError(f"enhancer version {provenance['version']} differs")
     for name, digest in manifest["packaged_assets"].items():
-        if provenance["files"].get(f"assets/{name}") != digest:
+        if provenance["files"].get("assets/" + Path(name).name) != digest:
             raise EnhanceError(f"packaged asset {name} differs from the inventory")
+    if provenance.get("guide_renderer", {}) != manifest["guide_renderer"]:
+        raise EnhanceError(f"guide renderer {provenance.get('guide_renderer')} differs")
     pristine = support.tree_hashes(native)
     stage = root / STAGE
     if stage.exists():
@@ -82,16 +85,21 @@ def enhance(environment: Path, native: Path, output: Path, root: Path = ROOT) ->
     comparison = support.compare_native(native / "api", output / "api")
     if comparison["errors"]:
         raise EnhanceError(f"native comparison failed: {comparison['errors']}")
-    if comparison["added_files"] != sorted(manifest["added_files"]):
-        raise EnhanceError(f"added files {comparison['added_files']} differ from the inventory")
-    if comparison["scripts"] != manifest["scripts"]:
-        raise EnhanceError(f"scripts {comparison['scripts']} differ from the inventory")
+    links = support.check_site_links(output)
+    if links["errors"]:
+        raise EnhanceError(f"site link check failed: {links['errors']}")
+    added = sorted(set(once) - set(support.tree_hashes(native)))
+    if added != sorted(manifest["added_files"]):
+        raise EnhanceError(f"added files {added} differ from the inventory")
+    if links["scripts"] != manifest["scripts"]:
+        raise EnhanceError(f"scripts {links['scripts']} differ from the inventory")
     for name, digest in manifest["packaged_assets"].items():
-        if support.sha256(output / "api" / name) != digest:
+        if support.sha256(output / name) != digest:
             raise EnhanceError(f"published {name} differs from the packaged asset")
     if support.tree_hashes(native) != pristine:
         raise EnhanceError("the pristine native site changed")
-    report.update(native_comparison=comparison, byte_idempotent=True,
+    report.update(native_comparison=comparison, site_links=links, added_files=added,
+                  byte_idempotent=True,
                   fresh_enhancement_identical=True, pristine_unchanged=True,
                   enhanced_site=once)
     return report
@@ -115,7 +123,8 @@ def main(argv=None) -> int:
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print("PASS: enhanced copy verified; byte-idempotent; fresh run identical; native "
-          f"identities preserved; added {report['native_comparison']['added_files']}")
+          f"identities preserved; {report['site_links']['pages']} pages with resolved links; "
+          f"added {report['added_files']}")
     return 0
 
 

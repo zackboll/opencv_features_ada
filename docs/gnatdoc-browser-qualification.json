@@ -5,7 +5,7 @@
     "node": "v20.19.2"
   },
   "url": "http://127.0.0.1:8072/api/index.html",
-  "passed": 39,
+  "passed": 64,
   "failed": 0,
   "assertions": [
     {
@@ -148,6 +148,117 @@
       }
     },
     {
+      "name": "light portal: home page heading",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "light portal: navigation lists Home, API Reference and every guide",
+      "pass": true,
+      "detail": [
+        "Home",
+        "API Reference",
+        "Getting started",
+        "ORB feature extraction",
+        "Binary matching",
+        "Candidate correspondences",
+        "Ownership and lifecycle",
+        "Platform compatibility",
+        "Limitations and roadmap"
+      ]
+    },
+    {
+      "name": "light portal: package directory lists the four packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "light portal: themed background",
+      "pass": true,
+      "detail": "rgb(255, 255, 255)"
+    },
+    {
+      "name": "light portal: home and guides run no scripts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "portal: API Reference opens the enhanced package index",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "portal: guide navigation opens the guide",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "guide: embedded Ada example is the real orb_synthetic.adb",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "guide: api: overload link lands on the masked Detect_And_Compute section",
+      "pass": true,
+      "detail": {
+        "id": "07eb80b590b7f97f4c088474add72fc7d2b3f9a09f745f293468ca8cf358c2df",
+        "text": "Detect_And_Compute",
+        "target": true,
+        "code": "function Detect_And_Compute\n  (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set\n"
+      }
+    },
+    {
+      "name": "guide: first Tab focuses a visible skip link",
+      "pass": true,
+      "detail": {
+        "text": "Skip to content",
+        "position": "static",
+        "outline": "solid"
+      }
+    },
+    {
+      "name": "light portal: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "light mobile: ../index.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/binary-matching.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/orb-extraction.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/platform-compatibility.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
       "name": "dark: index lists exactly the four public packages",
       "pass": true,
       "detail": [
@@ -227,6 +338,83 @@
       "detail": {
         "overflow": 0,
         "snippetScroll": "auto"
+      }
+    },
+    {
+      "name": "dark portal: home page heading",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark portal: navigation lists Home, API Reference and every guide",
+      "pass": true,
+      "detail": [
+        "Home",
+        "API Reference",
+        "Getting started",
+        "ORB feature extraction",
+        "Binary matching",
+        "Candidate correspondences",
+        "Ownership and lifecycle",
+        "Platform compatibility",
+        "Limitations and roadmap"
+      ]
+    },
+    {
+      "name": "dark portal: package directory lists the four packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "dark portal: themed background",
+      "pass": true,
+      "detail": "rgb(20, 27, 38)"
+    },
+    {
+      "name": "dark portal: home and guides run no scripts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark portal: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "dark mobile: ../index.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/binary-matching.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/orb-extraction.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/platform-compatibility.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
       }
     },
     {
