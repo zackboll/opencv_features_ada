@@ -22,7 +22,19 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - name: Record checkout
-        run: git rev-parse HEAD
+        run: |
+          git rev-parse HEAD
+          mkdir -p obj/docs
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          Path("obj/docs/qualification-head.json").write_text(json.dumps({
+              "head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "event": os.environ["GITHUB_EVENT_NAME"],
+              "run_url": os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"]
+                         + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+          }, indent=2) + "\n")
+          PY
       - name: Install native dependencies for Core configuration
         run: |
           sudo apt-get update
@@ -129,11 +141,22 @@ jobs:
           BLOCKERS: ${{ steps.pages.outputs.blockers }}
         run: echo "::warning title=GitHub Pages deployment blocked::$BLOCKERS"
       - name: Upload the qualified enhanced site as the GitHub Pages artifact
+        id: pages-upload
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site-enhanced/
       - name: Verify the uploaded Pages archive is byte-identical to the qualified site
         run: python3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/artifact.tar" --report obj/docs/pages-archive.json
+      - name: Download the actual uploaded Pages artifact by immutable ID
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.pages-upload.outputs.artifact_id }}
+          path: ${{ runner.temp }}/uploaded-pages
+          merge-multiple: true
+      - name: Verify the downloaded upload against the qualified site and local archive
+        run: |
+          cmp "$RUNNER_TEMP/artifact.tar" "$RUNNER_TEMP/uploaded-pages/artifact.tar"
+          python3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/uploaded-pages/artifact.tar" --report obj/docs/pages-uploaded-archive.json
       - name: Upload diagnostics and reports
         if: always()
         uses: actions/upload-artifact@v4

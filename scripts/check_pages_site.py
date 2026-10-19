@@ -43,6 +43,16 @@ URL_ATTRIBUTES = {"href", "src", "srcset", "action", "formaction", "poster", "da
 CREDENTIALS = re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_|AKIA[0-9A-Z]{16}|"
                          r"-----BEGIN [A-Z ]*PRIVATE KEY-----")
 CSS_URL = re.compile(r"url\(\s*(['\"]?)(.*?)\1\s*\)|@import\s+(['\"])(.*?)\3", re.I)
+# Independently SHA-256'd from Git blob
+# 23cf51d3765e7b3f68411e25a57f52f4c0efc7e1:
+# src/ada_gnatdoc_enhancer/assets/gnatdoc-navigation.js.
+# This is source-owned policy, NEVER read from presentation.json or the
+# output-side enhancement report. The full reviewed script uses the sole
+# slash literal at line 103 as state.url.href.lastIndexOf('/'), not a URL.
+# Authorize those exact bytes only; do not strip expressions or neighboring
+# text and do not attempt to parse arbitrary JavaScript with a regex.
+APPROVED_NAVIGATION = "api/gnatdoc-navigation.js"
+APPROVED_NAVIGATION_SHA256 = "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd"
 
 
 class PagesError(ValueError):
@@ -222,7 +232,10 @@ def check(site: Path, expected: set[str], site_routes: list[str], enhancement: d
             if (error := resolve(name, match[2] or match[4], files, ids)) is not None:
                 errors.append(error)
     for name in sorted(n for n in files if n.endswith(".js")):
-        if re.search(r"://|[\"'`]/", files[name].decode("utf-8")):
+        if name == APPROVED_NAVIGATION:
+            if hashes[name] != APPROVED_NAVIGATION_SHA256:
+                errors.append(f"{name}: JavaScript differs from the reviewed immutable Git blob")
+        elif re.search(r"://|[\"'`]/", files[name].decode("utf-8")):
             errors.append(f"{name}: JavaScript contains an absolute or root-relative URL literal")
     for route in site_routes:
         if (error := resolve("", route, files, ids)) is not None:

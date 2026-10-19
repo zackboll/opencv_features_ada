@@ -1,0 +1,41 @@
+{
+  "files": {
+    "__init__.py": "21896c73fca800e37688baf29579a31a9a19f232fdc2845dfd2bc3caa085c17b",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "adapters/__init__.py": "bc7839c1ed01b2d028cbb28537f7ab636ae839e11e9c6fba0c82ae9669a882d3",
+    "adapters/mel.py": "4e3d20173d81a03a18d1027814334100f00d9159ba3031d5a94f2f85a3a9bef8",
+    "adapters/opencv.py": "7f45fca90c6c8656398a56ff02bf4aacbde19a96dc4f81d553e7d16a87c55410",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "assets/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+    "assets/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+    "authored.py": "ab263beb88bbd5602b8f61b5269486a56b6ffb91930d641ab192e87dc2cb66de",
+    "browser_metadata.py": "ba5bbadc6e009f55e592ace9d547e6cbee7aba6bdb021a97efe49c25c6fa5740",
+    "cli.py": "2236a2c01928a42772ddb3a8b4e16f02fdbec63fb30f396a8ddd3366d6a1789e",
+    "config.py": "01dab5ed7c0b26bd027f0bba4e7ce57b960705a1a010aca3001f95d3eb6f41fb",
+    "conformance.py": "ae2f04143abf23dd70f0c56ff82fe500af6111b1a8abbff18cff904778d4507d",
+    "coverage.py": "b5e78be5f070f65731bcc16e1338ad034e6feac4420b2ed3ed31c91d737fdecf",
+    "destinations.py": "7a10181adafbfe236ee7999db5f5093ef746fe367e4e186a15698cb9c04e2bc6",
+    "errors.py": "6fa7d9eab4bac0a32a114685606f11fd1e8838fc8463c8852766edacf8a480da",
+    "external_types.py": "86333d6a961a5f02af71f14cb276e888f35ef4fbd531921f2ea71ae4fc85bc33",
+    "generic_instances.py": "07efc9e92201548f7c33939c57ef1f8c3c3aecd92f3199a52f657aff65ff12f8",
+    "guides.py": "d219950de21c257f3e941dbf6b54432869e1716264828eb1e0dc601053184324",
+    "inventory.py": "d8e29273e8960cee5cf435eaa7a52ba266a8ad9d2fc8ceb1e0fa4eb13e01b593",
+    "metadata.py": "48b263b53485d89a9ffcd737d7c7b1c54804228503d58279ed7cabf03613024d",
+    "native_html.py": "1e29e589c7ed30de1933c7902fa920894d5b4f2decb77502d3dbc337cb8193ca",
+    "navigation.py": "8687b0ebd90eaf92c7fe1c27749bb063654754ad11dedbceda8f10047cdabc8c",
+    "pipeline.py": "b3922ecfc67c5884c8f54ddb3f5d7c145bcf2e3bae057811a88318ef36269b14",
+    "profiles.py": "be0fa1b79f2a522d6c830841709906953c7f746c1a021bc9fdda11a6642c6ab2",
+    "qualification.py": "4bf8be78c682a9e5ff362f344a4bc17bf86b808111c92dabaff56b2fbdd058cc",
+    "syntax.py": "2f2c0e45ed158292e0b788a65cdfb5c4933066038afeeeef3a23a8bf2ebf6bee",
+    "theme.py": "ec24fcdd209c976a8d17473544f2ad5ed1b6e92ae4d7a6c85d5500697680d55e",
+    "util.py": "0b2c9d554263ca6d3251737e191b2859c738a64b7b41607adecf0e7e204a66f1",
+    "validation.py": "bf7ae413eeb558f6300a650fa7ad62f6aaa12fbaa66897691d75659b67224818",
+    "warnings.py": "3e3e2090f541c5872b08594e72af4fedb39301cd66c919cf040d63ba9e6e15fc"
+  },
+  "guide_renderer": {
+    "markdown-it-py": "3.0.0",
+    "mdurl": "0.1.2"
+  },
+  "revision": "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1",
+  "version": "0.1.0.dev0"
+}

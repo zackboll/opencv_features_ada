@@ -14,6 +14,7 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,6 +35,32 @@ PAGE = """<!DOCTYPE html>
 
 
 class ProfileTests(unittest.TestCase):
+    def test_installer_rejects_every_unapproved_revision_before_installation(self):
+        import install_gnatdoc_enhancer as installer
+        for revision in ("main", "latest", "0" * 40,
+                         "478d0bbff0be1b9141b5ad39f07a71f0386d86e9"):
+            with self.subTest(revision=revision), mock.patch.object(support, "install") as install:
+                self.assertEqual(installer.main(["--checkout", str(ROOT), "--venv", "/unused",
+                                                 "--revision", revision]), 1)
+                install.assert_not_called()
+
+    def test_modified_installed_asset_and_wrong_provenance_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            environment = Path(directory)
+            package = environment / "package"
+            package.mkdir()
+            asset = package / "navigation.js"
+            asset.write_text("original\n")
+            record = {"revision": support.PINNED_REVISION, "files": support.package_hashes(package)}
+            (environment / support.PROVENANCE).write_text(json.dumps(record))
+            with self.assertRaisesRegex(support.SupportError, "is not"):
+                support.verified_tool(environment, "0" * 40)
+            asset.write_text("modified\n")
+            self.assertNotEqual(support.package_hashes(package), record["files"])
+            with mock.patch.object(support, "installed_package", return_value=package):
+                with self.assertRaisesRegex(support.SupportError, "files changed"):
+                    support.verified_tool(environment)
+
     def test_configuration_is_offline_and_local(self):
         config = tomllib.loads((ROOT / enhance_docs.CONFIG).read_text())
         self.assertEqual(config["security"]["external_hosts"], [])
@@ -168,9 +195,14 @@ class EnhancedSiteMutationTests(unittest.TestCase):
             shutil.copy(ROOT / portal, self.root / portal)
         shutil.copytree(ROOT / "docs/guides", self.root / "docs/guides")
         shutil.copytree(ROOT / "examples/src", self.root / "examples/src")
+        shutil.copy(ROOT / "docs_api.gpr", self.root / "docs_api.gpr")
+        shutil.copy(ROOT / enhance_docs.ASSETS, self.root / enhance_docs.ASSETS)
+        shutil.copytree(ROOT / "src", self.root / "src")
         self.copy = Path(directory.name) / "site"
         shutil.copytree(self.site, self.copy)
         anchors = json.loads((ROOT / "docs/gnatdoc-native-anchors.json").read_text())
+        self.existing_anchor = next(v["anchor"] for k, v in anchors["declarations"].items()
+                                    if k.startswith("OpenCV.Features.ORB.Create|"))
         self.page = self.copy / "api" / anchors["packages"]["OpenCV.Features.ORB"]["page"]
 
     def verify(self):
@@ -184,6 +216,30 @@ class EnhancedSiteMutationTests(unittest.TestCase):
 
     def test_unmodified_copy_verifies(self):
         self.assertEqual(self.verify()["mode"], "verified")
+
+    def test_driver_rejects_nonidempotent_and_nondeterministic_output(self):
+        real_enhancer = support.enhancer
+        for fresh in (False, True):
+            with self.subTest(fresh=fresh):
+                output = self.root / ("fresh" if fresh else "idempotent")
+                calls = 0
+
+                def altered(tool, command, root, config, site, *extra, **kwargs):
+                    nonlocal calls
+                    result = real_enhancer(tool, command, root, config, site, *extra, **kwargs)
+                    if command == "enhance" and "--dry-run" not in extra:
+                        calls += 1
+                        if (fresh and site != output) or (not fresh and calls == 2):
+                            path = site / "index.html"
+                            original = path.read_bytes()
+                            path.write_bytes(original + b"\n")
+                            self.assertNotEqual(path.read_bytes(), original)
+                    return result
+
+                with mock.patch.object(support, "enhancer", side_effect=altered):
+                    with self.assertRaisesRegex(enhance_docs.EnhanceError,
+                                                "fresh enhancement differs" if fresh else "not byte-idempotent"):
+                        enhance_docs.enhance(Path(VENV), ROOT / "_site", output, self.root)
 
     def test_mutations_are_rejected(self):
         api = self.copy / "api"
@@ -219,6 +275,14 @@ class EnhancedSiteMutationTests(unittest.TestCase):
             "guide API link": (self.copy / "guides/orb-extraction.html",
                                lambda t: re.sub(r'(href="\.\./api/[0-9a-f]{64}\.html#)[0-9a-f]{8}',
                                                 r"\g<1>00000000", t, count=1)),
+            "missing title": (self.page, lambda t: re.sub(r"<title>.*?</title>", "", t, count=1)),
+            "duplicated title": (self.page, lambda t: t.replace("</title>", "</title><title>X</title>", 1)),
+            "RCDATA title": (self.page, lambda t: t.replace("<title>", "<title><b>", 1)),
+            "unapproved metadata": (self.page, lambda t: t.replace("</head>", '<meta name="x" content="y"></head>', 1)),
+            "native declaration": (self.page, lambda t: t.replace("Feature_Set", "Feature_Bag", 1)),
+            "wrong existing type link": (self.page, lambda t: re.sub(
+                r'(class="type-reference" href="[0-9a-f]{64}\.html#)[0-9a-f]{64}',
+                lambda m: m[1] + self.existing_anchor, t, count=1)),
         }
         for label, (path, change) in mutations.items():
             with self.subTest(mutation=label):

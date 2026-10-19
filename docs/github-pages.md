@@ -1,4 +1,4 @@
-# GitHub Pages publication (DOC-009)
+# GitHub Pages publication (DOC-009 / DOC-010)
 
 The documentation workflow publishes the qualified enhanced site, the API
 reference with the developer portal and the seven guides, as the project site
@@ -6,9 +6,13 @@ reference with the developer portal and the seven guides, as the project site
 `_site-enhanced` directory that the existing pipeline generates and qualifies;
 there is no second documentation build and no source file is published.
 
-**Status: not yet published.** Deployment is held by the page-title
-requirement below. Until a deployment from `main` succeeds, the address serves
-nothing, and no document may describe the site as available.
+**Status: locally Pages-qualified, awaiting exact-head hosted qualification and
+independent review; not publicly deployed by this campaign.** DOC-010 removes
+the title blocker and narrowly corrects the navigation slash false positive.
+See [fresh qualification evidence](evidence/features-doc-010/README.md) for the
+exact tested identities and hosted status. Do not describe the public site as
+available until a human merge, successful main deployment and public route
+verification have actually occurred.
 
 The site describes the development sources on `main` (version 0.1.0-dev). It is
 not a release, and Features 0.1.0 is not accepted into the Alire index.
@@ -18,7 +22,7 @@ not a release, and Features 0.1.0 is not accepted into the Alire index.
 The pipeline is unchanged: GNATdoc 26.0.0 output from the four public
 specifications with indexed `opencv_core` 0.5.0 (`scripts/generate_docs.sh`,
 127/127 elements documented, zero warnings), presented by the pinned
-`ada-gnatdoc-enhancer` `478d0bbff0be1b9141b5ad39f07a71f0386d86e9` with the
+`ada-gnatdoc-enhancer` `23cf51d3765e7b3f68411e25a57f52f4c0efc7e1` with the
 hash-pinned Markdown renderer (`scripts/enhance_docs.py`). See the
 [GNATdoc foundation](gnatdoc-foundation.md) and the
 [enhancer integration](gnatdoc-enhancer-integration.md).
@@ -63,7 +67,12 @@ Pages steps of `native-gnatdoc`, after every existing qualification step:
 4. `actions/upload-pages-artifact@v4` uploads `_site-enhanced/` as the
    `github-pages` artifact.
 5. `check_pages_site.py --archive "$RUNNER_TEMP/artifact.tar"` proves the
-   uploaded tar is byte-identical to the qualified directory.
+   action-created tar is byte-identical to the qualified directory. The reviewed
+   Linux action creates that exact path and uploads it. The workflow additionally
+   downloads the actual uploaded artifact by the action's immutable artifact ID,
+   compares the downloaded tar with the original tar and reruns the consumer
+   checker on it. Missing or mismatched uploaded bytes fail the build; a locally
+   synthesized substitute cannot qualify the upload.
 
 `deploy-pages` has one step, `actions/deploy-pages@v4`, targets the
 `github-pages` environment, checks out and runs no repository code, and is in a
@@ -87,7 +96,10 @@ runs on `main` queue. Independently of the workflow file, the repository's
   a reference does not resolve under `https://zackboll.github.io/opencv_features_ada/`
   to a published file and, for HTML targets, an existing fragment;
 - JavaScript contains an absolute or root-relative URL literal (navigation
-  behaviour is qualified in Chromium);
+  behaviour is qualified in Chromium), or the approved navigation asset differs
+  in any byte from its independently reviewed Git-blob hash. Only those exact
+  bytes are authorized: `lastIndexOf('/')` at line 103 locates a separator, not
+  a URL. No filename-only, slash-literal or method-call exemption is applied;
 - a file contains a build path (repository, home, runner or workspace
   directory) or credential-like text;
 - with `--archive`, the uploaded tar differs from the site.
@@ -96,30 +108,24 @@ Publication additionally requires a non-empty `<title>` on every HTML page.
 This does not fail pull requests; it keeps `publication_ready` false, so the
 deployment job is skipped and the run shows the blockers.
 
-### Page titles (current finding)
+### Page titles (DOC-010)
 
 | Page | Produced by | `<title>` | `lang` |
 | --- | --- | --- | --- |
 | `index.html` | `docs/index.html` through the enhancer | `OpenCV Features for Ada documentation` | `en` |
-| seven `guides/*.html` | enhancer Markdown guide mode | none | `en` |
-| `api/index.html` | GNATdoc 26.0.0, preserved by the enhancer | none | none |
-| four `api/<hash>.html` | GNATdoc 26.0.0, preserved by the enhancer | none | none |
+| seven `guides/*.html` | enhancer Markdown guide mode | authored label + ` — OpenCV Features Ada` | `en` |
+| `api/index.html` | source-verified shared enhancement | `API Reference — OpenCV Features Ada` | `en` |
+| four `api/<hash>.html` | source/native verified package identity | package name + ` — OpenCV Features Ada` | `en` |
 
-12 of the 13 pages have no `<title>`. Browser tabs, history, bookmarks and
-search results then show the URL instead of a name, and assistive technology
-cannot announce the page (WCAG 2.4.2 Page Titled). The five API pages also
-have no `lang` attribute (WCAG 3.1.1) and no `<head>` or character-encoding
-declaration; their content is ASCII.
-
-Generated HTML is not patched in Features, and the enhancer pin is not changed
-silently. The intended correction is an independently reviewed
-`ada-gnatdoc-enhancer` change that gives guide pages a title (for example from
-the site-map label) and adds a title (and preferably `lang`) to the preserved
-native API pages, adopted here by a reviewed pin update that requalifies the
-site (`PINNED_REVISION` in `scripts/gnatdoc_enhancer_support.py`,
-`docs/gnatdoc-enhanced-assets.json` and the evidence). When the generated pages
-carry titles, the gate opens without a workflow change. Publishing without
-titles would instead need a reviewed change to this requirement.
+The reproduced old pin had 12/13 missing titles and five missing languages.
+The old pinned navigation did not contain the slash expression; it first
+appears in the adopted navigation, where the original Pages regex rejects it.
+All 13 new pages have exactly one valid title, language and UTF-8 metadata.
+Shared `verify` reconstructs source-owned output and rejects RCDATA/title
+substitution, duplication and unapproved metadata. Features never patches
+generated HTML. Metadata is also checked independently and in loaded Chromium
+documents, including iframe navigation, reload, history and JavaScript-disabled
+pages. The 248-reference census is unchanged; no destinations were waived.
 
 ## Project-site prefix
 
@@ -142,6 +148,9 @@ artifact below the same prefix and checks:
   and a prefixed declaration bookmark.
 
 The existing 64-assertion script also passes unchanged under the prefix.
+DOC-010 retains all original 109 prefix assertions and adds 90 metadata checks
+(199/199 locally); the reports are in the fresh evidence directory. The
+following DOC-009 report remains historical.
 Local results (Chromium 156.0.8078.4, Playwright 1.64.1, Node v20.19.2):
 [github-pages-browser-qualification.json](github-pages-browser-qualification.json),
 109/109 prefix assertions. This is Chromium only, not cross-browser or

@@ -1,0 +1,92 @@
+{
+  "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": {
+    "old_sha256": "12d49d3c4eb2e0aed99619ee1e3ec5b2d1cb3065f7cd809af8176b53a549f4cd",
+    "new_sha256": "68ccd873f4f1cae094a6282a6f346e8711f5932d34b804ab1e1fecc3e41e07aa",
+    "classification": "source-verified head/title/lang/UTF-8 only; native content identical"
+  },
+  "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": {
+    "old_sha256": "bce6ea7d3fdbfbbc8c3a74c09918b363eeef3f6f1b594e4cce183a8954b351e7",
+    "new_sha256": "bd3475083566736854bbf751d4f2525db74d8ec74c601962d676e0b9eb7e2fd0",
+    "classification": "source-verified head/title/lang/UTF-8 only; native content identical"
+  },
+  "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": {
+    "old_sha256": "80651b0ac77b5848aa56f53cfe6419fd75a32f89ed5499dffc5e297ff8e27844",
+    "new_sha256": "7f07159f36cff3827ec11d10766a375b9203a996be6112867beecb965ddad938",
+    "classification": "source-verified head/title/lang/UTF-8 only; native content identical"
+  },
+  "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": {
+    "old_sha256": "1dcd90fd69b427fc4a2f0dad8394c3b6d04a33f01a6d88f306ab74d39389b30f",
+    "new_sha256": "0279845dab4b00d8d40d8ad22a4843ae2f9c8efd74719ead3dc7cb9382ef2f86",
+    "classification": "source-verified head/title/lang/UTF-8 only; native content identical"
+  },
+  "api/gnatdoc-navigation.js": {
+    "old_sha256": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
+    "new_sha256": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+    "classification": "reviewed exact Git blob: declaration-aware allowlisted navigation and history; separator at line 103"
+  },
+  "api/gnatdoc-theme.css": {
+    "old_sha256": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
+    "new_sha256": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+    "classification": "reviewed exact Git blob: four generic-instance theme rules (no Features generic instances)"
+  },
+  "api/gnatdoc.css": {
+    "old_sha256": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "new_sha256": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "classification": "unchanged"
+  },
+  "api/index.html": {
+    "old_sha256": "448e29550cbad33cc75e03195d8f75a3f3b051c38241b2f20af867e2dc444ee7",
+    "new_sha256": "60ffd3519d5bfacab78beea825daee4140b38e15a96a2c782e759819dbbb9cf4",
+    "classification": "source-verified head/title/lang/UTF-8 only; native content identical"
+  },
+  "api/presentation.json": {
+    "old_sha256": "be824a6340d53ff9309955450c2c92444186c9bd957eb5b88e0d0db153fd67a8",
+    "new_sha256": "9d1d42c33ae38a880666059cba859234729815e4737b269565fb696d56264a36",
+    "classification": "only reconstructed output_sha256 hashes changed"
+  },
+  "assets/gnatdoc-guides.css": {
+    "old_sha256": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "new_sha256": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "classification": "unchanged"
+  },
+  "guides/binary-matching.html": {
+    "old_sha256": "79cb0953f4be5e6fe9925fb952bc33674ac76983b1d6afe1d68f3d0f5e6ec202",
+    "new_sha256": "11e82e580ce628013631cb350f24d3a374efd624b6a45401e6518201bcc98c72",
+    "classification": "source-owned title only"
+  },
+  "guides/candidate-correspondences.html": {
+    "old_sha256": "a2154f34cfc96e618be2d4536ac1d2c46ebe4b14b2cf49f270e5ae3e819857e3",
+    "new_sha256": "353d961c8efa417a97216a2ac1126b2bac55ffb5d27ba4d39e7f54aa8e8fc70d",
+    "classification": "source-owned title only"
+  },
+  "guides/getting-started.html": {
+    "old_sha256": "c40063db5dba967270ad3d72cc234d09d9f5ffcbe77601f7245ac713a836076f",
+    "new_sha256": "fbe171fcccf6f091d9da511957a98dadb7059c757189924996f44a304762afa1",
+    "classification": "source-owned title only"
+  },
+  "guides/limitations-roadmap.html": {
+    "old_sha256": "cee5558287424f62c72c02536ee025ec0a463f66523a7a04b781bde2e6c56fd9",
+    "new_sha256": "6015d123d655d670dfc6719e15564c82e1ee481686140c374f256fce83c49b76",
+    "classification": "source-owned title only"
+  },
+  "guides/orb-extraction.html": {
+    "old_sha256": "b9d4ca2ed2729cd95303e62050d708328e5f1b51441c36b2ddc5424345745025",
+    "new_sha256": "8df438a6ace34cd7fc2c15b03baa16971ed46b7f61d90a1b59140a82163e9647",
+    "classification": "source-owned title only"
+  },
+  "guides/ownership-lifecycle.html": {
+    "old_sha256": "d922c13dedc8e1ff9019e9b87c4365a4bb28a8aba03158365cc24a817834ae74",
+    "new_sha256": "a44e0a900e795e3df5f5138b9c93d20cde60609f8af7c68b9e41d7446819ffd4",
+    "classification": "source-owned title only"
+  },
+  "guides/platform-compatibility.html": {
+    "old_sha256": "3a446ef8c9bcac22552eae88412ba9e3594fd19112d00561000846ca041cf4f3",
+    "new_sha256": "fcc6911ebe42b4a11ff263f96fe62be162694060d7ea5e158300046db531aff8",
+    "classification": "source-owned title only"
+  },
+  "index.html": {
+    "old_sha256": "31c286befe39a58e784de45d0b078ca1f3d4b858dc2b300fa86ff64a5933271a",
+    "new_sha256": "31c286befe39a58e784de45d0b078ca1f3d4b858dc2b300fa86ff64a5933271a",
+    "classification": "unchanged"
+  }
+}
