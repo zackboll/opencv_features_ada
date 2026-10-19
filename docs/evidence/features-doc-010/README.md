@@ -25,7 +25,7 @@ servers were not altered. Historical DOC-001–009 evidence is untouched.
 
 ## Baseline and false-positive reproduction
 
-`baseline.log`, `baseline-pages.json`, `baseline-enhancement.json`,
+`baseline.txt`, `baseline-pages.json`, `baseline-enhancement.json`,
 `baseline-provenance.json` and baseline Chromium reports are fresh measurements
 from the exact starting commit, before the pin/checker changed.
 
@@ -44,7 +44,8 @@ The original regex (colon/slashes or a quote/backtick followed by a slash) match
 expression. `original-checker-new-site.json` runs the actual unmodified baseline
 checker against the new complete site: this is its sole error; all titles and
 languages are now present. The negative-first run `security-red.log` shows the
-exact approved-script acceptance test failing before the checker correction.
+exact approved-script acceptance test failing before the checker correction
+(`security-red.txt`).
 
 The test fixture is byte-identical to the new Git blob, SHA-256
 `b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd`.
@@ -74,7 +75,7 @@ malformed calls, appended redirects and rewritten output-side manifests/hashes.
 | Consumer Pages checker | `errors=[]`, `pages_without_title=[]`, `pages_without_lang=[]`, `publication_ready=true` |
 | Local Pages tar | action-equivalent command: 18 files byte-identical; **not** claimed as uploaded-artifact proof |
 
-`documentation-tests.log` records the complete enabled run. Additional adversarial
+`documentation-tests.txt` records the complete enabled run. Additional adversarial
 cases include wrong enhancer revision, modified installed assets, existing-but-wrong
 type destination, staged source/comment changes, missing/extra files, presentation
 manifest, native declaration/anchor changes, authored content, broken fragments,
