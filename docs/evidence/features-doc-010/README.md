@@ -17,6 +17,17 @@
   actual uploaded-artifact identity and exact-head hosted success remain required.
   Live exact-head status and completed run links are recorded on
   [Features PR #25](https://github.com/zackboll/opencv_features_ada/pull/25).
+- Hosted implementation qualification **passed** at
+  `fde853b5447a740b41f6c8eb22b9b9680ba65ef6` in
+  [run 39191682802](https://github.com/zackboll/opencv_features_ada/actions/runs/39191682802).
+  `hosted-fde853b/` preserves the actual downloaded metadata, Pages and browser
+  reports, artifact IDs/digests and job/step outcomes. `native-gnatdoc` succeeded;
+  `deploy-pages` was skipped. Both archive checks passed, including the actual
+  upload downloaded by immutable ID. A separate agent-side download confirmed
+  all 18 hashes equal both hosted and local qualified sites; tar SHA-256 is
+  `11d45b53b734a9d06fc3b22f7aa7362f810d05901329cb8fa94d9a5a0ac14b6f`.
+  This evidence-only follow-up requires a **new exact-final-head run**; the PR
+  records that result without pretending the earlier commit is the final HEAD.
 - No merge, deployment, release, tag, auto-merge, production/dependency changes,
   shared-enhancer modifications or PR #15 modifications are authorized or made.
 

@@ -6,8 +6,10 @@ reference with the developer portal and the seven guides, as the project site
 `_site-enhanced` directory that the existing pipeline generates and qualifies;
 there is no second documentation build and no source file is published.
 
-**Status: locally Pages-qualified, awaiting exact-head hosted qualification and
-independent review; not publicly deployed by this campaign.** DOC-010 removes
+**Status: Pages-qualified implementation, awaiting final evidence-head CI and
+independent review; not publicly deployed by this campaign.** Hosted implementation
+qualification passed including actual uploaded-artifact verification, with the
+deployment job skipped. DOC-010 removes
 the title blocker and narrowly corrects the navigation slash false positive.
 See [fresh qualification evidence](evidence/features-doc-010/README.md) for the
 exact tested identities and hosted status. Do not describe the public site as

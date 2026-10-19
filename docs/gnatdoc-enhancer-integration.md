@@ -25,8 +25,9 @@ The installer still uses an immutable Git archive, private documentation-only
 environment and installed-module/asset Git-blob comparison. The Markdown
 renderer pins and distribution hashes are unchanged.
 
-Status: **locally Pages-qualified, awaiting exact-head hosted qualification and
-independent review**. This is not a public deployment; see
+Status: **Pages-qualified implementation, awaiting final evidence-head CI and
+independent review**. The implementation run passed including actual uploaded
+artifact verification; deployment was skipped. This is not a public deployment; see
 [Pages publication](github-pages.md) and the qualification record for hosted status.
 
 DOC-004 adopts the reviewed shared `ada-gnatdoc-enhancer` for a presentation
