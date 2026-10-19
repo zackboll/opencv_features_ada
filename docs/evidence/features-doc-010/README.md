@@ -13,8 +13,10 @@
   run URL and event. It is deliberately recorded at runtime: embedding a commit's
   own SHA in that same commit is not possible. The PR qualification comment binds
   the exact final HEAD to its completed hosted run and downloaded reports.
-- Current disposition: **HOSTED_CI_PENDING**. Local site qualification passed;
+- Disposition when this record was written: **HOSTED_CI_PENDING**. Local site qualification passed;
   actual uploaded-artifact identity and exact-head hosted success remain required.
+  Live exact-head status and completed run links are recorded on
+  [Features PR #25](https://github.com/zackboll/opencv_features_ada/pull/25).
 - No merge, deployment, release, tag, auto-merge, production/dependency changes,
   shared-enhancer modifications or PR #15 modifications are authorized or made.
 
@@ -43,7 +45,7 @@ if (!state || link.getAttribute('href')!==state.url.href.slice(state.url.href.la
 The original regex (colon/slashes or a quote/backtick followed by a slash) matches the quote/slash inside that
 expression. `original-checker-new-site.json` runs the actual unmodified baseline
 checker against the new complete site: this is its sole error; all titles and
-languages are now present. The negative-first run `security-red.log` shows the
+languages are now present. The negative-first run `security-red.txt` shows the
 exact approved-script acceptance test failing before the checker correction
 (`security-red.txt`).
 
@@ -81,6 +83,11 @@ type destination, staged source/comment changes, missing/extra files, presentati
 manifest, native declaration/anchor changes, authored content, broken fragments,
 metadata, nonidempotent/nondeterministic driver output and mismatched tar.
 Every added mutation asserts that the changed bytes differ from the original.
+The optional independent preflight also passed with zero failures, preserving
+the pristine site and checking conservative and local-type-link profiles:
+`preflight.json`. `source-integrity.txt` records the committed-tree check from
+the actual main merge base; the unchanged production token/byte invariant is
+also enforced on the final hosted HEAD.
 
 Two local test setup failures were corrected without weakening gates: the first
 full test invocation omitted `GNATDOC_PREFIX`; it was rerun with the required
