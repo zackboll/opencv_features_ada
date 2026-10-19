@@ -13,15 +13,15 @@
     "guides/platform-compatibility.html",
     "index.html"
   ],
-  "enhancer_revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
+  "enhancer_revision": "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1",
   "enhancer_version": "0.1.0.dev0",
   "guide_renderer": {
     "markdown-it-py": "3.0.0",
     "mdurl": "0.1.2"
   },
   "packaged_assets": {
-    "api/gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
-    "api/gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
+    "api/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+    "api/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
     "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c"
   },
   "public_packages": [

@@ -16,7 +16,7 @@ import venv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PINNED_REVISION = "478d0bbff0be1b9141b5ad39f07a71f0386d86e9"
+PINNED_REVISION = "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1"
 PROVENANCE = "gnatdoc-enhancer-provenance.json"
 
 

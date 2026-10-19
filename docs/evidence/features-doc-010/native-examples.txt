@@ -1,0 +1,372 @@
+Note: Running pre-build actions for opencv_core=0.5.0...
+Note: Running pre-build actions for opencv_features=0.1.0-dev...
+OpenCV: 4.10.0 (opencv4), native backend: features2d
+Core bridge: /home/zboll/.local/share/alire/builds/opencv_core_0.5.0_f8aef00c/59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689/cpp
+Shim: Static_PIC
+Note: Building opencv_features=0.1.0-dev/opencv_features.gpr...
+Setup
+   [mkdir]        object directory for project OpenCV_Features_Shim
+   [mkdir]        library directory for project OpenCV_Features_Shim
+   [mkdir]        object directory for project OpenCV_Features
+Compile
+   [C++]          opencv_features_shim.cpp
+   [Ada]          opencv_features_config.ads
+   [Ada]          opencv-features-internal.ads
+   [Ada]          opencv-features-internal-c_api.adb
+   [Ada]          opencv-features-correspondences.adb
+   [Ada]          opencv-features-orb.adb
+   [Ada]          opencv-features.adb
+   [Ada]          opencv-features-matching.adb
+Build Libraries
+   [gprlib]       opencv_features_shim.lexch
+   [gprlib]       opencv_features_ada.lexch
+   [archive]      libopencv_features_shim.a
+   [index]        libopencv_features_shim.a
+   [archive]      libopencv_features_ada.a
+   [index]        libopencv_features_ada.a
+Success: Build finished successfully in 1.06 seconds.
+Note: Synchronizing workspace...
+Dependencies automatically updated as follows:
+
+   +  aunit           26.0.0    (new)
+   +b opencv          4.10.0    (new,indirect,system package)
+   +  opencv_core     0.5.0     (new,indirect)
+   +. opencv_features 0.1.0-dev (new,path=..)
+   +b pkg_config      1.8.1     (new,indirect,system package)
+
+Note: Running pre-build actions for opencv_core=0.5.0...
+Note: Running pre-build actions for opencv_features=0.1.0-dev...
+OpenCV: 4.10.0 (opencv4), native backend: features2d
+Core bridge: /home/zboll/.local/share/alire/builds/opencv_core_0.5.0_f8aef00c/59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689/cpp
+Shim: Static_PIC
+Note: Building opencv_features_tests=0.1.0-dev/opencv_features_tests.gpr...
+Setup
+   [mkdir]        object directory for project OpenCV_Features_Shim
+   [mkdir]        object directory for project OpenCV_Features
+   [mkdir]        object directory for project Opencv_Features_Tests
+   [mkdir]        exec directory for project Opencv_Features_Tests
+Compile
+   [Ada]          run_tests.adb
+   [C++]          opencv_features_shim.cpp
+   [Ada]          opencv_features_config.ads
+   [Ada]          opencv-features-internal.ads
+   [Ada]          opencv-features-internal-c_api.adb
+   [Ada]          opencv-features-correspondences.adb
+   [Ada]          opencv-features-orb.adb
+   [Ada]          opencv-features.adb
+   [Ada]          opencv-features-matching.adb
+   [C]            keypoint_layout.c
+   [Ada]          features_tests.adb
+   [Ada]          opencv-features-radius_fixtures.adb
+Build Libraries
+   [gprlib]       opencv_features_shim.lexch
+   [gprlib]       opencv_features_ada.lexch
+   [archive]      libopencv_features_shim.a
+   [index]        libopencv_features_shim.a
+   [archive]      libopencv_features_ada.a
+   [index]        libopencv_features_ada.a
+Bind
+   [gprbind]      run_tests.bexch
+   [Ada]          run_tests.ali
+Link
+   [archive]      libopencv_features_tests.a
+   [index]        libopencv_features_tests.a
+   [link]         run_tests.adb
+Success: Build finished successfully in 1.52 seconds.
+Match C/Ada layout: size 12, alignment 4, offsets 0/ 4/ 8; C-written interchange PASS
+KNN2 C/Ada layout: size 20, alignment 4, offsets 0 4 8 12 16; C-written interchange PASS
+
+OK Native backend/version metadata
+OK Owned detector lifecycle and idempotent Close
+OK Typed ORB configuration round trip
+OK Blank image returns a paired empty result
+OK Textured image: keypoints and UInt8 descriptor rows
+OK Zero mask excludes all keypoints
+OK Full mask produces results without mutation
+OK Reject non-UInt8 source
+OK Reject multichannel source
+OK Reject empty source
+OK Reject collapsed fixed-profile pyramid
+OK Reject mismatched mask geometry
+OK Reject non-UInt8 mask
+OK Reject extraction from an unready detector
+OK Result survives detector close and source mutation
+OK Descriptor_Copy cannot mutate stored pairing
+OK Noncontiguous ROI agrees with its isolated clone
+OK Reject a positive keypoint index beyond the result
+OK WTA_K 3 and 4 carry Hamming_2 metadata
+OK Reject a FAST threshold outside the public profile
+OK Nonbinary mask native semantics
+OK Compiler-derived C/Ada keypoint layout
+OK Raw C ABI detector creation
+OK Raw C ABI extraction/results with real Core handles
+OK Matching WTA2 Hamming self-match
+OK Matching WTA3 Hamming2 self-match
+OK Matching WTA4 Hamming2 self-match
+OK Matching rejects different norms including empty sets
+OK Matching compatible empty sets in both modes
+OK Matching mutual-nearest translated scene
+OK Matching preserves descriptors and keypoints
+OK Matching values survive input/detector finalization
+OK Compiler-derived C/Ada match layout and interchange
+OK Pure Ada strict ratio boundary oracles
+OK Pure Ada ratio invalid thresholds including empty filter
+OK Pure Ada ratio filter fields/order/empty/all accepted/rejected
+OK KNN2 WTA2 Hamming invariants and preservation
+OK KNN2 WTA3 Hamming2 invariants and preservation
+OK KNN2 WTA4 Hamming2 invariants and preservation
+OK KNN2 norm mismatch before empties
+OK KNN2 compatible empty inputs
+OK KNN2 owned values survive inputs/detector
+OK KNN2 translated scene strict ratio filter
+OK Compiler-derived C/Ada KNN2 layout/interchange
+OK Radius WTA2 exact Hamming boundary/ties/buckets and ORB oracle
+OK Radius WTA3 exact Hamming2 boundary/ties/buckets and ORB oracle
+OK Radius WTA4 exact Hamming2 boundary/ties/buckets and ORB oracle
+OK Radius compatible empty query/train/both
+OK Radius incompatible norms including all empty combinations
+OK Radius invalid thresholds including empties and preserved inputs
+OK Radius one-row train, entirely empty result, norm maximum
+OK Radius values survive inputs/detector/native finalization
+OK Radius direct high train index 262145 in both norms
+OK Correspondences exact indices Float32 coordinates and distance
+OK Correspondences preserve reordered shifted and highest input bounds
+OK Correspondences preserve identical repeated-query and repeated-train duplicates
+OK Correspondences reject out-of-range query indices with OpenCV_Error
+OK Correspondences reject out-of-range train indices with OpenCV_Error
+OK Correspondences preflight late invalid query and train items
+OK Correspondences canonical empty bounds for all feature-set combinations
+OK Correspondences reject nonempty matches with empty query
+OK Correspondences reject nonempty matches with empty train
+OK Correspondences owned values survive sets and detector finalization
+OK Correspondences accept Nearest Mutual KNN2-ratio and Radius outputs
+OK Correspondences preserve input counts keypoints norms and descriptors
+OK Correspondences ignore norm mismatch and preserve full distance metadata
+OK Correspondences copy noncontiguous Region-local coordinates unchanged
+
+Total Tests Run:   67
+Successful Tests:  67
+Failed Assertions: 0
+Unexpected Errors: 0
+test_corrected_install_and_relocation_link_both_library_kinds (__main__.InstalledLinkMetadataTests.test_corrected_install_and_relocation_link_both_library_kinds) ... ok
+test_predecessor_installs_absolute_source_linker_path (__main__.InstalledLinkMetadataTests.test_predecessor_installs_absolute_source_linker_path) ... Corrected static-pic installed linker metadata: --  This project has been generated by GPRINSTALL 26.0.0 (2026-04-15-gpr2) (x86_64-pc-linux-gnu)
+
+with "opencv_features_shim";
+
+library project OpenCV_Features is
+   type BUILD_KIND is ("default");
+   BUILD : BUILD_KIND := external("OPENCV_FEATURES_BUILD", "default");
+
+   for Languages use ("Ada");
+
+   case BUILD is
+      when "default" =>
+         for Source_Dirs use ("../../include/opencv_features");
+         for Library_Dir use "../../lib/opencv_features";
+         for Library_Kind use "static-pic";
+   end case;
+
+   for Library_Name use "opencv_features_ada";
+
+   package Naming is
+      case BUILD is
+         when "default" =>
+            null;
+      end case;
+   end Naming;
+
+   package Linker is
+      case BUILD is
+         when "default" =>
+            for Linker_Options use ("-lopencv_features_shim");
+      end case;
+   end Linker;
+
+   package Install is
+      for Active use "False";
+   end Install;
+
+   for Externally_Built use "True";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+
+   Library_Type : Library_Type_Type := "static-pic";
+end OpenCV_Features;
+
+Relocated static-pic actual link trace: object directory "/tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/obj" created for project Consumer
+Changing to object directory of "Consumer": "/tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/obj/"
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc -c -x ada -gnatA -gnatec=/tmp/GPR.1756861/GNAT-TEMP-000003.TMP -gnatem=/tmp/GPR.1756861/GNAT-TEMP-000004.TMP /tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/main.adb
+/home/zboll/.local/share/alire/toolchains/gprbuild_26.0.1_e3f27f25/libexec/gprbuild/gprbind main.bexch
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gnatbind -shared -o b__main.adb /tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/obj/main.ali -x -F=/tmp/GPR.1756861/GNAT-TEMP-000005.TMP -O=/tmp/GPR.1756884/GNAT-TEMP-000001.TMP
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc -c -x ada -gnatA -c -gnatA -gnatWb -gnatiw -gnatws -mtune=generic -march=x86-64 b__main.adb -o b__main.o
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc main.o b__main.o /tmp/features-external-gprinstall.9538tdqe/prefix-b-static-pic/lib/opencv_features/libopencv_features_ada.a -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-static-pic/lib/opencv_features_shim/ -lopencv_features_shim -lopencv_features_shim -L/tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/obj/ -L/tmp/features-external-gprinstall.9538tdqe/consumer-static-pic/obj/ -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-static-pic/lib/opencv_features/ -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-static-pic/lib/opencv_features_shim/ -L/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0/adalib/ -lgnat-16 -ldl -Wl,-rpath-link,/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0//adalib -shared-libgcc -Wl,-z,origin,-rpath,$ORIGIN/../..//prefix-b-static-pic/lib/opencv_features_shim:$ORIGIN/:$ORIGIN/../..//prefix-b-static-pic/lib/opencv_features:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0/adalib:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib64:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib -o main
+
+Corrected relocatable installed linker metadata: --  This project has been generated by GPRINSTALL 26.0.0 (2026-04-15-gpr2) (x86_64-pc-linux-gnu)
+
+with "opencv_features_shim";
+
+library project OpenCV_Features is
+   type BUILD_KIND is ("default");
+   BUILD : BUILD_KIND := external("OPENCV_FEATURES_BUILD", "default");
+
+   for Languages use ("Ada");
+
+   case BUILD is
+      when "default" =>
+         for Source_Dirs use ("../../include/opencv_features");
+         for Library_Dir use "../../lib/opencv_features";
+         for Library_Kind use "relocatable";
+   end case;
+
+   for Library_Name use "opencv_features_ada";
+
+   package Naming is
+      case BUILD is
+         when "default" =>
+            null;
+      end case;
+   end Naming;
+
+   package Linker is
+      case BUILD is
+         when "default" =>
+            for Linker_Options use ("-lopencv_features_shim");
+      end case;
+   end Linker;
+
+   package Install is
+      for Active use "False";
+   end Install;
+
+   for Externally_Built use "True";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+
+   Library_Type : Library_Type_Type := "relocatable";
+end OpenCV_Features;
+
+Relocated relocatable actual link trace: object directory "/tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/obj" created for project Consumer
+Changing to object directory of "Consumer": "/tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/obj/"
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc -c -x ada -gnatA -gnatec=/tmp/GPR.1756946/GNAT-TEMP-000003.TMP -gnatem=/tmp/GPR.1756946/GNAT-TEMP-000004.TMP /tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/main.adb
+/home/zboll/.local/share/alire/toolchains/gprbuild_26.0.1_e3f27f25/libexec/gprbuild/gprbind main.bexch
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gnatbind -shared -o b__main.adb /tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/obj/main.ali -x -F=/tmp/GPR.1756946/GNAT-TEMP-000005.TMP -O=/tmp/GPR.1756969/GNAT-TEMP-000001.TMP
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc -c -x ada -gnatA -c -gnatA -gnatWb -gnatiw -gnatws -mtune=generic -march=x86-64 b__main.adb -o b__main.o
+/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/bin/gcc main.o b__main.o -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-relocatable/lib/opencv_features/ -lopencv_features_ada -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-relocatable/lib/opencv_features_shim/ -lopencv_features_shim -lopencv_features_shim -L/tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/obj/ -L/tmp/features-external-gprinstall.9538tdqe/consumer-relocatable/obj/ -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-relocatable/lib/opencv_features/ -L/tmp/features-external-gprinstall.9538tdqe/prefix-b-relocatable/lib/opencv_features_shim/ -L/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0/adalib/ -lgnat-16 -ldl -Wl,-rpath-link,/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0//adalib -shared-libgcc -Wl,-z,origin,-rpath,$ORIGIN/../..//prefix-b-relocatable/lib/opencv_features:$ORIGIN/../..//prefix-b-relocatable/lib/opencv_features_shim:$ORIGIN/:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib/gcc/x86_64-pc-linux-gnu/16.1.0/adalib:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib64:/home/zboll/.local/share/alire/toolchains/gnat_native_16.1.0_9f74f58a/lib -o main
+
+Predecessor installed linker metadata: --  This project has been generated by GPRINSTALL 26.0.0 (2026-04-15-gpr2) (x86_64-pc-linux-gnu)
+
+with "opencv_features_shim";
+
+library project OpenCV_Features is
+   type BUILD_KIND is ("default");
+   BUILD : BUILD_KIND := external("OPENCV_FEATURES_BUILD", "default");
+
+   for Languages use ("Ada");
+
+   case BUILD is
+      when "default" =>
+         for Source_Dirs use ("../../include/opencv_features");
+         for Library_Dir use "../../lib/opencv_features";
+         for Library_Kind use "static-pic";
+   end case;
+
+   for Library_Name use "opencv_features_ada";
+
+   package Naming is
+      case BUILD is
+         when "default" =>
+            null;
+      end case;
+   end Naming;
+
+   package Linker is
+      case BUILD is
+         when "default" =>
+            for Linker_Options use ("-L/tmp/features-external-gprinstall.46gecvpo/lib", "-lopencv_features_shim");
+      end case;
+   end Linker;
+
+   package Install is
+      for Active use "False";
+   end Install;
+
+   for Externally_Built use "True";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+
+   Library_Type : Library_Type_Type := "static-pic";
+end OpenCV_Features;
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.319s
+
+OK
+
+PASS: matcher Hamming 0/1/2/256; Hamming2 0/1/128; cross-check A/X retained B/X rejected; raw negatives, empty, ROI, large query, lifetime/publication
+PASS: KNN2 Hamming/Hamming2 exact 0/1, nonzero 1/2, 0x03 cell, tie; raw negatives/empty/one-row; 262143 train high indices; 262144 query; ROI/lifetime/get/publication
+PASS: radius Hamming exact 0/1/2/3, inclusive boundary, ties, multiple/one/zero buckets
+PASS: radius Hamming2 exact 0/1/2/3, inclusive boundary, ties, multiple/one/zero buckets
+PASS: radius high train index 262144 (Ada 262145), both norms; KNN rejection retained
+PASS: radius raw negatives, thresholds/empties/one row, overflow helpers, ROI/lifetime
+PASS: actual Features shim / Core bridge / ORB boundary on 4.10.0
+PASS: matcher Hamming 0/1/2/256; Hamming2 0/1/128; cross-check A/X retained B/X rejected; raw negatives, empty, ROI, large query, lifetime/publication
+PASS: KNN2 Hamming/Hamming2 exact 0/1, nonzero 1/2, 0x03 cell, tie; raw negatives/empty/one-row; 262143 train high indices; 262144 query; ROI/lifetime/get/publication
+PASS: radius Hamming exact 0/1/2/3, inclusive boundary, ties, multiple/one/zero buckets
+PASS: radius Hamming2 exact 0/1/2/3, inclusive boundary, ties, multiple/one/zero buckets
+PASS: radius high train index 262144 (Ada 262145), both norms; KNN rejection retained
+PASS: radius fault stages 15/16/17/18 x five exception categories, empty cleanup
+PASS: radius raw negatives, thresholds/empties/one row, overflow helpers, ROI/lifetime
+PASS: actual Features shim / Core bridge / ORB boundary on 4.10.0
+Note: Synchronizing workspace...
+Dependencies automatically updated as follows:
+
+   +b opencv          4.10.0    (new,indirect,system package)
+   +  opencv_core     0.5.0     (new,indirect)
+   +. opencv_features 0.1.0-dev (new,path=..)
+   +b pkg_config      1.8.1     (new,indirect,system package)
+
+Note: Running pre-build actions for opencv_core=0.5.0...
+Note: Running pre-build actions for opencv_features=0.1.0-dev...
+OpenCV: 4.10.0 (opencv4), native backend: features2d
+Core bridge: /home/zboll/.local/share/alire/builds/opencv_core_0.5.0_f8aef00c/59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689/cpp
+Shim: Static_PIC
+Note: Building opencv_features_examples=0.1.0-dev/opencv_features_examples.gpr...
+Setup
+   [mkdir]        object directory for project Opencv_Features_Examples
+   [mkdir]        exec directory for project Opencv_Features_Examples
+Compile
+   [Ada]          orb_synthetic.adb
+   [Ada]          orb_match_synthetic.adb
+Bind
+   [gprbind]      orb_synthetic.bexch
+   [gprbind]      orb_match_synthetic.bexch
+   [Ada]          orb_synthetic.ali
+   [Ada]          orb_match_synthetic.ali
+Link
+   [link]         orb_synthetic.adb
+   [link]         orb_match_synthetic.adb
+Success: Build finished successfully in 0.80 seconds.
+OpenCV 4.10.0 / features2d
+Keypoints: 393
+Descriptor rows: 393
+Required matcher norm: HAMMING
+OpenCV 4.10.0 / features2d
+Query features: 406
+Train features: 418
+Matching mode: NEAREST
+NEAREST match count: 406
+Zero-distance matches: 86
+NEAREST distance min/max: 0 / 99
+Matching mode: MUTUAL_NEAREST
+MUTUAL_NEAREST match count: 218
+Zero-distance matches: 86
+MUTUAL_NEAREST distance min/max: 0 / 92
+KNN2 candidate count: 406
+Ratio threshold (example policy, no library default): 8.00000000000000E-01
+Ratio-accepted count: 121
+Owned candidate 2-D correspondences: 121
+Candidates only: not geometric inliers; downstream Calib3D/application policy required.
+Accepted-distance min/max: 0 / 74
+Absolute inclusive radius 32 (example policy), match count: 89
+Descriptor correspondence only: no geometric registration or navigation accuracy claim.

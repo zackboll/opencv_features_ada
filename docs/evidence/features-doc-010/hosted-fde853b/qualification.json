@@ -1,0 +1,286 @@
+{
+  "head": "fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+  "run_url": "https://github.com/zackboll/opencv_features_ada/actions/runs/39191682802",
+  "native_job": "success",
+  "deploy_job": "skipped",
+  "independent_downloaded_tar_sha256": "11d45b53b734a9d06fc3b22f7aa7362f810d05901329cb8fa94d9a5a0ac14b6f",
+  "independent_download_files_match_hosted_and_local_site": true,
+  "files": 18,
+  "artifacts": [
+    {
+      "id": 12160730501,
+      "name": "github-pages",
+      "size_in_bytes": 40663,
+      "digest": "sha256:80f813c181e6c8da1f7037616cf7e510f72dd93c9a20ef63aa6599489ba900ba"
+    },
+    {
+      "id": 12160292813,
+      "name": "features-api-enhanced-fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+      "size_in_bytes": 60617,
+      "digest": "sha256:f211db7b84d8093e9b20ca2f6cd5326aa8411ccd10680301d9dc6d94ff0537f2"
+    },
+    {
+      "id": 12160128472,
+      "name": "features-api-fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+      "size_in_bytes": 15801,
+      "digest": "sha256:2486152dd54dfe4355bff2d61d702ff756d7fdf2cf608bd767784b763ea35876"
+    },
+    {
+      "id": 12160048765,
+      "name": "gnatdoc-diagnostics-fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+      "size_in_bytes": 29443,
+      "digest": "sha256:22e4d89c8f21b6de52c4efb1d4164f7958cdefc6599a1301d8816b242c6081a2"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 117865666569,
+      "name": "native-gnatdoc",
+      "conclusion": "success",
+      "html_url": "https://github.com/zackboll/opencv_features_ada/actions/runs/39191682802/job/117865666569",
+      "head_sha": "fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-19T02:49:48Z",
+          "completed_at": "2026-10-19T02:49:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-19T02:49:50Z",
+          "completed_at": "2026-10-19T02:49:51Z"
+        },
+        {
+          "name": "Record checkout",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-19T02:49:51Z",
+          "completed_at": "2026-10-19T02:49:51Z"
+        },
+        {
+          "name": "Install native dependencies for Core configuration",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-19T02:49:51Z",
+          "completed_at": "2026-10-19T02:50:20Z"
+        },
+        {
+          "name": "Run alire-project/setup-alire@latest",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-19T02:50:20Z",
+          "completed_at": "2026-10-19T02:50:32Z"
+        },
+        {
+          "name": "Select Ada toolchain and install GNATdoc 26.0.0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-19T02:50:32Z",
+          "completed_at": "2026-10-19T02:50:34Z"
+        },
+        {
+          "name": "Resolve indexed Core and generate crate configuration (no compilation)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-19T02:50:34Z",
+          "completed_at": "2026-10-19T02:50:36Z"
+        },
+        {
+          "name": "Documentation tooling unit tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-19T02:50:36Z",
+          "completed_at": "2026-10-19T02:50:36Z"
+        },
+        {
+          "name": "Generate native site and run Features-owned checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-19T02:50:36Z",
+          "completed_at": "2026-10-19T02:50:39Z"
+        },
+        {
+          "name": "Mutation and strict-qualification tests against the generated site",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-19T02:50:39Z",
+          "completed_at": "2026-10-19T02:50:44Z"
+        },
+        {
+          "name": "Qualify deterministic regeneration in a separate clean directory",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-19T02:50:44Z",
+          "completed_at": "2026-10-19T02:50:46Z"
+        },
+        {
+          "name": "Install the pinned shared enhancer (documentation-only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-19T02:50:46Z",
+          "completed_at": "2026-10-19T02:50:55Z"
+        },
+        {
+          "name": "Enhance an isolated copy of the native site with guides and verify it",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-19T02:50:55Z",
+          "completed_at": "2026-10-19T02:50:58Z"
+        },
+        {
+          "name": "Enhanced-site mutation tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-19T02:50:58Z",
+          "completed_at": "2026-10-19T02:51:09Z"
+        },
+        {
+          "name": "Chromium qualification of the enhanced site",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-19T02:51:09Z",
+          "completed_at": "2026-10-19T02:51:32Z"
+        },
+        {
+          "name": "Documentation-only source integrity (docs/* branches)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-19T02:51:32Z",
+          "completed_at": "2026-10-19T02:51:32Z"
+        },
+        {
+          "name": "Coverage and warning summary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-19T02:51:32Z",
+          "completed_at": "2026-10-19T02:51:32Z"
+        },
+        {
+          "name": "Upload native site for review",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-19T02:51:32Z",
+          "completed_at": "2026-10-19T02:51:33Z"
+        },
+        {
+          "name": "Upload enhanced site for review",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-19T02:51:33Z",
+          "completed_at": "2026-10-19T02:51:34Z"
+        },
+        {
+          "name": "Qualify the Pages artifact under the project-site prefix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-19T02:51:34Z",
+          "completed_at": "2026-10-19T02:51:44Z"
+        },
+        {
+          "name": "Report the Pages publication gate",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 21,
+          "started_at": "2026-10-19T02:51:44Z",
+          "completed_at": "2026-10-19T02:51:44Z"
+        },
+        {
+          "name": "Upload the qualified enhanced site as the GitHub Pages artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-19T02:51:44Z",
+          "completed_at": "2026-10-19T02:51:45Z"
+        },
+        {
+          "name": "Verify the uploaded Pages archive is byte-identical to the qualified site",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-19T02:51:45Z",
+          "completed_at": "2026-10-19T02:51:45Z"
+        },
+        {
+          "name": "Download the actual uploaded Pages artifact by immutable ID",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-10-19T02:51:45Z",
+          "completed_at": "2026-10-19T02:51:45Z"
+        },
+        {
+          "name": "Verify the downloaded upload against the qualified site and local archive",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-19T02:51:45Z",
+          "completed_at": "2026-10-19T02:51:45Z"
+        },
+        {
+          "name": "Upload diagnostics and reports",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-10-19T02:51:45Z",
+          "completed_at": "2026-10-19T02:51:46Z"
+        },
+        {
+          "name": "Post Run alire-project/setup-alire@latest",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 51,
+          "started_at": "2026-10-19T02:51:46Z",
+          "completed_at": "2026-10-19T02:51:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 52,
+          "started_at": "2026-10-19T02:51:46Z",
+          "completed_at": "2026-10-19T02:51:46Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 53,
+          "started_at": "2026-10-19T02:51:46Z",
+          "completed_at": "2026-10-19T02:51:46Z"
+        }
+      ]
+    },
+    {
+      "id": 117866457416,
+      "name": "deploy-pages",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/zackboll/opencv_features_ada/actions/runs/39191682802/job/117866457416",
+      "head_sha": "fde853b5447a740b41f6c8eb22b9b9680ba65ef6",
+      "steps": []
+    }
+  ]
+}

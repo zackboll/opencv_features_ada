@@ -186,6 +186,83 @@ class ReviewedInventoryTests(unittest.TestCase):
         self.assertLessEqual({r or "index.html" for r in routes}, expected)
 
 
+class NavigationSecurityTests(unittest.TestCase):
+    """Immutable input fixture, independently copied from the reviewed Git blob.
+
+    Output-side manifests and same-run hashes must never confer JS authority.
+    """
+    NAVIGATION = "api/gnatdoc-navigation.js"
+    EXPRESSION = "state.url.href.lastIndexOf('/')"
+
+    def setUp(self):
+        CheckerTests.setUp(self)
+        self.script = (ROOT / "tests/documentation/fixtures/gnatdoc-navigation.js").read_text()
+        self.assertEqual(pages.sha256(self.script.encode()),
+                         "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd")
+        write(self.site, {self.NAVIGATION: self.script})
+
+    def check(self, **options):
+        return pages.check(self.site, set(FIXTURE) | {self.NAVIGATION}, ROUTES, **options)
+
+    def test_original_regex_rejects_the_approved_separator(self):
+        self.assertEqual(self.script.count(self.EXPRESSION), 1)
+        matches = list(re.finditer(r"://|[\"'`]/", self.script))
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(self.script[:matches[0].start()].count("\n") + 1, 103)
+        self.assertIn(self.EXPRESSION, self.script.splitlines()[102])
+
+    def test_exact_reviewed_navigation_passes(self):
+        self.assertEqual(self.check()["errors"], [])
+
+    def test_unsafe_literals_cannot_hide_beside_the_approved_expression(self):
+        for literal in ("'/api/index.html'", "'//example.com/path'", "'https://example.com/'",
+                        '"http://example.com/"', '`/${path}`', "'/x' + suffix", "'/'",
+                        r"'\x2fapi/index.html'", r"'\u002fapi/index.html'", r"'\/api/index.html'",
+                        r'"\u{2f}api/index.html"', r'`\x2f${path}`', r"'\057api/index.html'",
+                        '"//example.com"', '`https://example.com/`'):
+            with self.subTest(literal=literal):
+                altered = self.script + "\nconst destination = " + literal + ";\n"
+                self.assertNotEqual(altered, self.script)
+                self.assertIn(self.EXPRESSION, altered)
+                write(self.site, {self.NAVIGATION: altered})
+                report = self.check()
+                self.assertTrue(any("JavaScript" in e for e in report["errors"]), report)
+                self.assertFalse(report["publication_ready"])
+
+    def test_rewrites_and_malformed_expressions_are_rejected(self):
+        for expression in ("state.url.href.lastIndexOf('/x')", 'state.url.href.lastIndexOf("/")',
+                           "state.url.href.indexOf('/')", "state.url.href.split('/')",
+                           "0 /* substituted separator expression */",
+                           "state.url.href.lastIndexOf('/'", "window.location.href = '//example.com'",
+                           "state.url.href.lastIndexOf(`/${path}`)"):
+            with self.subTest(expression=expression):
+                altered = self.script.replace(self.EXPRESSION, expression)
+                self.assertNotEqual(altered, self.script)
+                write(self.site, {self.NAVIGATION: altered})
+                self.assertFalse(self.check()["publication_ready"])
+
+    def test_rewritten_output_manifests_cannot_authorize_modified_javascript(self):
+        altered = self.script + "\n// unexpected modification\n"
+        self.assertNotEqual(altered, self.script)
+        write(self.site, {self.NAVIGATION: altered})
+        manifest = "api/presentation.json"
+        forged = {"assets": {self.NAVIGATION: pages.sha256(altered.encode())}}
+        write(self.site, {manifest: json.dumps(forged)})
+        self.assertEqual(json.loads((self.site / manifest).read_text()), forged)
+        hashes = {p.relative_to(self.site).as_posix(): pages.sha256(p.read_bytes())
+                  for p in self.site.rglob("*") if p.is_file()}
+        report = pages.check(self.site, set(hashes), ROUTES, {"enhanced_site": hashes})
+        self.assertNotIn("the site differs from the files and hashes verified by enhance_docs.py",
+                         report["errors"])
+        self.assertTrue(any("JavaScript" in e for e in report["errors"]), report)
+        self.assertFalse(report["publication_ready"])
+
+    def test_filename_alone_does_not_authorize_the_expression(self):
+        write(self.site, {self.NAVIGATION: self.EXPRESSION + ";\n"})
+        self.assertNotEqual((self.site / self.NAVIGATION).read_text(), self.script)
+        self.assertFalse(self.check()["publication_ready"])
+
+
 def jobs(text: str) -> dict[str, str]:
     body = text.split("\njobs:\n", 1)[1]
     return {m[1]: m[2] for m in re.finditer(r"^  ([\w-]+):\n((?:(?:    .*)?\n)+)", body, re.M)}
@@ -239,12 +316,45 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("publication_ready: ${{ steps.pages.outputs.publication_ready }}", build)
         self.assertIn('python3 scripts/check_pages_site.py --github-output "$GITHUB_OUTPUT"', build)
         self.assertIn('check_pages_site.py --archive "$RUNNER_TEMP/artifact.tar"', build)
+        self.assertIn("artifact-ids: ${{ steps.pages-upload.outputs.artifact_id }}", build)
+        self.assertIn("          merge-multiple: true\n", build)
+        self.assertIn('cmp "$RUNNER_TEMP/artifact.tar" "$RUNNER_TEMP/uploaded-pages/artifact.tar"',
+                      build)
+        self.assertIn('--archive "$RUNNER_TEMP/uploaded-pages/artifact.tar"', build)
         self.assertIn("node tests/documentation/test_pages_browser.cjs", build)
         self.assertIn('DOC_URL="${PAGES_URL}api/index.html"', build)
 
 
 @unittest.skipUnless(SITE, "set FEATURES_ENHANCED_SITE")
 class RealSiteTests(unittest.TestCase):
+    def test_all_metadata_matches_source_owned_identities(self):
+        import html
+        import tomllib
+        project = tomllib.loads((ROOT / "docs/gnatdoc-enhance.toml").read_text())["project"]
+        anchors = json.loads((ROOT / "docs/gnatdoc-native-anchors.json").read_text())
+        site_map = json.loads((ROOT / "docs/site-map.json").read_text())
+        expected = {"index.html": "OpenCV Features for Ada documentation",
+                    "api/index.html": "API Reference — " + project}
+        expected.update({"api/" + data["page"]: name + " — " + project
+                         for name, data in anchors["packages"].items()})
+        expected.update({g["path"]: g["label"] + " — " + project for g in site_map["guides"]})
+        self.assertEqual(len(expected), 13)
+        for name, title in expected.items():
+            with self.subTest(page=name):
+                text = (Path(SITE) / name).read_text(encoding="utf-8")
+                self.assertEqual(len(re.findall(r"<title(?:\s[^>]*)?>", text, re.I)), 1)
+                raw = re.search(r"<title>(.*?)</title>", text, re.S)[1]
+                self.assertEqual(html.unescape(raw), title)
+                self.assertNotIn("<", raw)
+                self.assertRegex(text, r'<html\b[^>]*\blang="en"')
+                self.assertEqual(len(re.findall(r"<head>", text)), 1)
+                self.assertEqual(len(re.findall(r"</head>", text)), 1)
+                self.assertEqual(len(re.findall(r'<meta charset="utf-8">', text)), 1)
+                metas = re.findall(r"<meta\b[^>]*>", text)
+                self.assertTrue(all(m == '<meta charset="utf-8">' or
+                                    m == '<meta name="viewport" content="width=device-width, initial-scale=1">'
+                                    for m in metas), metas)
+
     def test_real_site_is_a_qualified_pages_artifact(self):
         report = pages.check(Path(SITE).resolve(), pages.expected_files(), pages.routes())
         self.assertEqual(report["errors"], [])

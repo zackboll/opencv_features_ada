@@ -1,4 +1,34 @@
-# Shared GNATdoc enhancer integration (DOC-004)
+# Shared GNATdoc enhancer integration (DOC-004 through DOC-010)
+
+## DOC-010 qualification
+
+The integration now adopts merged shared-enhancer PR #10 at immutable revision
+`23cf51d3765e7b3f68411e25a57f52f4c0efc7e1`, still `0.1.0.dev0`. This includes
+source-verified document metadata, fragment-aware navigation/history and the
+reviewed generic-instance theme rules. Features has no public generic instance;
+its declarations, anchors, guides, examples and offline type-link policy are
+unchanged. [The fresh qualification record](evidence/features-doc-010/README.md)
+supersedes current-pin/results statements below; DOC-001–009 evidence remains
+historical and is not rewritten.
+
+The complete site has 13 source-identified titles, language `en`, UTF-8 metadata,
+18 files and 248 resolved relative references. The pristine native site remains
+byte-identical (127/127 documented items, four packages, 38 declaration sections,
+zero warnings). RCDATA/title validation and reconstruction by shared `verify`
+remain enabled, with additional consumer mutation tests. The original 64 browser
+assertions are unchanged; prefix-browser metadata checks are additive.
+
+Only the exact reviewed navigation Git-blob SHA-256 is authorized by the Pages
+checker. No general slash-literal or method-call exemption exists. Output-side
+manifests and rewritten same-run hashes cannot authorize a different script.
+The installer still uses an immutable Git archive, private documentation-only
+environment and installed-module/asset Git-blob comparison. The Markdown
+renderer pins and distribution hashes are unchanged.
+
+Status: **Pages-qualified implementation, awaiting final evidence-head CI and
+independent review**. The implementation run passed including actual uploaded
+artifact verification; deployment was skipped. This is not a public deployment; see
+[Pages publication](github-pages.md) and the qualification record for hosted status.
 
 DOC-004 adopts the reviewed shared `ada-gnatdoc-enhancer` for a presentation
 copy of the native Features API site. It was first qualified on the DOC-001
@@ -16,21 +46,20 @@ production or Alire dependency.
 | Item | Value |
 | --- | --- |
 | Repository | `https://github.com/zackboll/ada-gnatdoc-enhancer` |
-| Revision | `478d0bbff0be1b9141b5ad39f07a71f0386d86e9` (reviewed merge of PR #5) |
+| Revision | `23cf51d3765e7b3f68411e25a57f52f4c0efc7e1` (reviewed merge of PR #10) |
 | Version | `0.1.0.dev0` |
-| Packaged `gnatdoc-navigation.js` | `61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2` |
-| Packaged `gnatdoc-theme.css` | `63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371` |
+| Packaged `gnatdoc-navigation.js` | `b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd` |
+| Packaged `gnatdoc-theme.css` | `cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc` |
+| Packaged `gnatdoc-guides.css` (unchanged) | `79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c` |
 
 `scripts/install_gnatdoc_enhancer.py` accepts only that revision (a constant in
 `scripts/gnatdoc_enhancer_support.py`), builds it from `git archive` of the
-commit, never from a branch or working tree, and proves that all 26 installed
+commit, never from a branch or working tree, and proves that all 31 installed
 modules and assets equal the commit's Git blobs. It records the installed
 hashes; `scripts/enhance_docs.py` re-checks them, the revision and version, and
 the packaged assets against `docs/gnatdoc-enhanced-assets.json` before every
-run. Enhancer `main` later merged PR #6 (`4c75e86`, generic-instance
-summaries), PR #7 (`f52dcfe`, authored guides and portal) and PR #8 (`255e645`,
-overload labels in operation navigation); none is adopted because none has been
-authorized for this integration, and Features has no public generic instance.
+run. DOC-010 supersedes the old PR #5 pin and adopts the intervening reviewed
+shared changes through merged PR #10. Features has no public generic instance.
 DOC-005 uses the Markdown guide mode of the pinned revision. The installer
 rejects any other revision.
 

@@ -1,0 +1,21 @@
+Note: Synchronizing workspace...
+Dependencies automatically updated as follows:
+
+   +b opencv      4.10.0 (new,system package)
+   +  opencv_core 0.5.0  (new)
+   +b pkg_config  1.8.1  (new,system package)
+
+Note: Running pre-build actions for opencv_core=0.5.0...
+Note: Running pre-build actions for opencv_features=0.1.0-dev...
+OpenCV: 4.10.0 (opencv4), native backend: features2d
+Core bridge: /home/zboll/.local/share/alire/builds/opencv_core_0.5.0_f8aef00c/59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689/cpp
+Shim: Static_PIC
+Success: Partial build finished successfully in 0.05 seconds.
+Note: Build was requested to stop after stage: pre_build; build artifacts may be missing.
+PASS inventory: {"declarations": 38, "internal_units": 2, "packages": 4}
+PASS site: {"files": 6, "packages": 4, "sections": 38}
+PASS warnings: {"baseline": 0, "new": [], "raw": 0, "regions": {}, "stale": []}
+PASS coverage: {"baseline": 0, "categories": {"field": {"documented": 23, "elements": 23, "rendered": 23}, "function": {"documented": 20, "elements": 20, "rendered": 20}, "literal": {"documented": 9, "elements": 9, "rendered": 9}, "package": {"documented": 4, "elements": 4, "rendered": 4}, "parameter": {"documented": 33, "elements": 33, "rendered": 33}, "procedure": {"documented": 1, "elements": 1, "rendered": 1}, "return": {"documented": 20, "elements": 20, "rendered": 20}, "type": {"documented": 17, "elements": 17, "rendered": 17}}, "new_gaps": [], "packages": {"OpenCV.Features": {"documented": 40, "elements": 40, "rendered": 40}, "OpenCV.Features.Correspondences": {"documented": 13, "elements": 13, "rendered": 13}, "OpenCV.Features.Matching": {"documented": 40, "elements": 40, "rendered": 40}, "OpenCV.Features.ORB": {"documented": 34, "elements": 34, "rendered": 34}}, "stale_baseline": [], "total": {"documented": 127, "elements": 127, "percent": 100.0, "rendered": 127}}
+PASS: installed /tmp/features-doc-010-evidence/old-venv/bin/gnatdoc-enhancer from 478d0bbff0be1b9141b5ad39f07a71f0386d86e9; installed files equal Git blobs
+PASS: enhanced copy verified; byte-idempotent; fresh run identical; native identities preserved; 13 pages with resolved links; added ['api/gnatdoc-navigation.js', 'api/gnatdoc-theme.css', 'api/presentation.json', 'assets/gnatdoc-guides.css', 'guides/binary-matching.html', 'guides/candidate-correspondences.html', 'guides/getting-started.html', 'guides/limitations-roadmap.html', 'guides/orb-extraction.html', 'guides/ownership-lifecycle.html', 'guides/platform-compatibility.html', 'index.html']
+PASS: 18 files (13 pages); 248 references and 13 routes resolve under https://zackboll.github.io/opencv_features_ada/; publication BLOCKED: 12 of 13 HTML pages have no <title>: api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html, api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html, api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html, api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html, api/index.html, guides/binary-matching.html, guides/candidate-correspondences.html, guides/getting-started.html, guides/limitations-roadmap.html, guides/orb-extraction.html, guides/ownership-lifecycle.html, guides/platform-compatibility.html

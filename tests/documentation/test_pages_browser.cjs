@@ -32,6 +32,20 @@ function check(name, condition, detail) {
 }
 const under = (href) => { const u = new URL(href); return u.origin === origin && u.pathname.startsWith(prefix); };
 const frameOf = (page) => page.frame({ name: 'document-content' });
+const TITLES = new Map([['', 'OpenCV Features for Ada documentation'],
+  ['api/index.html', 'API Reference — OpenCV Features Ada'],
+  ...siteMap.guides.map((g) => [g.path, `${g.label} — OpenCV Features Ada`]),
+  ...PACKAGES.map((name) => [`api/${anchors.packages[name].page}`, `${name} — OpenCV Features Ada`])]);
+
+async function metadata(document, route, label) {
+  await document.waitForFunction(() => document.documentElement && document.readyState === 'complete');
+  const actual = await document.evaluate(() => ({ title: document.title,
+    titles: document.querySelectorAll('title').length, lang: document.documentElement.lang,
+    charset: document.characterSet, heads: document.querySelectorAll('head').length }));
+  check(`metadata ${label}: source-owned title, language and UTF-8`,
+        actual.title === TITLES.get(route) && actual.titles === 1 && actual.lang === 'en' &&
+        actual.charset === 'UTF-8' && actual.heads === 1, actual);
+}
 
 async function frameHeading(page, expected) {
   const deadline = Date.now() + 10000;
@@ -73,6 +87,9 @@ async function routes(browser, scheme) {
     for (const list of Object.values(seen)) list.length = 0;
     const response = await page.goto(root + route);
     const h1 = await heading(page, route, expected);
+    await metadata(page, route, `${scheme} ${label}`);
+    if (route === 'api/index.html')
+      await metadata(frameOf(page), `api/${anchors.packages[expected].page}`, `${scheme} loaded iframe`);
     check(`${scheme} ${label}: ${prefix}${route} loads with its heading`,
           response.status() === 200 && page.url().startsWith(root + route) && h1 === expected,
           { status: response.status(), url: page.url(), h1 });
@@ -230,6 +247,37 @@ async function anchorsUnderPrefix(browser) {
   await context.close();
 }
 
+async function metadataNavigation(browser) {
+  for (const javaScriptEnabled of [true, false]) {
+    const context = await browser.newContext({ javaScriptEnabled, viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    const seen = monitor(page);
+    for (const [route, label] of ROUTES) {
+      await page.goto(root + route);
+      await metadata(page, route, `mobile JS=${javaScriptEnabled} ${label}`);
+      await page.reload();
+      await metadata(page, route, `reload JS=${javaScriptEnabled} ${label}`);
+    }
+    await page.goto(root);
+    await page.click('header nav a:text-is("Getting started")');
+    await metadata(page, 'guides/getting-started.html', `guide navigation JS=${javaScriptEnabled}`);
+    await page.goBack();
+    await metadata(page, '', `Back JS=${javaScriptEnabled}`);
+    await page.goForward();
+    await metadata(page, 'guides/getting-started.html', `Forward JS=${javaScriptEnabled}`);
+    await page.goto(root + 'api/index.html');
+    await page.click('#compilation-units + ul a:text-is("OpenCV.Features.Matching")');
+    const deadline = Date.now() + 10000;
+    while (!frameOf(page).url().endsWith(anchors.packages['OpenCV.Features.Matching'].page) && Date.now() < deadline)
+      await page.waitForTimeout(50);
+    await metadata(frameOf(page), `api/${anchors.packages['OpenCV.Features.Matching'].page}`,
+                   `loaded native iframe JS=${javaScriptEnabled}`);
+    check(`metadata navigation JS=${javaScriptEnabled}: no errors or prefix escapes`,
+          seen.errors.length === 0 && seen.failures.length === 0 && seen.requests.every(under), seen);
+    await context.close();
+  }
+}
+
 (async () => {
   const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
   const versions = {
@@ -244,6 +292,7 @@ async function anchorsUnderPrefix(browser) {
     await portalNavigation(browser);
     await apiNavigation(browser);
     await anchorsUnderPrefix(browser);
+    await metadataNavigation(browser);
   } finally {
     await browser.close();
   }
