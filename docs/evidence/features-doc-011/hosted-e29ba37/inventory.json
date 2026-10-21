@@ -1,0 +1,1441 @@
+{
+  "internal_sha256": {
+    "src/internal/opencv-features-internal-c_api.ads": "2ed9cf5a587fc8c8b06d64dd70c0c01b257fe39ba19fd028be7ea9bb413553d9",
+    "src/internal/opencv-features-internal.ads": "c06ff7a289dc911e837369fc6cecd9dfe0ada10f12c5e973618af0544e1d0aad"
+  },
+  "internal_units": {
+    "OpenCV.Features.Internal": "src/internal/opencv-features-internal.ads",
+    "OpenCV.Features.Internal.C_API": "src/internal/opencv-features-internal-c_api.ads"
+  },
+  "public_packages": {
+    "OpenCV.Features": {
+      "declarations": [
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "One detected keypoint, copied from the native result without",
+            "normalization. Coordinates are local to the image or Region passed to",
+            "the detector: X is the column and Y the row, in pixels from its first",
+            "element. Before publication the native layer requires finite values,",
+            "0 <= X < columns, 0 <= Y < rows, Size > 0 and a valid pyramid octave.",
+            "Keypoints from a higher octave are rescaled to input pixels and need",
+            "not have integral coordinates.",
+            "@field Position Keypoint location (X column, Y row) in input pixels.",
+            "@field Size Diameter of the keypoint neighborhood in input pixels, as",
+            "reported by OpenCV; always finite and positive.",
+            "@field Angle_Degrees Keypoint orientation in degrees, as computed by",
+            "the native detector; finite, with no range normalization by Ada.",
+            "@field Response Native detector response used to rank keypoints (the",
+            "configured Harris or FAST score). It is preserved unchanged and is not",
+            "a probability or match confidence.",
+            "@field Octave Zero-based pyramid level that produced the keypoint; for",
+            "the fixed ORB profile it is in 0 .. 7.",
+            "@field Class_Id Native class identifier, preserved unchanged. The",
+            "Features operations neither assign nor interpret it."
+          ],
+          "identity": "OpenCV.Features.Keypoint|type|type Keypoint is record Position : OpenCV.Float32_Point; Size : OpenCV.Float32_Value; Angle_Degrees : OpenCV.Float32_Value; Response : OpenCV.Float32_Value; Octave : OpenCV.Int32_Value; Class_Id : OpenCV.Int32_Value; end record",
+          "kind": "type",
+          "line": 36,
+          "members": [
+            {
+              "kind": "field",
+              "name": "Position",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Size",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Angle_Degrees",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Response",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Octave",
+              "subtype": "OpenCV.Int32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Class_Id",
+              "subtype": "OpenCV.Int32_Value"
+            }
+          ],
+          "name": "Keypoint",
+          "ownership_sensitive": [],
+          "signature": "type Keypoint is record Position : OpenCV.Float32_Point; Size : OpenCV.Float32_Value; Angle_Degrees : OpenCV.Float32_Value; Response : OpenCV.Float32_Value; Octave : OpenCV.Int32_Value; Class_Id : OpenCV.Int32_Value; end record"
+        },
+        {
+          "category": "array",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Ordinary Ada array of keypoint values. Keypoints returns bounds",
+            "1 .. Count, so element I corresponds to descriptor row I - 1."
+          ],
+          "identity": "OpenCV.Features.Keypoint_Array|type|type Keypoint_Array is array (Positive range <>) of Keypoint",
+          "kind": "type",
+          "line": 47,
+          "members": [],
+          "name": "Keypoint_Array",
+          "ownership_sensitive": [],
+          "signature": "type Keypoint_Array is array (Positive range <>) of Keypoint"
+        },
+        {
+          "category": "enumeration",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Distance norm required to compare a set's binary descriptors. ORB",
+            "WTA_K = 2 (Two_Samples) produces Hamming descriptors; WTA_K = 3 or 4",
+            "produces Hamming_2 descriptors. Matching requires both sets to carry",
+            "the same norm.",
+            "@enum Hamming Number of differing bits across the 32-byte descriptor,",
+            "0 .. 256 (OpenCV NORM_HAMMING).",
+            "@enum Hamming_2 Number of differing 2-bit cells across the descriptor,",
+            "0 .. 128 (OpenCV NORM_HAMMING2)."
+          ],
+          "identity": "OpenCV.Features.Binary_Descriptor_Norm|type|type Binary_Descriptor_Norm is (Hamming, Hamming_2)",
+          "kind": "type",
+          "line": 57,
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Hamming"
+            },
+            {
+              "kind": "literal",
+              "name": "Hamming_2"
+            }
+          ],
+          "name": "Binary_Descriptor_Norm",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Descriptor_Norm is (Hamming, Hamming_2)"
+        },
+        {
+          "category": "private",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "An immutable, paired collection. Construction is through a detector.",
+            "A default-declared set is empty. Results own their keypoint values and",
+            "Core-owned descriptor storage, independently of the source/detector.",
+            "Limited ownership avoids accidental copying of large feature sets.",
+            "Keypoints are stored as Ada values in native detector order; keypoint",
+            "I is paired with descriptor row I - 1. A set stays valid after its",
+            "detector is closed or finalized and after the source image or mask is",
+            "modified. No public operation changes a set after construction. A",
+            "default-declared set reports the Hamming norm."
+          ],
+          "identity": "OpenCV.Features.Feature_Set|type|type Feature_Set is limited private",
+          "kind": "type",
+          "line": 68,
+          "members": [],
+          "name": "Feature_Set",
+          "ownership_sensitive": [],
+          "signature": "type Feature_Set is limited private"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Number of keypoints, equal to the number of descriptor rows. This is",
+            "the actual produced count: it can be zero and is not bounded by a",
+            "detector's requested feature target.",
+            "@param Features Feature set to inspect.",
+            "@return Number of stored keypoints."
+          ],
+          "identity": "OpenCV.Features.Count|function|function Count (Features : Feature_Set) return Natural",
+          "kind": "function",
+          "line": 75,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Count",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Count (Features : Feature_Set) return Natural"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "True exactly when Count (Features) = 0, for example for a blank or",
+            "fully masked image, or for a default-declared set.",
+            "@param Features Feature set to inspect.",
+            "@return Whether the set contains no keypoints."
+          ],
+          "identity": "OpenCV.Features.Is_Empty|function|function Is_Empty (Features : Feature_Set) return Boolean",
+          "kind": "function",
+          "line": 81,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Is_Empty",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Is_Empty (Features : Feature_Set) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Copy of one stored keypoint, selected by its one-based index.",
+            "@param Features Feature set to read.",
+            "@param Index One-based keypoint index in 1 .. Count (Features).",
+            "@return The keypoint value stored at Index.",
+            "@exception OpenCV_Error Index is greater than Count (Features)."
+          ],
+          "identity": "OpenCV.Features.Point|function|function Point (Features : Feature_Set; Index : Positive) return Keypoint",
+          "kind": "function",
+          "line": 88,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "return",
+              "subtype": "Keypoint"
+            }
+          ],
+          "name": "Point",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Point (Features : Feature_Set; Index : Positive) return Keypoint"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Copy of every stored keypoint, in stored order.",
+            "@param Features Feature set to read.",
+            "@return An array with bounds 1 .. Count (Features); 1 .. 0 when empty."
+          ],
+          "identity": "OpenCV.Features.Keypoints|function|function Keypoints (Features : Feature_Set) return Keypoint_Array",
+          "kind": "function",
+          "line": 93,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Keypoint_Array"
+            }
+          ],
+          "name": "Keypoints",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Keypoints (Features : Feature_Set) return Keypoint_Array"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Norm that must be used to compare these descriptors. It is recorded",
+            "from the detector configuration, also for empty results.",
+            "@param Features Feature set to inspect.",
+            "@return Hamming for ORB Two_Samples results; Hamming_2 for",
+            "Three_Samples and Four_Samples results."
+          ],
+          "identity": "OpenCV.Features.Required_Norm|function|function Required_Norm (Features : Feature_Set) return Binary_Descriptor_Norm",
+          "kind": "function",
+          "line": 100,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Binary_Descriptor_Norm"
+            }
+          ],
+          "name": "Required_Norm",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Required_Norm (Features : Feature_Set) return Binary_Descriptor_Norm"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Ada keypoint Index = 1 maps to OpenCV descriptor row 0. An invalid",
+            "positive index raises OpenCV_Error (not a native unchecked access).",
+            "@param Features Feature set whose pairing is queried.",
+            "@param Index One-based keypoint index in 1 .. Count (Features).",
+            "@return The zero-based descriptor row, Index - 1.",
+            "@exception OpenCV_Error Index is greater than Count (Features)."
+          ],
+          "identity": "OpenCV.Features.Descriptor_Row|function|function Descriptor_Row (Features : Feature_Set; Index : Positive) return Natural",
+          "kind": "function",
+          "line": 109,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "return",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Descriptor_Row",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Descriptor_Row (Features : Feature_Set; Index : Positive) return Natural"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Explicit deep copy: caller mutation cannot break the stored pairing.",
+            "For a nonempty ORB result: Count rows, 32 columns, UInt8 C1.",
+            "For an empty result: an empty Mat; no 0x32 shape is promised.",
+            "The returned Mat is a new Core-owned matrix owned by the caller. It",
+            "shares no storage with the set, so writing to it never changes the set,",
+            "and it stays valid after the set is finalized. Matching operations",
+            "read a set's descriptors directly; no copy is needed for matching.",
+            "@param Features Feature set whose descriptors are copied.",
+            "@return A caller-owned copy of the descriptor matrix."
+          ],
+          "identity": "OpenCV.Features.Descriptor_Copy|function|function Descriptor_Copy (Features : Feature_Set) return OpenCV.Core.Mat",
+          "kind": "function",
+          "line": 121,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "OpenCV.Core.Mat"
+            }
+          ],
+          "name": "Descriptor_Copy",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set",
+            "result: Core-owned native matrix wrapper"
+          ],
+          "signature": "function Descriptor_Copy (Features : Feature_Set) return OpenCV.Core.Mat"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "OpenCV version string (CV_VERSION) of the headers that the native",
+            "Features shim was compiled against, for example \"4.10.0\".",
+            "@return The native OpenCV version identifier."
+          ],
+          "identity": "OpenCV.Features.Native_Version|function|function Native_Version return String",
+          "kind": "function",
+          "line": 126,
+          "members": [
+            {
+              "kind": "return",
+              "subtype": "String"
+            }
+          ],
+          "name": "Native_Version",
+          "ownership_sensitive": [],
+          "signature": "function Native_Version return String"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Native OpenCV module behind this binding: \"features2d\" for OpenCV 4",
+            "and \"features\" for OpenCV 5.0. The public Ada API is the same for both.",
+            "@return The native backend module name."
+          ],
+          "identity": "OpenCV.Features.Native_Backend|function|function Native_Backend return String",
+          "kind": "function",
+          "line": 131,
+          "members": [
+            {
+              "kind": "return",
+              "subtype": "String"
+            }
+          ],
+          "name": "Native_Backend",
+          "ownership_sensitive": [],
+          "signature": "function Native_Backend return String"
+        }
+      ],
+      "description_block": [
+        "Version-independent feature values shared by the Features packages:",
+        "keypoints, binary descriptor norms and the paired Feature_Set result.",
+        "Public values are Ada values, not C++ or C ABI records. A Feature_Set is",
+        "produced by a detector such as OpenCV.Features.ORB and pairs each Ada",
+        "keypoint with one row of a Core-owned descriptor Mat. Keypoint indices are",
+        "one-based; native descriptor rows are zero-based (see Descriptor_Row).",
+        "Binding and native failures raise OpenCV.OpenCV_Error. Language-defined",
+        "checks, such as passing zero as a Positive index, raise their normal Ada",
+        "exceptions, and array function results can raise Storage_Error."
+      ],
+      "sha256": "0093e62e69815a369478f74d9a39d92ec811bb6cac7df1adf1af940e1301dd01",
+      "source": "src/opencv-features.ads"
+    },
+    "OpenCV.Features.Correspondences": {
+      "declarations": [
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "One candidate correspondence, copied exactly from a match and the",
+            "stored keypoints of both feature sets.",
+            "@field Query_Index One-based keypoint index in the Query set, copied",
+            "from the match.",
+            "@field Train_Index One-based keypoint index in the Train set, copied",
+            "from the match.",
+            "@field Query_Point Stored Position of the query keypoint, an exact",
+            "Float32 copy in the query image's Region-local coordinates.",
+            "@field Train_Point Stored Position of the train keypoint, an exact",
+            "Float32 copy in the train image's Region-local coordinates.",
+            "@field Distance Binary descriptor distance copied from the match. It",
+            "is descriptor metadata, not a confidence, probability, geometric",
+            "residual or reprojection error."
+          ],
+          "identity": "OpenCV.Features.Correspondences.Point_Correspondence|type|type Point_Correspondence is record Query_Index : Positive; Train_Index : Positive; Query_Point : OpenCV.Float32_Point; Train_Point : OpenCV.Float32_Point; Distance : Matching.Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "line": 31,
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Query_Point",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Point",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Matching.Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Point_Correspondence",
+          "ownership_sensitive": [],
+          "signature": "type Point_Correspondence is record Query_Index : Positive; Train_Index : Positive; Query_Point : OpenCV.Float32_Point; Train_Point : OpenCV.Float32_Point; Distance : Matching.Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "array",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Ordinary Ada array of candidate correspondences. From_Matches returns",
+            "bounds 1 .. Matches'Length, in input order."
+          ],
+          "identity": "OpenCV.Features.Correspondences.Point_Correspondence_Array|type|type Point_Correspondence_Array is array (Positive range <>) of Point_Correspondence",
+          "kind": "type",
+          "line": 41,
+          "members": [],
+          "name": "Point_Correspondence_Array",
+          "ownership_sensitive": [],
+          "signature": "type Point_Correspondence_Array is array (Positive range <>) of Point_Correspondence"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Pure Ada value copy using only public Count/Point accessors. Validate",
+            "every one-based query/train index before constructing the result;",
+            "an index beyond its feature count raises OpenCV_Error.",
+            "Return bounds are 1 .. Matches'Length, including 1 .. 0 for any empty",
+            "Matches (even with empty feature sets or different descriptor norms).",
+            "Preserve input order and all duplicates, indices and descriptor distances",
+            "exactly. Norm compatibility and norm-specific distance validation are",
+            "deliberately not required for manually supplied matches.",
+            "Copy stored Float32 positions without arithmetic, rounding, normalization,",
+            "offsets or coordinate-frame/Region reinterpretation. Distance is metadata,",
+            "not confidence, probability, geometric residual or reprojection error.",
+            "Inputs are unchanged; returned ordinary Ada values retain no references",
+            "to features, detectors, Mats or native storage. No matching/filtering or",
+            "geometric verification occurs: these are candidates, not geometric inliers.",
+            "Normal Ada allocation exceptions remain possible for array results.",
+            "Matches can come from Nearest, Mutual_Nearest, ratio-filtered KNN2 or",
+            "radius matching, or be supplied manually, provided they refer to these",
+            "same Query and Train sets. Raw two-nearest candidates are not accepted;",
+            "select matches first, for example with Filter_By_Ratio.",
+            "@param Query Feature set that the matches' Query_Index values refer to.",
+            "@param Train Feature set that the matches' Train_Index values refer to.",
+            "@param Matches Accepted matches, with any index bounds; each",
+            "Query_Index must be at most Count (Query) and each Train_Index at most",
+            "Count (Train).",
+            "@return One correspondence per match, in the same order, with bounds",
+            "1 .. Matches'Length.",
+            "@exception OpenCV_Error A Query_Index exceeds Count (Query) or a",
+            "Train_Index exceeds Count (Train); nothing is returned in that case."
+          ],
+          "identity": "OpenCV.Features.Correspondences.From_Matches|function|function From_Matches (Query : Feature_Set; Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) return Point_Correspondence_Array",
+          "kind": "function",
+          "line": 72,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Matches",
+              "subtype": "Matching.Descriptor_Match_Array"
+            },
+            {
+              "kind": "return",
+              "subtype": "Point_Correspondence_Array"
+            }
+          ],
+          "name": "From_Matches",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function From_Matches (Query : Feature_Set; Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) return Point_Correspondence_Array"
+        }
+      ],
+      "description_block": [
+        "Conversion of accepted descriptor matches into candidate 2-D point",
+        "correspondences between two feature sets. This is pure Ada: it uses only",
+        "the public Count and Point accessors, makes no native call and adds no",
+        "C ABI. A correspondence pairs the stored query and train keypoint",
+        "positions with the match's indices and descriptor distance; it is a",
+        "candidate for downstream geometry, not a verified inlier. Both points are",
+        "OpenCV.Float32_Point values from the shared Core root package, so an",
+        "application can hand them to its Geometry or Calib3D stage (for example",
+        "a robust estimator that decides inliers) without Features depending on",
+        "those packages. Coordinates keep each detector input's Region-local",
+        "pixel frame; relating the two frames is the caller's responsibility."
+      ],
+      "sha256": "5d033b894e254f46bb3913a63a69d7d4eaa3098cda16e9a31ff1fb2d51f20aac",
+      "source": "src/opencv-features-correspondences.ads"
+    },
+    "OpenCV.Features.Matching": {
+      "declarations": [
+        {
+          "category": "enumeration",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Selection rule for one-best matching (Brute_Force_Match).",
+            "@enum Nearest For every query descriptor, the train descriptor at",
+            "minimum distance (OpenCV BFMatcher without cross-check). Every query",
+            "gets one match when both sets are nonempty; train indices may repeat.",
+            "@enum Mutual_Nearest OpenCV BFMatcher cross-check: a query's nearest",
+            "train descriptor is kept only when that query is also the train",
+            "descriptor's nearest query. Queries without a mutual partner are",
+            "omitted; query and train indices are each unique. This symmetric",
+            "consistency check is not a ratio test."
+          ],
+          "identity": "OpenCV.Features.Matching.Matching_Mode|type|type Matching_Mode is (Nearest, Mutual_Nearest)",
+          "kind": "type",
+          "line": 29,
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Nearest"
+            },
+            {
+              "kind": "literal",
+              "name": "Mutual_Nearest"
+            }
+          ],
+          "name": "Matching_Mode",
+          "ownership_sensitive": [],
+          "signature": "type Matching_Mode is (Nearest, Mutual_Nearest)"
+        },
+        {
+          "category": "range",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Exact integer binary descriptor distance: smaller means more similar.",
+            "Hamming distances are in 0 .. 256 and Hamming_2 distances in 0 .. 128;",
+            "the type range covers both. It is not a confidence or probability."
+          ],
+          "identity": "OpenCV.Features.Matching.Binary_Descriptor_Distance|type|type Binary_Descriptor_Distance is range 0 .. 256",
+          "kind": "type",
+          "line": 34,
+          "members": [],
+          "name": "Binary_Descriptor_Distance",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Descriptor_Distance is range 0 .. 256"
+        },
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "One accepted query/train descriptor pair.",
+            "@field Query_Index One-based keypoint index in the Query feature set;",
+            "native descriptor row Query_Index - 1.",
+            "@field Train_Index One-based keypoint index in the Train feature set;",
+            "native descriptor row Train_Index - 1.",
+            "@field Distance Exact distance between the two descriptors under the",
+            "sets' shared norm."
+          ],
+          "identity": "OpenCV.Features.Matching.Descriptor_Match|type|type Descriptor_Match is record Query_Index : Positive; Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "line": 43,
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Descriptor_Match",
+          "ownership_sensitive": [],
+          "signature": "type Descriptor_Match is record Query_Index : Positive; Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "array",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Ordinary Ada array of matches. Matching operations return bounds",
+            "1 .. N, including 1 .. 0 for an empty result."
+          ],
+          "identity": "OpenCV.Features.Matching.Descriptor_Match_Array|type|type Descriptor_Match_Array is array (Positive range <>) of Descriptor_Match",
+          "kind": "type",
+          "line": 51,
+          "members": [],
+          "name": "Descriptor_Match_Array",
+          "ownership_sensitive": [],
+          "signature": "type Descriptor_Match_Array is array (Positive range <>) of Descriptor_Match"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "One-based indices map to descriptor rows/keypoints (1 -> native row 0).",
+            "Results are ordinary owned Ada values, in ascending Query_Index order.",
+            "Norms must agree, even for empty sets: WTA2 uses Hamming (0..256),",
+            "WTA3/4 uses Hamming2 (0..128), with exact integer distances.",
+            "Nearest returns Count(Query) entries if both sets are nonempty; ties",
+            "do not promise a particular Train_Index. Mutual_Nearest uses native",
+            "cross-check, with unique query/train indices; it is NOT a ratio test.",
+            "Compatible empty inputs return (1 .. 0). Train.Count > 262143 raises",
+            "OpenCV_Error (native BFMatcher packs train indices into 18 bits).",
+            "No masks, confidence score or geometric verification.",
+            "Inputs are borrowed, not copied or modified. Concurrent mutation through",
+            "implementation interfaces is not supported. Large results allocate an",
+            "array function result; normal Ada allocation exceptions remain possible.",
+            "@param Query Feature set whose descriptors are matched; in Nearest",
+            "mode every query keypoint receives exactly one match.",
+            "@param Train Feature set searched for the nearest descriptors; at most",
+            "262143 keypoints. There is no corresponding 18-bit limit on Query.",
+            "@param Mode Nearest (the default) or Mutual_Nearest.",
+            "@return Matches with strictly ascending Query_Index and bounds 1 .. N:",
+            "N = Count (Query) for Nearest with two nonempty sets, N <=",
+            "Count (Query) for Mutual_Nearest, and N = 0 when either set is empty.",
+            "@exception OpenCV_Error The two norms differ (also for empty sets),",
+            "Train has more than 262143 keypoints, or native matching fails."
+          ],
+          "identity": "OpenCV.Features.Matching.Brute_Force_Match|function|function Brute_Force_Match (Query : Feature_Set; Train : Feature_Set; Mode : Matching_Mode := Nearest) return Descriptor_Match_Array",
+          "kind": "function",
+          "line": 77,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "default": "Nearest",
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Mode",
+              "subtype": "Matching_Mode"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_Match",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_Match (Query : Feature_Set; Train : Feature_Set; Mode : Matching_Mode := Nearest) return Descriptor_Match_Array"
+        },
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "One train neighbor of a query descriptor in a two-nearest result.",
+            "@field Train_Index One-based keypoint index in the Train feature set.",
+            "@field Distance Exact distance from the query descriptor to this train",
+            "descriptor."
+          ],
+          "identity": "OpenCV.Features.Matching.Binary_Neighbor|type|type Binary_Neighbor is record Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "line": 85,
+          "members": [
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Binary_Neighbor",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Neighbor is record Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Absolute inclusive radius, not KNN/ratio filtering or cross-check.",
+            "Norms must agree, even for empty inputs; automatic Hamming for WTA2,",
+            "Hamming2 for WTA3/4. OpenCV_Error unless Maximum_Distance is 1..256",
+            "(Hamming) or 1..128 (Hamming2), including empty inputs. Zero is rejected;",
+            "exact-zero radius matching is deferred, not mapped to another radius.",
+            "Compatible empties return (1 .. 0); one-row Train is valid.",
+            "All qualifying matches, flat and Ada-owned: ascending Query_Index,",
+            "nondecreasing Distance within each query, unspecified tied train order.",
+            "Query/train indices are one-based and bounded by the input counts;",
+            "each train row occurs at most once per query, not once globally.",
+            "Queries can contribute zero, one, or many matches; length need not equal",
+            "Query.Count. Distances are exact integers, <= Maximum_Distance.",
+            "No KNN 18-bit train bound: native rows/indices are signed 32-bit; flat",
+            "count must fit signed 32-bit and Ada Natural/allocation representation.",
+            "Inputs unchanged; owned values survive inputs, detector and native staging.",
+            "CPU Mats only; no masks, persistent matcher or geometric policy. Native",
+            "full distance matrices/results may be large; allocation can fail.",
+            "OpenCV itself rejects radii that are not above floating-point epsilon",
+            "for nonempty inputs, so the binding rejects zero for every input",
+            "instead of silently substituting a different radius.",
+            "@param Query Feature set whose descriptors are matched.",
+            "@param Train Feature set searched within the radius; no 18-bit row",
+            "limit applies.",
+            "@param Maximum_Distance Inclusive absolute distance limit chosen by",
+            "the caller: 1 .. 256 for Hamming sets, 1 .. 128 for Hamming_2 sets.",
+            "There is no default.",
+            "@return Every pair with distance <= Maximum_Distance, grouped by",
+            "ascending Query_Index, with bounds 1 .. N; 1 .. 0 when nothing",
+            "qualifies or either set is empty.",
+            "@exception OpenCV_Error The norms differ, Maximum_Distance is zero or",
+            "above the norm's maximum (checked also for empty inputs), or native",
+            "matching or allocation fails."
+          ],
+          "identity": "OpenCV.Features.Matching.Brute_Force_Radius_Match|function|function Brute_Force_Radius_Match (Query : Feature_Set; Train : Feature_Set; Maximum_Distance : Binary_Descriptor_Distance) return Descriptor_Match_Array",
+          "kind": "function",
+          "line": 122,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_Radius_Match",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_Radius_Match (Query : Feature_Set; Train : Feature_Set; Maximum_Distance : Binary_Descriptor_Distance) return Descriptor_Match_Array"
+        },
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "The two nearest train descriptors of one query descriptor.",
+            "@field Query_Index One-based keypoint index in the Query feature set.",
+            "@field Nearest Closest train neighbor.",
+            "@field Second_Nearest Next closest train neighbor: its Train_Index",
+            "differs from Nearest's and its Distance is at least Nearest.Distance."
+          ],
+          "identity": "OpenCV.Features.Matching.Two_Nearest_Match|type|type Two_Nearest_Match is record Query_Index : Positive; Nearest : Binary_Neighbor; Second_Nearest : Binary_Neighbor; end record",
+          "kind": "type",
+          "line": 132,
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Nearest",
+              "subtype": "Binary_Neighbor"
+            },
+            {
+              "kind": "field",
+              "name": "Second_Nearest",
+              "subtype": "Binary_Neighbor"
+            }
+          ],
+          "name": "Two_Nearest_Match",
+          "ownership_sensitive": [],
+          "signature": "type Two_Nearest_Match is record Query_Index : Positive; Nearest : Binary_Neighbor; Second_Nearest : Binary_Neighbor; end record"
+        },
+        {
+          "category": "array",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Ordinary Ada array of two-nearest candidates. Brute_Force_KNN_2",
+            "returns one per query keypoint, with bounds 1 .. N."
+          ],
+          "identity": "OpenCV.Features.Matching.Two_Nearest_Match_Array|type|type Two_Nearest_Match_Array is array (Positive range <>) of Two_Nearest_Match",
+          "kind": "type",
+          "line": 140,
+          "members": [],
+          "name": "Two_Nearest_Match_Array",
+          "ownership_sensitive": [],
+          "signature": "type Two_Nearest_Match_Array is array (Positive range <>) of Two_Nearest_Match"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Exactly K=2, without cross-check. Norm compatibility is checked before",
+            "empties. Compatible empties return (1 .. 0); a nonempty query with one",
+            "train row raises OpenCV_Error. Train.Count <= 262143; no corresponding",
+            "18-bit Query limit. Otherwise Length = Query.Count, in ascending query",
+            "order. One-based train indices are distinct, nearest distance <= second,",
+            "exact Hamming 0..256 / Hamming2 0..128. Ties have no fixed train ordering.",
+            "Owned Ada values survive all inputs and native staging. Inputs unchanged.",
+            "The result carries candidates only; apply an explicit caller policy,",
+            "such as Filter_By_Ratio, before using pairs as matches.",
+            "@param Query Feature set whose descriptors are matched.",
+            "@param Train Feature set searched for two neighbors; it needs at least",
+            "two keypoints when Query is nonempty, and at most 262143.",
+            "@return One candidate per query keypoint, with Query_Index I at",
+            "position I and bounds 1 .. Count (Query); 1 .. 0 when either set is",
+            "empty.",
+            "@exception OpenCV_Error The norms differ (also for empty sets), Train",
+            "has more than 262143 keypoints, a nonempty Query meets a one-keypoint",
+            "Train, or native matching fails."
+          ],
+          "identity": "OpenCV.Features.Matching.Brute_Force_KNN_2|function|function Brute_Force_KNN_2 (Query : Feature_Set; Train : Feature_Set) return Two_Nearest_Match_Array",
+          "kind": "function",
+          "line": 161,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Two_Nearest_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_KNN_2",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_KNN_2 (Query : Feature_Set; Train : Feature_Set) return Two_Nearest_Match_Array"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Pure Ada mechanics, no default application policy. OpenCV_Error unless",
+            "0 < Maximum_Ratio < 1 (also rejects NaN/nonfinite). Strict acceptance:",
+            "nearest < Maximum_Ratio * second, using floating integer conversion.",
+            "Thus 0/0 duplicate descriptors reject. Ratio is not confidence/probability.",
+            "The test only compares the two distances of one query as a",
+            "distinctiveness heuristic; its outcome depends on the caller's",
+            "threshold and is not a calibrated likelihood. A zero nearest distance",
+            "passes whenever the second distance is nonzero.",
+            "@param Candidate Two-nearest candidate to test.",
+            "@param Maximum_Ratio Caller-chosen threshold, strictly between 0 and 1.",
+            "@return True when Nearest.Distance < Maximum_Ratio *",
+            "Second_Nearest.Distance.",
+            "@exception OpenCV_Error Maximum_Ratio is not in the open interval",
+            "0 .. 1, including NaN and infinities."
+          ],
+          "identity": "OpenCV.Features.Matching.Passes_Ratio_Test|function|function Passes_Ratio_Test (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value) return Boolean",
+          "kind": "function",
+          "line": 179,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Candidate",
+              "subtype": "Two_Nearest_Match"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Ratio",
+              "subtype": "OpenCV.Float64_Value"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Passes_Ratio_Test",
+          "ownership_sensitive": [],
+          "signature": "function Passes_Ratio_Test (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Returns nearest matches only, preserving candidate order. Validates the",
+            "threshold even for empty input; empty/all-rejected returns (1 .. 0).",
+            "No native calls or geometric verification. Normal Ada allocation errors",
+            "remain possible for array results, as for Brute_Force_Match.",
+            "@param Candidates Two-nearest candidates, normally from",
+            "Brute_Force_KNN_2.",
+            "@param Maximum_Ratio Caller-chosen threshold, strictly between 0 and 1;",
+            "applied to every candidate exactly as Passes_Ratio_Test.",
+            "@return The Query_Index, Nearest.Train_Index and Nearest.Distance of",
+            "each accepted candidate, in candidate order, with bounds 1 .. N.",
+            "@exception OpenCV_Error Maximum_Ratio is not in the open interval",
+            "0 .. 1, including NaN and infinities, even for empty Candidates."
+          ],
+          "identity": "OpenCV.Features.Matching.Filter_By_Ratio|function|function Filter_By_Ratio (Candidates : Two_Nearest_Match_Array; Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array",
+          "kind": "function",
+          "line": 195,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Candidates",
+              "subtype": "Two_Nearest_Match_Array"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Ratio",
+              "subtype": "OpenCV.Float64_Value"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Filter_By_Ratio",
+          "ownership_sensitive": [],
+          "signature": "function Filter_By_Ratio (Candidates : Two_Nearest_Match_Array; Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array"
+        }
+      ],
+      "description_block": [
+        "Brute-force matching of binary ORB descriptors between two feature sets,",
+        "through OpenCV's CPU BFMatcher, plus pure Ada ratio filtering. The norm",
+        "is selected automatically from the sets: Hamming for WTA_K = 2 results,",
+        "Hamming_2 for WTA_K = 3 or 4 results; both sets must agree. Available",
+        "operations are one-best matching (Nearest or native cross-check",
+        "Mutual_Nearest), exactly two nearest neighbors (KNN2), explicit ratio",
+        "filtering of KNN2 candidates and absolute inclusive radius matching.",
+        "Input descriptor Mats are borrowed for the duration of a call through",
+        "Core's scoped bridge; they are neither copied nor modified. Results are",
+        "ordinary Ada values with one-based keypoint indices and exact integer",
+        "distances; they own no native storage and stay valid after the inputs,",
+        "detectors and native staging are finalized. A distance is not a",
+        "confidence or probability. Arbitrary K, matching masks, FLANN or other",
+        "approximate matchers, GPU/UMat execution, persistent trained matchers",
+        "and geometric verification are not provided."
+      ],
+      "sha256": "5b75e3b3ea94a60cc8b0fa2905a41b628ab2c476f8e0893bf3831e4fa965aca9",
+      "source": "src/opencv-features-matching.ads"
+    },
+    "OpenCV.Features.ORB": {
+      "declarations": [
+        {
+          "category": "enumeration",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Number of points compared to build each descriptor element (OpenCV",
+            "WTA_K). It also selects the norm recorded in the result.",
+            "@enum Two_Samples WTA_K = 2, the default; descriptors use Hamming.",
+            "@enum Three_Samples WTA_K = 3; descriptors use Hamming_2.",
+            "@enum Four_Samples WTA_K = 4; descriptors use Hamming_2."
+          ],
+          "identity": "OpenCV.Features.ORB.Tuple_Size|type|type Tuple_Size is (Two_Samples, Three_Samples, Four_Samples)",
+          "kind": "type",
+          "line": 22,
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Two_Samples"
+            },
+            {
+              "kind": "literal",
+              "name": "Three_Samples"
+            },
+            {
+              "kind": "literal",
+              "name": "Four_Samples"
+            }
+          ],
+          "name": "Tuple_Size",
+          "ownership_sensitive": [],
+          "signature": "type Tuple_Size is (Two_Samples, Three_Samples, Four_Samples)"
+        },
+        {
+          "category": "enumeration",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Measure used to rank FAST keypoint candidates before the strongest",
+            "are retained. It also determines the meaning of Keypoint.Response.",
+            "@enum Harris_Score Rank by the Harris corner response (OpenCV",
+            "HARRIS_SCORE); the default.",
+            "@enum FAST_Score Rank by the FAST score (OpenCV FAST_SCORE)."
+          ],
+          "identity": "OpenCV.Features.ORB.Score_Kind|type|type Score_Kind is (Harris_Score, FAST_Score)",
+          "kind": "type",
+          "line": 29,
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Harris_Score"
+            },
+            {
+              "kind": "literal",
+              "name": "FAST_Score"
+            }
+          ],
+          "name": "Score_Kind",
+          "ownership_sensitive": [],
+          "signature": "type Score_Kind is (Harris_Score, FAST_Score)"
+        },
+        {
+          "category": "record",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Public ORB parameters. Create validates the ranges that the Ada",
+            "subtypes do not express and rejects others with OpenCV_Error.",
+            "@field Maximum_Features Requested feature target (OpenCV nfeatures),",
+            "1 .. 1_073_741_823 (2_147_483_647 / 2), default 500. It is a target",
+            "distributed over the pyramid levels, not a strict cap: a result can",
+            "hold fewer keypoints, or more when native responses tie.",
+            "@field Tuple WTA_K selection, default Two_Samples.",
+            "@field Score Candidate ranking measure, default Harris_Score.",
+            "@field FAST_Threshold FAST intensity-difference threshold (OpenCV",
+            "fastThreshold), 0 .. 255, default 20; larger values make corner",
+            "detection stricter."
+          ],
+          "identity": "OpenCV.Features.ORB.Configuration|type|type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record",
+          "kind": "type",
+          "line": 42,
+          "members": [
+            {
+              "default": "500",
+              "kind": "field",
+              "name": "Maximum_Features",
+              "subtype": "Positive"
+            },
+            {
+              "default": "Two_Samples",
+              "kind": "field",
+              "name": "Tuple",
+              "subtype": "Tuple_Size"
+            },
+            {
+              "default": "Harris_Score",
+              "kind": "field",
+              "name": "Score",
+              "subtype": "Score_Kind"
+            },
+            {
+              "default": "20",
+              "kind": "field",
+              "name": "FAST_Threshold",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Configuration",
+          "ownership_sensitive": [],
+          "signature": "type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record"
+        },
+        {
+          "category": "private",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Owner of one native ORB detector, configured with a Configuration and",
+            "a deliberately small initial profile. Native structural parameters are",
+            "fixed at scaleFactor=1.2f, nlevels=8, edgeThreshold=31, firstLevel=0,",
+            "patchSize=31. Expanding that surface is a later reviewed slice.",
+            "A default-declared Detector is not ready; Create returns a ready one.",
+            "Close and finalization release the native detector; both are",
+            "idempotent and never raise. Detectors are limited and cannot be",
+            "copied. Feature sets produced by a detector remain valid after it is",
+            "closed or finalized."
+          ],
+          "identity": "OpenCV.Features.ORB.Detector|type|type Detector is tagged limited private",
+          "kind": "type",
+          "line": 58,
+          "members": [],
+          "name": "Detector",
+          "ownership_sensitive": [],
+          "signature": "type Detector is tagged limited private"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Create a ready detector with the given parameters and the fixed",
+            "structural profile.",
+            "@param Parameters Requested configuration; all defaults when omitted.",
+            "@return A ready detector owning its native ORB instance.",
+            "@exception OpenCV_Error Maximum_Features exceeds 1_073_741_823,",
+            "FAST_Threshold exceeds 255, or the native detector cannot be created."
+          ],
+          "identity": "OpenCV.Features.ORB.Create|function|function Create (Parameters : Configuration := (others => <>)) return Detector",
+          "kind": "function",
+          "line": 66,
+          "members": [
+            {
+              "default": "(others => <>)",
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Parameters",
+              "subtype": "Configuration"
+            },
+            {
+              "kind": "return",
+              "subtype": "Detector"
+            }
+          ],
+          "name": "Create",
+          "ownership_sensitive": [
+            "result: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Create (Parameters : Configuration := (others => <>)) return Detector"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Release the native detector early. Closing a default-declared or",
+            "already closed detector has no effect. Afterwards Is_Ready is False,",
+            "and Parameters and Detect_And_Compute raise OpenCV_Error. Existing",
+            "feature sets are unaffected. Do not close a detector while another",
+            "task is extracting with it.",
+            "@param Self Detector to close."
+          ],
+          "identity": "OpenCV.Features.ORB.Close|procedure|procedure Close (Self : in out Detector)",
+          "kind": "procedure",
+          "line": 75,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in out",
+              "name": "Self",
+              "subtype": "Detector"
+            }
+          ],
+          "name": "Close",
+          "ownership_sensitive": [
+            "in out Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "procedure Close (Self : in out Detector)"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Whether the detector owns a native ORB instance, that is, it was",
+            "returned by Create and has not been closed or finalized.",
+            "@param Self Detector to inspect.",
+            "@return True when extraction can be attempted."
+          ],
+          "identity": "OpenCV.Features.ORB.Is_Ready|function|function Is_Ready (Self : Detector) return Boolean",
+          "kind": "function",
+          "line": 81,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Is_Ready",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Is_Ready (Self : Detector) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Configuration that was supplied to Create, unchanged.",
+            "@param Self A ready detector.",
+            "@return The detector's public parameters.",
+            "@exception OpenCV_Error The detector is not ready."
+          ],
+          "identity": "OpenCV.Features.ORB.Parameters|function|function Parameters (Self : Detector) return Configuration",
+          "kind": "function",
+          "line": 87,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "return",
+              "subtype": "Configuration"
+            }
+          ],
+          "name": "Parameters",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Parameters (Self : Detector) return Configuration"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Detect ORB keypoints anywhere in the image and compute their binary",
+            "descriptors. Image: nonempty UInt8 C1, two dimensions, at least 2x2.",
+            "The fixed-profile native arithmetic envelope is checked in the shim;",
+            "see docs/orb-contract.md. The image is snapshotted before native",
+            "detection: a Region is an isolated logical image, returned coordinates",
+            "are local to it, and a noncontiguous Region gives the same result as",
+            "its packed clone. Inputs are unchanged on success and failure. A valid",
+            "image without detectable features returns an empty set, not an error.",
+            "Count of the result is the actual number produced, which can differ",
+            "from Maximum_Features. Use distinct detectors for concurrent calls.",
+            "Concurrent mutation of source storage, or Close during extraction, is",
+            "not supported.",
+            "@param Self A ready detector.",
+            "@param Image Two-dimensional UInt8 single-channel image, at least 2x2",
+            "and within the conservative native size envelope.",
+            "@return A new feature set that owns its keypoints and descriptors and",
+            "records the norm implied by the detector's Tuple.",
+            "@exception OpenCV_Error The detector is not ready, the image is",
+            "empty, has the wrong type, rank or size, exceeds the native envelope,",
+            "or the native extraction fails."
+          ],
+          "identity": "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set",
+          "kind": "function",
+          "line": 109,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Image",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "return",
+              "subtype": "Feature_Set"
+            }
+          ],
+          "name": "Detect_And_Compute",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector",
+            "in Image: Core-owned native matrix wrapper",
+            "result: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set"
+        },
+        {
+          "category": "subprogram",
+          "comment_shared_with_package": false,
+          "existing_comment": [
+            "Detect only where Mask is nonzero, then describe the detected",
+            "keypoints. The mask controls where keypoints may be detected; it does",
+            "not restrict which pixels a descriptor patch samples. Mask must match",
+            "the image geometry and type: a two-dimensional UInt8 single-channel",
+            "Mat with the image's rows and columns. Image and mask are",
+            "independently snapshotted; neither is modified.",
+            "An all-zero mask yields an empty set. For portable results use only",
+            "0 and 255. Other nonzero values are passed through unchanged. In the",
+            "reviewed OpenCV 4.1.0 and 4.10.0 sources they count at pyramid level 0,",
+            "but only 255 survives into later levels; OpenCV 5.0.0 first maps every",
+            "nonzero value to 255. Thus an all-1 mask allows only octave-0 keypoints",
+            "on those 4.x releases but behaves like an all-255 mask on 5.0. All",
+            "other rules match the unmasked overload.",
+            "@param Self A ready detector.",
+            "@param Image Two-dimensional UInt8 single-channel image, at least 2x2",
+            "and within the conservative native size envelope.",
+            "@param Mask Detection mask with the same rows, columns and type as",
+            "Image.",
+            "@return A new feature set restricted to keypoints detected inside the",
+            "mask.",
+            "@exception OpenCV_Error The detector is not ready, the image or",
+            "mask is invalid, their geometries differ, the native envelope is",
+            "exceeded, or the native extraction fails."
+          ],
+          "identity": "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set",
+          "kind": "function",
+          "line": 135,
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Image",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Mask",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "return",
+              "subtype": "Feature_Set"
+            }
+          ],
+          "name": "Detect_And_Compute",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector",
+            "in Image: Core-owned native matrix wrapper",
+            "in Mask: Core-owned native matrix wrapper",
+            "result: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Detect_And_Compute (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set"
+        }
+      ],
+      "description_block": [
+        "ORB (Oriented FAST and Rotated BRIEF) keypoint detection and binary",
+        "descriptor extraction for 8-bit grayscale Core Mats. The public profile",
+        "exposes the requested feature target, WTA_K, the Harris/FAST score and",
+        "the FAST threshold. The structural profile is fixed: scale factor 1.2,",
+        "eight pyramid levels, edge threshold 31, first level 0, patch size 31.",
+        "OpenCV 4 runs through the native features2d module and OpenCV 5.0",
+        "through features; the Ada API is the same for both. Results are",
+        "OpenCV.Features.Feature_Set values that own their keypoints and",
+        "descriptors. See docs/orb-contract.md for the reviewed native contract."
+      ],
+      "sha256": "bb3466d7eef4fa3023c2c8bb308bca346c90e5ebda1558ea5cecbff2cc03d8e9",
+      "source": "src/opencv-features-orb.ads"
+    }
+  },
+  "schema_version": 1
+}

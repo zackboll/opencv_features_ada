@@ -19,6 +19,31 @@
   Embedding a commit's own SHA in itself is not possible; the hosted runtime
   `qualification-head.json` records that exact identity independently.
 
+### Retained hosted success (evidence-parent head)
+
+[Run 39539323421](https://github.com/zackboll/opencv_features_ada/actions/runs/39539323421)
+passed on `e29ba37d80a439e425acc34057cdc168625086ff`, tree
+`03bd5323b8e303b58cc3508c547ab0998f53c450`. `native-gnatdoc` succeeded and
+`deploy-pages` was **skipped**. `hosted-e29ba37/` retains runtime head identity,
+job/step outcomes, artifact IDs/digests, installation provenance, strict reports,
+all three successful Chromium reports and actual downloaded-upload verification.
+Hosted mutation run executed 104 passing tests; Chromium passed 64/64, 199/199
+and 64/64. The workflow downloaded Pages artifact **12319001473** by immutable ID,
+compared the tar with the action-created archive and verified all 18 files.
+
+An additional agent-side immutable-ID download verified the ZIP SHA-256
+`e9c581a5d176a1acae131e23f8c9c14b01a5d02126e4e19d5fc3f37a0e3f4f2b`, then
+proved the extracted tar's 18 file hashes equal both hosted and local qualified
+sites; the complete native-site hashes also match. Tar SHA-256:
+`91c6fc685b53abd39a324eff0631ece23eb1a078e098f196d5965270d041128e`.
+`independent-upload-verification.json` and `independent-pages-check.json` record
+these comparisons, rather than treating local tar synthesis as upload evidence.
+
+This retained-report commit changes evidence only and therefore requires a new
+**exact-final-head** hosted run. The final PR qualification comment supplies its
+head/tree, run, immutable artifact identity, final disposition and refreshed
+main/PR #15 status without creating a self-referential evidence commit loop.
+
 No Ada source, GPR/ABI, library behavior, Alire manifest, consumer repository,
 upstream enhancer, deployment permission or Pages environment changes are made.
 No rebase, force-push, amend, auto-merge, merge or feature-branch publication.
@@ -149,3 +174,9 @@ No unrelated task files were removed. One preliminary probe lacked source stagin
 it failed before enhancement and was rerun after staging. An initial provenance
 comparison omitted its `name` field; this failed closed before environment creation
 and was corrected to require the exact published schema. No gate was relaxed.
+After relocation, the environment's original launcher contained its original
+noncanonical path; the CLI resolves environment paths and correctly rejected that
+launcher mismatch. A new release environment was acquired and installed at its
+canonical path, then all 104 tests and the full enhancement were rerun successfully.
+Long browser commands interrupted by the command tool's time limit were rerun as
+background processes with explicit exit-code files; final campaigns all exited 0.
