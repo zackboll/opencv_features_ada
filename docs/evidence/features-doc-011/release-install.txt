@@ -1,0 +1,1 @@
+PASS: installed /tmp/features-doc-011/release-venv/bin/gnatdoc-enhancer from official v0.1.0; approved wheel and installed bytes verified

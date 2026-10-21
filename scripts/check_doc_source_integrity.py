@@ -39,6 +39,7 @@ DOCUMENTATION = (
     "scripts/check_doc_source_integrity.py",
     "scripts/check_gnatdoc.py",
     "scripts/check_pages_site.py",
+    "scripts/compare_gnatdoc_release.py",
     "scripts/enhance_docs.py",
     "scripts/gnatdoc_enhancer_support.py",
     "scripts/gnatdoc_native.py",

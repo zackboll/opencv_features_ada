@@ -1,0 +1,37 @@
+{
+  "core_solution": "opencv_features=0.1.0-dev: Thick Ada binding to OpenCV feature detection and description\nOrigin: path /home/zboll/git/opencv/features-doc-011\nProperties:\n   Pre_Build run: sh scripts/configure_opencv.sh (from ${CRATE_ROOT}/.)\n   Test run: sh scripts/test.sh (from ${CRATE_ROOT}/.)\n   Author: Zack Boll\n   Build Switches: \n   Description: Thick Ada binding to OpenCV feature detection and description\n   case Distribution is\n      when Msys2 => Environment: PATH=${CRATE_ROOT}/lib:${PATH}\n   License: Apache-2.0\n   Maintainer: Zack Boll <zackboll@gmail.com>\n   Maintainers_Logins: zackboll\n   Name: opencv_features\n   Project_File: opencv_features.gpr\n   Tag: opencv\n   Tag: computer-vision\n   Tag: binding\n   Tag: ada\n   Version: 0.1.0-dev\n   Website: https://github.com/zackboll/opencv_features_ada\nDependencies (direct):\n   case OS is\n      when Windows => mingw_w64_gcc*\n   opencv*\n   opencv_core~0.5.0\n   pkg_config*\nDependencies (solution):\n   opencv=4.10.0\n   opencv_core=0.5.0\n   pkg_config=1.8.1\nDependencies (graph):\n   opencv_core=0.5.0         --> opencv=4.10.0 (*)\n   opencv_core=0.5.0         --> pkg_config=1.8.1 (*)\n   opencv_features=0.1.0-dev --> opencv=4.10.0 (*)\n   opencv_features=0.1.0-dev --> opencv_core=0.5.0 (~0.5.0)\n   opencv_features=0.1.0-dev --> pkg_config=1.8.1 (*)\n",
+  "gprbuild": "GPRBUILD 26.0.0 (2026-04-15) (x86_64-pc-linux-gnu)\nCopyright (C) 2004-2026, AdaCore\nThis is free software; see the source for copying conditions.\nThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "native_equal": true,
+  "native_first": {
+    "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "8528f405aa2c9fb936d426a026781ff1b720172f3715258edab904c7e68f448b",
+    "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "bcb5d237fcbcbf0ba493e353015c87b809e5543fde43c606c8dd1969d9ed1cfd",
+    "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "bc42228b09c8825211d86149725af11c1857be071cded08a49a79625f526b7ae",
+    "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "b213b4ded5f7a4fb2c5effd458651838a0b074843ec762fc914f05924f0fd81c",
+    "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "api/index.html": "0d4a79efbedd84ceb9107baec943875d34557a2b07d546a3e460a70d1fd83986"
+  },
+  "native_log_equal": true,
+  "native_second": {
+    "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "8528f405aa2c9fb936d426a026781ff1b720172f3715258edab904c7e68f448b",
+    "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "bcb5d237fcbcbf0ba493e353015c87b809e5543fde43c606c8dd1969d9ed1cfd",
+    "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "bc42228b09c8825211d86149725af11c1857be071cded08a49a79625f526b7ae",
+    "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "b213b4ded5f7a4fb2c5effd458651838a0b074843ec762fc914f05924f0fd81c",
+    "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "api/index.html": "0d4a79efbedd84ceb9107baec943875d34557a2b07d546a3e460a70d1fd83986"
+  },
+  "source_hashes": {
+    "opencv-features-correspondences.ads": "5d033b894e254f46bb3913a63a69d7d4eaa3098cda16e9a31ff1fb2d51f20aac",
+    "opencv-features-matching.ads": "5b75e3b3ea94a60cc8b0fa2905a41b628ab2c476f8e0893bf3831e4fa965aca9",
+    "opencv-features-orb.ads": "bb3466d7eef4fa3023c2c8bb308bca346c90e5ebda1558ea5cecbff2cc03d8e9",
+    "opencv-features.ads": "0093e62e69815a369478f74d9a39d92ec811bb6cac7df1adf1af940e1301dd01"
+  },
+  "staged_public_sources": {
+    "opencv-features-correspondences.ads": "5d033b894e254f46bb3913a63a69d7d4eaa3098cda16e9a31ff1fb2d51f20aac",
+    "opencv-features-matching.ads": "5b75e3b3ea94a60cc8b0fa2905a41b628ab2c476f8e0893bf3831e4fa965aca9",
+    "opencv-features-orb.ads": "bb3466d7eef4fa3023c2c8bb308bca346c90e5ebda1558ea5cecbff2cc03d8e9",
+    "opencv-features.ads": "0093e62e69815a369478f74d9a39d92ec811bb6cac7df1adf1af940e1301dd01"
+  },
+  "starting_commit": "71eb93f45b3ee833d4cb2b96a10095aaf0541acd",
+  "starting_tree": "5ad7cef0eb808bc57828509f66aeabeb712c8bc3",
+  "toolchain": "GNAT 16.1.0\nCopyright (C) 1996-2025, Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+}

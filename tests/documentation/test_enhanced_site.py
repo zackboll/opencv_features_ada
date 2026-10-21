@@ -40,7 +40,7 @@ class ProfileTests(unittest.TestCase):
         for revision in ("main", "latest", "0" * 40,
                          "478d0bbff0be1b9141b5ad39f07a71f0386d86e9"):
             with self.subTest(revision=revision), mock.patch.object(support, "install") as install:
-                self.assertEqual(installer.main(["--checkout", str(ROOT), "--venv", "/unused",
+                self.assertEqual(installer.main(["--venv", "/unused",
                                                  "--revision", revision]), 1)
                 install.assert_not_called()
 
@@ -57,9 +57,9 @@ class ProfileTests(unittest.TestCase):
                 support.verified_tool(environment, "0" * 40)
             asset.write_text("modified\n")
             self.assertNotEqual(support.package_hashes(package), record["files"])
-            with mock.patch.object(support, "installed_package", return_value=package):
-                with self.assertRaisesRegex(support.SupportError, "files changed"):
-                    support.verified_tool(environment)
+            with self.assertRaisesRegex(support.SupportError, "files changed"):
+                support.approved_installed_files(
+                    environment, {"package/navigation.js": record["files"]["navigation.js"]})
 
     def test_configuration_is_offline_and_local(self):
         config = tomllib.loads((ROOT / enhance_docs.CONFIG).read_text())
@@ -108,10 +108,10 @@ class ProfileTests(unittest.TestCase):
             with self.assertRaises(support.SupportError):
                 support.stage_public_sources(staged)
 
-    def test_install_requires_a_full_resolvable_revision(self):
+    def test_install_requires_a_new_isolated_environment(self):
         with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaisesRegex(support.SupportError, "full commit SHA"):
-                support.install(Path(directory), "main", Path(directory) / "env")
+            with self.assertRaisesRegex(support.SupportError, "must not exist"):
+                support.install(Path(directory))
 
 
 class SiteLinkTests(unittest.TestCase):

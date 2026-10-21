@@ -1,22 +1,28 @@
 """Shared support for the pinned ada-gnatdoc-enhancer: installation and checks.
 
-The enhancer is a documentation-only tool. It is installed from an exact,
-reviewed Git revision into a private virtual environment, and every
-installed module and asset must equal that revision's Git blobs. The native
+The enhancer is a documentation-only tool, installed from the SHA-256-approved
+official release wheel into a private virtual environment. Installed modules,
+metadata and assets must equal the independently approved wheel members. The native
 comparison here is independent of the enhancer's own ``verify`` operation.
 """
 from __future__ import annotations
 
 import hashlib
+import email.parser
 import html.parser
 import json
 import re
+import shutil
 import subprocess
+import tempfile
+import urllib.parse
+import urllib.request
 import venv
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PINNED_REVISION = "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1"
+PINNED_REVISION = "4ee95e8c95b8c7f54397a07e3e1c507783c115aa"
 PROVENANCE = "gnatdoc-enhancer-provenance.json"
 
 
@@ -66,55 +72,122 @@ def stage_public_sources(destination: Path, root: Path = ROOT) -> list[str]:
     return specs
 
 
-def install(checkout: Path, revision: str, environment: Path,
-            requirements: Path | None = None) -> Path:
-    """Install the exact revision into a new virtual environment.
+def approval() -> dict:
+    """Features-owned trust root, never supplied by a download or receipt."""
+    return json.loads((ROOT / "docs/gnatdoc-enhancer-release.json").read_text())
 
-    Returns the gnatdoc-enhancer executable. Writes a provenance record with
-    the installed file hashes, each proven equal to the revision's Git blob.
-    ``requirements`` optionally installs hash-pinned guide renderer wheels.
-    """
-    if not re.fullmatch(r"[0-9a-f]{40}", revision):
-        raise SupportError("the enhancer revision must be a full commit SHA")
-    resolved = run("git", "-C", str(checkout), "rev-parse",
-                   f"{revision}^{{commit}}").stdout.strip()
-    if resolved != revision:
-        raise SupportError(f"{revision} resolves to {resolved}")
+
+def validate_download_url(url: str) -> None:
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != "https" or parsed.hostname not in
+            {"github.com", "release-assets.githubusercontent.com"} or
+            parsed.port not in (None, 443) or parsed.username or parsed.password):
+        raise SupportError("unapproved download URL")
+
+
+class _ReleaseRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        validate_download_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def download_release(name: str, destination: Path, digest: str, size: int) -> None:
+    approved = approval()
+    url = f"{approved['repository']}/releases/download/{approved['tag']}/{name}"
+    validate_download_url(url)
+    opener = urllib.request.build_opener(_ReleaseRedirect)
+    with opener.open(url, timeout=60) as response:
+        validate_download_url(response.url)
+        data = response.read(size + 1)
+        if response.status != 200 or len(data) != size:
+            raise SupportError(f"incomplete or oversized release download: {name}")
+        if response.headers.get("Content-Length") not in (None, str(size)):
+            raise SupportError(f"incorrect release Content-Length: {name}")
+    if hashlib.sha256(data).hexdigest() != digest:
+        raise SupportError(f"release SHA-256 mismatch: {name}")
+    destination.write_bytes(data)
+
+
+def verify_wheel(path: Path) -> dict:
+    expected = approval()["wheel"]
+    if sha256(path) != expected["sha256"]:
+        raise SupportError("wheel SHA-256 differs from Features-owned approval")
+    if path.stat().st_size != expected["bytes"]:
+        raise SupportError("wheel size differs")
+    with zipfile.ZipFile(path) as wheel:
+        names = wheel.namelist()
+        if len(names) != len(set(names)) or set(names) != set(expected["members"]):
+            raise SupportError("unexpected wheel members")
+        for member in wheel.infolist():
+            if member.is_dir() or (member.external_attr >> 16) & 0o170000 not in (0, 0o100000):
+                raise SupportError("non-regular wheel member")
+            if hashlib.sha256(wheel.read(member)).hexdigest() != expected["members"][member.filename]:
+                raise SupportError("wheel member identity differs")
+        metadata = email.parser.BytesParser().parsebytes(
+            wheel.read("ada_gnatdoc_enhancer-0.1.0.dist-info/METADATA"))
+        if metadata["Name"] != "ada-gnatdoc-enhancer" or metadata["Version"] != "0.1.0":
+            raise SupportError("incorrect wheel metadata")
+        if metadata.get_all("Requires-Dist", []) != [
+                'markdown-it-py==3.0.0; extra == "guides"', 'mdurl==0.1.2; extra == "guides"']:
+            raise SupportError("unexpected core dependencies")
+    return expected
+
+
+def verify_release_provenance(record: dict) -> None:
+    approved = approval()
+    tag = {"name": approved["tag"], "object_sha": approved["tag_object"],
+           "peeled_commit": approved["revision"], "peeled_tree": approved["tree"]}
+    if (any(record.get(k) != approved[v] for k, v in (
+            ("repository", "repository"), ("source_commit", "revision"),
+            ("git_tree", "tree"), ("release_version", "version"))) or
+            any(record.get("annotated_tag", {}).get(k) != v for k, v in tag.items()) or
+            record.get("archive_identities", {}).get("wheel") != {
+                k: approved["wheel"][k] for k in ("name", "bytes", "sha256", "members")} or
+            record.get("assets", {}).get(approved["wheel"]["name"]) != {
+                k: approved["wheel"][k] for k in ("bytes", "sha256")}):
+        raise SupportError("release provenance does not match approved tag/source/archive identity")
+
+
+def verify_tag(directory: Path) -> None:
+    """Fetch into a new Git database; do not trust mutable local tags/checkouts."""
+    approved = approval()
+    run("git", "init", "--quiet", str(directory))
+    run("git", "-c", "http.followRedirects=false", "-C", str(directory), "fetch", "--quiet", "--no-tags",
+        approved["repository"] + ".git", "refs/tags/" + approved["tag"])
+    actual = run("git", "-C", str(directory), "rev-parse", "FETCH_HEAD",
+                 "FETCH_HEAD^{commit}", "FETCH_HEAD^{tree}").stdout.split()
+    kind = run("git", "-C", str(directory), "cat-file", "-t", "FETCH_HEAD").stdout.strip()
+    if actual != [approved["tag_object"], approved["revision"], approved["tree"]] or kind != "tag":
+        raise SupportError("incorrect annotated tag/source identity")
+
+
+def install(environment: Path, requirements: Path | None = None) -> Path:
+    """Acquire and verify official artifacts before creating the isolated venv."""
+    approved = approval()
     if environment.exists():
         raise SupportError(f"{environment} must not exist")
-    source = environment.with_name(environment.name + "-source")
-    if source.exists():
-        raise SupportError(f"{source} must not exist")
-    source.mkdir(parents=True)
-    archive = subprocess.run(["git", "-C", str(checkout), "archive", revision],
-                             check=True, capture_output=True).stdout
-    subprocess.run(["tar", "-x", "-C", str(source)], input=archive, check=True)
-    venv.EnvBuilder(with_pip=True).create(environment)
-    python = environment / "bin/python"
-    run(str(python), "-m", "pip", "install", "--quiet", "--no-deps", str(source))
-    package = installed_package(environment)
-    listed = run("git", "-C", str(checkout), "ls-tree", "-r", "--name-only", revision,
-                 "src/ada_gnatdoc_enhancer").stdout.split()
-    expected = {}
-    for path in listed:
-        blob = subprocess.run(["git", "-C", str(checkout), "show", f"{revision}:{path}"],
-                              check=True, capture_output=True).stdout
-        expected[path.removeprefix("src/ada_gnatdoc_enhancer/")] = \
-            hashlib.sha256(blob).hexdigest()
-    installed = package_hashes(package)
-    if installed != expected:
-        raise SupportError("installed enhancer differs from the reviewed revision")
-    renderer = {}
+    with tempfile.TemporaryDirectory() as directory:
+        temporary = Path(directory)
+        wheel = temporary / approved["wheel"]["name"]
+        download_release(wheel.name, wheel, approved["wheel"]["sha256"], approved["wheel"]["bytes"])
+        verify_wheel(wheel)
+        manifest = temporary / "release-provenance.json"
+        download_release(manifest.name, manifest, approved["provenance_sha256"], 707651)
+        verify_release_provenance(json.loads(manifest.read_text()))
+        verify_tag(temporary / "git")
+        venv.EnvBuilder(with_pip=True).create(environment)
+        python = environment / "bin/python"
+        run(str(python), "-I", "-m", "pip", "install", "--quiet", "--no-deps", "--no-index", str(wheel))
+        (environment / manifest.name).write_bytes(manifest.read_bytes())
     if requirements is not None:
-        run(str(python), "-m", "pip", "install", "--quiet", "--no-deps", "--require-hashes",
+        run(str(python), "-I", "-m", "pip", "install", "--quiet", "--no-deps", "--require-hashes",
             "--only-binary=:all:", "-r", str(requirements))
-        renderer = installed_renderer(environment)
-    tool = environment / "bin/gnatdoc-enhancer"
-    version = run(str(tool), "--version").stdout.strip()
-    (environment / PROVENANCE).write_text(json.dumps(
-        {"revision": revision, "version": version, "files": installed,
-         "guide_renderer": renderer}, indent=2, sort_keys=True) + "\n")
-    return tool
+    # A fixed Features-owned launcher is independently rechecked too. Pip's
+    # generated wrapper varies across pip versions; it is not a trust root.
+    (environment / "bin/gnatdoc-enhancer").write_bytes(launcher(environment))
+    record = installation_identity(environment)
+    (environment / PROVENANCE).write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    return verified_tool(environment)[0]
 
 
 def installed_renderer(environment: Path) -> dict[str, str]:
@@ -130,9 +203,12 @@ def installed_renderer(environment: Path) -> dict[str, str]:
 
 
 def installed_package(environment: Path) -> Path:
-    return Path(run(str(environment / "bin/python"), "-I", "-c",
-                    "import ada_gnatdoc_enhancer,os;"
-                    "print(os.path.dirname(ada_gnatdoc_enhancer.__file__))").stdout.strip())
+    # Locate without importing unverified package code.
+    site = Path(run(str(environment / "bin/python"), "-I", "-c",
+                    "import sysconfig;print(sysconfig.get_path('purelib'))").stdout.strip())
+    if not site.resolve().is_relative_to(environment.resolve()):
+        raise SupportError("package directory escapes isolated environment")
+    return site / "ada_gnatdoc_enhancer"
 
 
 def package_hashes(package: Path) -> dict[str, str]:
@@ -141,15 +217,95 @@ def package_hashes(package: Path) -> dict[str, str]:
 
 
 def verified_tool(environment: Path, revision: str = PINNED_REVISION) -> tuple[Path, dict]:
-    """Re-check an installed environment against its recorded provenance."""
+    """Recheck against source-owned identities, not just a mutable receipt."""
+    if revision != PINNED_REVISION:
+        raise SupportError(f"requested revision {revision} is not {PINNED_REVISION}")
     record = json.loads((environment / PROVENANCE).read_text())
-    if record["revision"] != revision:
-        raise SupportError(f"installed enhancer {record['revision']} is not {revision}")
-    if package_hashes(installed_package(environment)) != record["files"]:
-        raise SupportError("installed enhancer files changed after installation")
-    if installed_renderer(environment) != record.get("guide_renderer", {}):
-        raise SupportError("installed guide renderer changed after installation")
+    if record != installation_identity(environment):
+        raise SupportError("incorrect installation provenance")
     return environment / "bin/gnatdoc-enhancer", record
+
+
+def launcher(environment: Path) -> bytes:
+    return (f"#!{environment}/bin/python -IB\n"
+            "from ada_gnatdoc_enhancer.cli import main\n"
+            "raise SystemExit(main())\n").encode()
+
+
+def approved_installed_files(site: Path, expected: dict[str, str]) -> None:
+    """Exact regular member bytes, plus only pip's installation bookkeeping.
+
+    Bytecode caches are discarded before any package import, so unapproved pyc
+    files cannot bypass the Python-source comparison.
+    """
+    top_names = {name.split('/')[0] for name in expected}
+    actual = {}
+    for top in sorted(top_names):
+        directory = site / top
+        if directory.is_symlink():
+            raise SupportError("installed package is a symbolic link")
+        for path in sorted(directory.rglob("*")):
+            if path.is_symlink():
+                raise SupportError("installed member is a symbolic link")
+            if path.is_file() and "__pycache__" not in path.parts:
+                relative = path.relative_to(site).as_posix()
+                if directory.name.endswith(".dist-info") and path.name in {
+                        "RECORD", "INSTALLER", "REQUESTED", "direct_url.json"}:
+                    continue
+                actual[relative] = sha256(path)
+        for cache in directory.rglob("__pycache__"):
+            shutil.rmtree(cache)
+    checked = {name: digest for name, digest in expected.items() if not name.endswith("/RECORD")}
+    if actual != checked:
+        raise SupportError("installed files changed from independently approved wheel members")
+
+
+def installation_identity(environment: Path) -> dict:
+    approved = approval()
+    package = installed_package(environment)
+    members = approved["wheel"]["members"]
+    approved_installed_files(package.parent, members)
+    files = {name.removeprefix("ada_gnatdoc_enhancer/"): digest
+             for name, digest in members.items() if name.startswith("ada_gnatdoc_enhancer/")}
+    if package_hashes(package) != files:
+        raise SupportError("installed enhancer files changed")
+    renderer = installed_renderer(environment)
+    renderer_files = {}
+    if renderer and renderer != {k: v["version"] for k, v in approved["renderers"].items()}:
+        raise SupportError("incorrect installed guide renderer")
+    for name in renderer:
+        expected = approved["renderers"][name]["members"]
+        approved_installed_files(package.parent, expected)
+        renderer_files.update(expected)
+    for name, directory in (("markdown-it-py", "markdown_it"), ("mdurl", "mdurl")):
+        if name not in renderer and (package.parent / directory).exists():
+            raise SupportError("unrecorded guide renderer package")
+    metadata = package.parent / "ada_gnatdoc_enhancer-0.1.0.dist-info"
+    direct = metadata / "direct_url.json"
+    if direct.exists():
+        origin = json.loads(direct.read_text())
+        if (origin.get("dir_info") or origin.get("vcs_info") or
+                origin.get("archive_info", {}).get("hashes", {}).get("sha256") != approved["wheel"]["sha256"]):
+            raise SupportError("incorrect non-editable wheel installation origin")
+    manifest = environment / "release-provenance.json"
+    if sha256(manifest) != approved["provenance_sha256"]:
+        raise SupportError("installed release provenance SHA-256 differs")
+    verify_release_provenance(json.loads(manifest.read_text()))
+    tool = environment / "bin/gnatdoc-enhancer"
+    if tool.is_symlink() or tool.read_bytes() != launcher(environment):
+        raise SupportError("installed launcher changed")
+    versions = json.loads(run(str(environment / "bin/python"), "-I", "-B", "-c",
+                             "import ada_gnatdoc_enhancer as a, importlib.metadata as m,json;"
+                             "print(json.dumps([a.__version__,m.version('ada-gnatdoc-enhancer')]))").stdout)
+    if versions != [approved["version"], approved["version"]] or \
+            run(str(tool), "--version").stdout.strip() != approved["version"]:
+        raise SupportError("incorrect installed enhancer version")
+    return {k: approved[k] for k in ("schema_version", "repository", "tag", "tag_object",
+                                     "revision", "tree", "version")} | {
+        "wheel_sha256": approved["wheel"]["sha256"],
+        "release_provenance_sha256": approved["provenance_sha256"],
+        "files": files, "distribution_files": members, "guide_renderer": renderer,
+        "renderer_files": renderer_files, "launcher_sha256": hashlib.sha256(launcher(environment)).hexdigest()}
 
 
 def enhancer(tool: Path, command: str, root: Path, config: str, site: Path, *extra: str,
