@@ -40,7 +40,7 @@ def check_correspondences(root: Path) -> None:
           re.search(r"\bPoint\s*\(Train,", source) is not None,
           "correspondences must use public accessors for both feature sets")
 
-def check_clean_consumer(root: Path) -> None:
+def check_clean_consumer(root: Path, manifests: list) -> None:
     fixture = (root / "scripts/features_clean_consumer.adb").read_text()
     fixture = re.sub(r"--[^\n]*", "", fixture)
     contexts = set(re.findall(r"^with\s+([\w.]+)\s*;", fixture, re.IGNORECASE | re.MULTILINE))
@@ -60,11 +60,30 @@ def check_clean_consumer(root: Path) -> None:
                       "check_consumer_install.py"):
         check(operation in validator, f"missing consumer stage: {operation}")
     check("with opencv_core --use" not in validator, "do not manually select Core")
+    check("install_resolved_consumer.sh" in validator,
+          "consumer install must use a script file, not an escaped sh -c payload")
     check("sh -c" not in validator, "do not pass quoted scripts through alr exec")
     installer = (root / "scripts/install_resolved_consumer.sh").read_text()
-    check('grep -E \'^version *= *"0\\.5\\.0"\'' in installer,
-          "resolved Core manifest must be version 0.5.0")
+    validation = '"$python" "$script_dir/validate_core_manifest.py" "$manifest"'
+    check(validation in installer and (root / "scripts/validate_core_manifest.py").is_file(),
+          "installer must parse the resolved Core manifest with the stable 0.5.x validator")
+    check("python=python3" in installer and "MINGW*|MSYS*) python=python" in installer,
+          "manifest validator must use the platform Python selection")
+    for operation in ('> "$work/core-source.txt"', '> "$work/toolchain-path.txt"',
+                      "gprinstall -f -p -r"):
+        check(operation in installer and installer.index(validation) < installer.index(operation),
+              "Core manifest validation must precede evidence writes and installation")
+    check("grep -E" not in installer, "do not validate Core manifests with line matching")
+    for workspace in ("candidate", "unavailable-candidate", "features_clean_consumer",
+                      "unavailable-source-consumer"):
+        check(f'"$work/{workspace}"*' in installer,
+              "installer must reject every Features workspace pin")
     check("gprinstall -f -p -r" in installer, "installer must recursively install projects")
+    names = [manifest["name"] for manifest in manifests]
+    check(names == ["opencv_features", "opencv_features_tests", "opencv_features_examples"],
+          "crate identities must stay independent")
+    check(all(manifest["version"] == "0.1.0" for manifest in manifests),
+          "release manifests must be version 0.1.0")
     check("alr -n exec -- sh" in validator and "install_resolved_consumer.sh" in validator,
           "installer must run through alr exec as a script file")
     cross = (root / ".github/workflows/cross-platform.yml").read_text()
@@ -87,7 +106,7 @@ def main() -> None:
     check(not dependencies & {"aunit", "gnatprove", "gnatcov", "opencv_imgproc", "opencv_geometry", "opencv_calib3d"},
           "production dependency boundary changed")
     core = next(group["opencv_core"] for group in production["depends-on"] if "opencv_core" in group)
-    check(core == "~0.5.0", "production Core dependency must be the indexed 0.5.0 constraint")
+    check(core == "~0.5.0", "production Core dependency must be the indexed ~0.5.0 constraint")
     for manifest in manifests:
         pins = manifest.get("pins", [])
         check(all("opencv_core" not in pin for pin in pins),
@@ -106,7 +125,7 @@ def main() -> None:
     check(all(re.search(r"\b" + n + r"\s*\(", cpp) for n in declared), "missing C++ export")
     check_bridge_ownership(ROOT)
     check_correspondences(ROOT)
-    check_clean_consumer(ROOT)
+    check_clean_consumer(ROOT, manifests)
     check_workflows(ROOT / ".github/workflows")
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()

@@ -32,15 +32,16 @@ reference with the developer portal and the seven guides, as the project site
 `_site-enhanced` directory that the existing pipeline generates and qualifies;
 there is no second documentation build and no source file is published.
 
-**Status: Pages-qualified implementation, awaiting final evidence-head CI and
-independent review; not publicly deployed by this campaign.** Hosted implementation
-qualification passed including actual uploaded-artifact verification, with the
-deployment job skipped. DOC-010 removes
-the title blocker and narrowly corrects the navigation slash false positive.
-See [fresh qualification evidence](evidence/features-doc-010/README.md) for the
-exact tested identities and hosted status. Do not describe the public site as
-available until a human merge, successful main deployment and public route
-verification have actually occurred.
+**Status: publicly deployed from main.** Documentation run
+[39196259148](https://github.com/zackboll/opencv_features_ada/actions/runs/39196259148)
+qualified and deployed main `71eb93f45b3ee833d4cb2b96a10095aaf0541acd`.
+GitHub deployment `7165250076` completed successfully on 2026-10-19; the portal
+and API route were independently fetched successfully during FEATURES-REL-014.
+DOC-010 removed the title blocker and narrowly corrected the navigation slash
+false positive. The [DOC-010 evidence](evidence/features-doc-010/README.md)
+remains historical pre-merge evidence; its skipped deployment does not describe
+the later main run. Candidate documentation qualification is separate from
+publication of the existing main site.
 
 The site describes the development sources on `main` (version 0.1.0-dev). It is
 not a release, and Features 0.1.0 is not accepted into the Alire index.
@@ -207,12 +208,10 @@ FEATURES_ENHANCED_SITE="$PWD/_site-enhanced" python3 -m unittest tests.documenta
    environment allowed deployments from `main` only (Settings → Environments →
    `github-pages` → Deployment branches and tags). No deployment had been made.
 2. After independent review and a human merge, the `push` run on `main` must
-   pass `native-gnatdoc`. While the title requirement is unmet, `deploy-pages`
-   is skipped and the run carries a `GitHub Pages deployment blocked` warning:
-   that is the expected outcome, not a deployment.
-3. Once a reviewed change makes every page titled, the next `push` to `main`
-   deploys. Confirm the `deploy-pages` job and the `github-pages` deployment
-   succeeded, then check the public site:
+   pass `native-gnatdoc`. A site failing the publication requirements must not
+   deploy. DOC-010 satisfied the former title blocker; main has now deployed.
+3. For every subsequent deployment, confirm `deploy-pages` and the
+   `github-pages` deployment succeeded, then check the public site:
 
    ```sh
    curl --fail --silent --show-error --location https://zackboll.github.io/opencv_features_ada/ | grep '<h1>OpenCV Features for Ada</h1>'
@@ -221,8 +220,8 @@ FEATURES_ENHANCED_SITE="$PWD/_site-enhanced" python3 -m unittest tests.documenta
    DOC_URL=https://zackboll.github.io/opencv_features_ada/api/index.html node tests/documentation/test_enhanced_browser.cjs
    ```
 
-4. Only then change the README from the "not yet published" note to a
-   confirmed link.
+4. Keep the README publication status evidence-based. The confirmed link now
+   records the successful main deployment, not a release-publication claim.
 
 To stop further deployments, disable the workflow (Actions → Ada API
 Documentation → Disable workflow) or remove `main` from the environment's

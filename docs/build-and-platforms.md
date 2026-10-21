@@ -66,7 +66,8 @@ GPRinstall needs these to emit an installed library project, not an abstract
 project. `Externally_Built = True` still prevents duplicate GPRbuild compilation.
 `Install.Required_Artifacts` requires `lib/libopencv_features_shim.dll.a` beside
 the installed DLL under `lib/opencv_features_shim`; a stale static archive is
-not a substitute. Core 0.4.1 has the corresponding Core correction.
+not a substitute. Indexed Core 0.5.0 supplies the corresponding Core import
+library through the Alire installation, not through the removed 0.4.1 pin.
 
 Build Ada with its selected GNAT compiler. Do not put MSYS2's compiler at
 the front of the Ada build PATH. The test launcher changes runtime DLL lookup
@@ -78,8 +79,10 @@ Windows CI is post-merge only: `windows-post-merge.yml` triggers exclusively
 on pushes to `main`, with neither PR nor manual dispatch triggers. Corrected
 code Windows qualification is deliberately deferred until it lands on main.
 MSYS2 provider updates may require reviewed maintenance rather than weakening
-compiler/runtime checks. Installation uses `pacman -Sy --noconfirm --needed`,
-not an unnecessary full system upgrade.
+compiler/runtime checks. The post-merge workflow performs the supported MSYS2
+two-step full upgrade (`pacman -Syu` twice) before
+`pacman -S --noconfirm --needed`. Do not return to a partial `pacman -Sy`
+transaction.
 
 ## CI routing
 
@@ -113,7 +116,7 @@ WITH_ADE is explicitly OFF: OpenCV 4.1's G-API initialization otherwise adds
 an unused ADE target before whitelist exclusion, failing with modern GCC's
 missing transitive `<cstdint>` include. G-API is not part of this ORB profile.
 
-Before release, test `alr build`, `alr test`, examples, all target backends,
+Before tagging, test `alr build`, `alr test`, examples, all target backends,
 compiler/runtime dependencies, `gprinstall`/clean consumer linkage, and source
 package contents. No release automation is included. The only publishing
 workflow deploys the documentation site to GitHub Pages, from `main` and once

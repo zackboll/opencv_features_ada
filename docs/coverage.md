@@ -1,15 +1,31 @@
 # Features binding coverage
 
+FEATURES-REL-014R1 aligns installed-consumer manifest validation with unchanged
+`opencv_core ~0.5.0`: parsed TOML identity and stable 0.5.x versions are required
+before any installation. Configuration fixtures cover 0.5.0/0.5.1/0.5.2 and
+incompatible/malformed/missing manifests, unchanged prefixes on failure, both
+installation calls, workspace-pin rejection and Unix/MSYS2 Python selection.
+These are packaging fixtures, not indexed 0.5.2 or Windows execution claims.
+The public API, **67 AUnit registrations and 17 native exports are unchanged**.
+
+The reconciled 0.1.0 source candidate retains all merged documentation and
+consumer corrections. **67 AUnit registrations and 17 native exports remain
+unchanged.** Indexed `opencv_core ~0.5.0` remains the production dependency.
+Configuration discovery checks the release version and the unescaped Core
+manifest assertion; it does not replace the native consumer runs in
+`bootstrap-validation.md`. See `release-0.1.0-qualification.md` for current
+release qualification; the task records below are historical.
+
 Task 013-W3 adds the recorded indexed Core source root to the existing
 consumer PATH removals. **67 AUnit registrations and 17 native exports remain
-unchanged.** Crate versions remain `0.1.0-dev` and Core remains indexed
+unchanged.** At that task's baseline crate versions remained `0.1.0-dev` and Core remained indexed
 `~0.5.0`. The source-path auditor is unchanged: a surviving Core path in a
 GPRls diagnostic still fails. Configuration fixtures are not Windows
 qualification. See `bootstrap-validation.md`.
 
 Task 013-W1 changes only the consumer installer invocation and its checks.
 **67 AUnit registrations and 17 native exports remain unchanged.** Crate
-versions remain `0.1.0-dev`. The new configuration cases reject a wrong Core
+versions remained `0.1.0-dev` at that baseline. The new configuration cases reject a wrong Core
 version, a missing manifest, a workspace pin, and each failed GPRinstall
 without treating a Linux mock as Windows qualification.
 
