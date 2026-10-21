@@ -1,0 +1,96 @@
+test_installed_bridge_preferred (test_configure.ConfigureTests.test_installed_bridge_preferred) ... ok
+test_legacy_include_metadata (test_configure.ConfigureTests.test_legacy_include_metadata) ... ok
+test_missing_bridge (test_configure.ConfigureTests.test_missing_bridge) ... ok
+test_missing_core_prefix (test_configure.ConfigureTests.test_missing_core_prefix) ... ok
+test_missing_header (test_configure.ConfigureTests.test_missing_header) ... ok
+test_missing_metadata (test_configure.ConfigureTests.test_missing_metadata) ... ok
+test_opencv4_source_bridge_and_space_paths (test_configure.ConfigureTests.test_opencv4_source_bridge_and_space_paths) ... ok
+test_opencv5 (test_configure.ConfigureTests.test_opencv5) ... ok
+test_unsupported_versions (test_configure.ConfigureTests.test_unsupported_versions) ... ok
+test_active_compiler_include_trace_rejected_with_provenance (test_consumer_install.InstallAuditTests.test_active_compiler_include_trace_rejected_with_provenance) ... ok
+test_active_linker_source_trace_rejected_despite_valid_installed_paths (test_consumer_install.InstallAuditTests.test_active_linker_source_trace_rejected_despite_valid_installed_paths) ... ok
+test_gprls_source_diagnostic_is_not_exempted (test_consumer_install.InstallAuditTests.test_gprls_source_diagnostic_is_not_exempted) ... ok
+test_original_prefix_lookup_is_rejected (test_consumer_install.InstallAuditTests.test_original_prefix_lookup_is_rejected) ... ok
+test_removed_prefix_in_actual_trace_is_rejected (test_consumer_install.InstallAuditTests.test_removed_prefix_in_actual_trace_is_rejected) ... ok
+test_removed_prefix_library_option_is_rejected (test_consumer_install.InstallAuditTests.test_removed_prefix_library_option_is_rejected) ... ok
+test_removed_prefix_linker_trace_rejected_with_provenance (test_consumer_install.InstallAuditTests.test_removed_prefix_linker_trace_rejected_with_provenance) ... ok
+test_source_in_actual_resolution_trace_is_rejected (test_consumer_install.InstallAuditTests.test_source_in_actual_resolution_trace_is_rejected) ... ok
+test_source_include_used_by_compiler_is_rejected (test_consumer_install.InstallAuditTests.test_source_include_used_by_compiler_is_rejected) ... ok
+test_source_library_linker_option_is_rejected (test_consumer_install.InstallAuditTests.test_source_library_linker_option_is_rejected) ... ok
+test_trace_must_resolve_both_projects_and_libraries (test_consumer_install.InstallAuditTests.test_trace_must_resolve_both_projects_and_libraries) ... ok
+test_unknown_textual_diagnostic_is_not_exempted (test_consumer_install.InstallAuditTests.test_unknown_textual_diagnostic_is_not_exempted) ... ok
+test_unused_build_provenance_is_not_a_lookup (test_consumer_install.InstallAuditTests.test_unused_build_provenance_is_not_a_lookup) ... ok
+test_valid_prefix_a_and_b_traces_pass (test_consumer_install.InstallAuditTests.test_valid_prefix_a_and_b_traces_pass) ... ok
+test_windows_drive_case_separator_and_short_parent_rejected (test_consumer_install.InstallAuditTests.test_windows_drive_case_separator_and_short_parent_rejected) ... ok
+test_windows_separators_are_audited (test_consumer_install.InstallAuditTests.test_windows_separators_are_audited) ... ok
+test_windows_source_path_is_rejected (test_consumer_install.InstallAuditTests.test_windows_source_path_is_rejected) ... ok
+test_windows_valid_drive_and_short_parent_lookups_pass (test_consumer_install.InstallAuditTests.test_windows_valid_drive_and_short_parent_lookups_pass) ... ok
+test_actual_core_pin_record (test_consumer_path.ConsumerPathTests.test_actual_core_pin_record) ... ok
+test_actual_short_parent_candidate_record (test_consumer_path.ConsumerPathTests.test_actual_short_parent_candidate_record) ... ok
+test_cli_outputs_shell_path (test_consumer_path.ConsumerPathTests.test_cli_outputs_shell_path) ... ok
+test_colon_drive_and_mixed_shell_entries (test_consumer_path.ConsumerPathTests.test_colon_drive_and_mixed_shell_entries) ... ok
+test_component_boundary_not_word_filter (test_consumer_path.ConsumerPathTests.test_component_boundary_not_word_filter) ... ok
+test_core_source_read_preserves_windows_backslashes (test_consumer_path.ConsumerPathTests.test_core_source_read_preserves_windows_backslashes) ... ok
+test_cygpath_long_absolute_mixed_conversion (test_consumer_path.ConsumerPathTests.test_cygpath_long_absolute_mixed_conversion) ... ok
+test_empty_and_all_removed (test_consumer_path.ConsumerPathTests.test_empty_and_all_removed) ... ok
+test_indexed_core_root_and_lib_are_removed (test_consumer_path.ConsumerPathTests.test_indexed_core_root_and_lib_are_removed) ... ok
+test_indexed_core_windows_case_slashes_and_short_parent (test_consumer_path.ConsumerPathTests.test_indexed_core_windows_case_slashes_and_short_parent) ... ok
+test_native_semicolon_and_drive_letters (test_consumer_path.ConsumerPathTests.test_native_semicolon_and_drive_letters) ... ok
+test_posix (test_consumer_path.ConsumerPathTests.test_posix) ... ok
+test_preserves_selected_tools_and_independent_runtime (test_consumer_path.ConsumerPathTests.test_preserves_selected_tools_and_independent_runtime) ... ok
+test_removed_prefix_a (test_consumer_path.ConsumerPathTests.test_removed_prefix_a) ... ok
+test_repository_source (test_consumer_path.ConsumerPathTests.test_repository_source) ... ok
+test_shell_source_entries (test_consumer_path.ConsumerPathTests.test_shell_source_entries) ... ok
+test_validator_passes_recorded_core_source_to_sanitizer (test_consumer_path.ConsumerPathTests.test_validator_passes_recorded_core_source_to_sanitizer) ... ok
+test_windows_case_and_slashes (test_consumer_path.ConsumerPathTests.test_windows_case_and_slashes) ... ok
+test_surviving_path_report_is_rejected (test_consumer_path.PathAuditTests.test_surviving_path_report_is_rejected) ... ok
+test_ci_evidence_output_does_not_change_local_directory_selection (test_consumer_validation.ConsumerValidationTests.test_ci_evidence_output_does_not_change_local_directory_selection) ... ok
+test_failed_find_cannot_be_masked_by_sort (test_consumer_validation.ConsumerValidationTests.test_failed_find_cannot_be_masked_by_sort) ... ok
+test_failure_artifact_is_narrow_and_post_merge_only (test_consumer_validation.ConsumerValidationTests.test_failure_artifact_is_narrow_and_post_merge_only) ... ok
+test_installer_preserves_each_gprinstall_failure (test_consumer_validation.ConsumerValidationTests.test_installer_preserves_each_gprinstall_failure) ... ok
+test_installer_rejects_bad_core_before_writing_prefix_evidence (test_consumer_validation.ConsumerValidationTests.test_installer_rejects_bad_core_before_writing_prefix_evidence) ... ok
+test_missing_core_shim_rejected (test_consumer_validation.ConsumerValidationTests.test_missing_core_shim_rejected) ... ok
+test_missing_native_features_rejected (test_consumer_validation.ConsumerValidationTests.test_missing_native_features_rejected) ... ok
+test_native_features_and_core_shim_without_direct_core (test_consumer_validation.ConsumerValidationTests.test_native_features_and_core_shim_without_direct_core) ... ok
+test_qualifier_uses_checked_helpers (test_consumer_validation.ConsumerValidationTests.test_qualifier_uses_checked_helpers) ... ok
+test_removed_cwd_recovers_before_artifact_checks (test_consumer_validation.ConsumerValidationTests.test_removed_cwd_recovers_before_artifact_checks) ... ok
+test_source_rename_leaves_valid_cwd_and_sorted_inventory (test_consumer_validation.ConsumerValidationTests.test_source_rename_leaves_valid_cwd_and_sorted_inventory) ... ok
+test_unrelated_names_rejected (test_consumer_validation.ConsumerValidationTests.test_unrelated_names_rejected) ... ok
+test_windows_case_variation (test_consumer_validation.ConsumerValidationTests.test_windows_case_variation) ... ok
+test_windows_style_evidence_path_is_not_a_quote_failure (test_consumer_validation.ConsumerValidationTests.test_windows_style_evidence_path_is_not_a_quote_failure) ... ok
+test_bridge_dependency_caches_are_not_vendoring (test_repository.RepositoryTests.test_bridge_dependency_caches_are_not_vendoring) ... ok
+test_clean_consumer_contract (test_repository.RepositoryTests.test_clean_consumer_contract) ... ok
+test_clean_consumer_rejects_private_packages_or_lookup (test_repository.RepositoryTests.test_clean_consumer_rejects_private_packages_or_lookup) ... ok
+test_correspondences_public_ada_boundary (test_repository.RepositoryTests.test_correspondences_public_ada_boundary) ... ok
+test_correspondences_reject_private_or_native_access (test_repository.RepositoryTests.test_correspondences_reject_private_or_native_access) ... ok
+test_each_consumer_workflow_stage_is_required (test_repository.RepositoryTests.test_each_consumer_workflow_stage_is_required) ... ok
+test_ambiguous_or_unsupported_routing_fails_closed (test_repository.WorkflowTests.test_ambiguous_or_unsupported_routing_fails_closed) ... ok
+test_current_topology (test_repository.WorkflowTests.test_current_topology) ... ok
+test_equivalent_formatting (test_repository.WorkflowTests.test_equivalent_formatting) ... ok
+test_forbidden_windows_events (test_repository.WorkflowTests.test_forbidden_windows_events) ... ok
+test_main_push_required (test_repository.WorkflowTests.test_main_push_required) ... ok
+test_manual_compatibility_only (test_repository.WorkflowTests.test_manual_compatibility_only) ... ok
+test_sanitizer_runner_must_be_linux (test_repository.WorkflowTests.test_sanitizer_runner_must_be_linux) ... ok
+test_step_scripts_are_opaque (test_repository.WorkflowTests.test_step_scripts_are_opaque) ... ok
+test_windows_pr_job_rejected_even_if_conditional (test_repository.WorkflowTests.test_windows_pr_job_rejected_even_if_conditional) ... ok
+test_windows_runner_or_matrix_rejected (test_repository.WorkflowTests.test_windows_runner_or_matrix_rejected) ... ok
+test_current_sequence (test_windows_packages.WindowsPackageTests.test_current_sequence) ... ok
+test_equivalent_full_upgrade_forms (test_windows_packages.WindowsPackageTests.test_equivalent_full_upgrade_forms) ... ok
+test_existing_failure_artifact_preserved (test_windows_packages.WindowsPackageTests.test_existing_failure_artifact_preserved) ... ok
+test_failures_and_consistency_check_required (test_windows_packages.WindowsPackageTests.test_failures_and_consistency_check_required) ... ok
+test_no_refresh_during_install (test_windows_packages.WindowsPackageTests.test_no_refresh_during_install) ... ok
+test_partial_upgrade_rejected (test_windows_packages.WindowsPackageTests.test_partial_upgrade_rejected) ... ok
+test_required_packages_and_environment (test_windows_packages.WindowsPackageTests.test_required_packages_and_environment) ... ok
+
+----------------------------------------------------------------------
+Ran 83 tests in 0.193s
+
+OK
+non-load-bearing unused build variable: /tmp/features-consumer._0v9l19w/relocated-longer-prefix-b/share/gpr/shim.gpr: Common_Cxx_Switches := ("-I/tmp/features-consumer._0v9l19w/candidate/core");
+Installed/relocated project and library resolution VERIFIED
+No source-path metadata findings
+Installed/relocated project and library resolution VERIFIED
+No source-path metadata findings
+Installed/relocated project and library resolution VERIFIED
+No source-path metadata findings
+Installed/relocated project and library resolution VERIFIED

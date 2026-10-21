@@ -1,4 +1,30 @@
-# GitHub Pages publication (DOC-009 / DOC-010)
+# GitHub Pages publication (DOC-009 / DOC-010 / DOC-011)
+
+## DOC-011 active enhancer dependency
+
+The active documentation dependency is the official **ada-gnatdoc-enhancer
+v0.1.0 GitHub release wheel**, source commit
+`4ee95e8c95b8c7f54397a07e3e1c507783c115aa`, verified against Features-owned
+SHA-256 `b0949aba6736515bf2ebe14fc7cc30c816a176257fc4524564285397b8aaf97d`.
+See [installation identities and procedure](gnatdoc-enhancer-integration.md#active-dependency-official-v010-doc-011)
+and [DOC-011 qualification](evidence/features-doc-011/README.md).
+This supersedes only the active development-tool pin below; DOC-009/010 evidence
+remains historical. It does not change the Features source-release status.
+
+The two-job architecture and deployment policy are unchanged. `native-gnatdoc`
+has read-only repository permissions and qualifies the actual uploaded Pages
+artifact downloaded by immutable ID, including byte comparison with the local
+archive and all 18 qualified site files. Only `deploy-pages` has Pages/id-token
+write permissions, and only a successful publication-ready **push to main** can
+deploy through the main-only `github-pages` environment. Pull requests and manual
+dispatches never deploy. No environment restrictions were changed.
+
+Local v0.1.0 qualification preserves all 13 source-owned page titles and metadata,
+248 relative references/fragments, all three Chromium campaigns (64, 199 and 64
+assertions), the project prefix and the independent JavaScript authority. The
+only output byte change is the release version in the rebuilt presentation
+manifest. Exact-final-head hosted status is recorded on the DOC-011 review PR;
+local archive synthesis is not evidence of an actual GitHub upload or deployment.
 
 The documentation workflow publishes the qualified enhanced site, the API
 reference with the developer portal and the seven guides, as the project site

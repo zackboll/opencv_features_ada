@@ -1,0 +1,198 @@
+{
+  "enhancer": {
+    "assets": {
+      "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+      "assets/gnatdoc-instance-navigation.js": "97dcc75055842e98a6294809b8e8c4e7436a427039d19c8afb6fdd1ca21ea310",
+      "assets/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+      "assets/gnatdoc-symbol-navigation.js": "233cf43211a711d0d64dfba2815bc2d9cc887720faed0ca38f464bc6d29e145f",
+      "assets/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc"
+    },
+    "installed_equals_revision": true,
+    "installed_files": 35,
+    "revision": "4ee95e8c95b8c7f54397a07e3e1c507783c115aa",
+    "version": "0.1.0"
+  },
+  "failures": [],
+  "pristine_site": {
+    "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "8528f405aa2c9fb936d426a026781ff1b720172f3715258edab904c7e68f448b",
+    "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "bcb5d237fcbcbf0ba493e353015c87b809e5543fde43c606c8dd1969d9ed1cfd",
+    "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "bc42228b09c8825211d86149725af11c1857be071cded08a49a79625f526b7ae",
+    "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "b213b4ded5f7a4fb2c5effd458651838a0b074843ec762fc914f05924f0fd81c",
+    "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "api/index.html": "0d4a79efbedd84ceb9107baec943875d34557a2b07d546a3e460a70d1fd83986"
+  },
+  "pristine_site_unchanged": true,
+  "profiles": {
+    "conservative": {
+      "byte_idempotent": true,
+      "dry_run": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 0,
+        "linked_types": 0,
+        "links": 56,
+        "mode": "dry-run",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      },
+      "dry_run_left_site_unchanged": true,
+      "enhance": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 0,
+        "linked_types": 0,
+        "links": 56,
+        "mode": "enhanced",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      },
+      "enhanced_site": {
+        "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "5a68da322a2adaa109020dea0150e8dcf83a545bcaa0bfc4807057135101519d",
+        "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "55351162b5c214cebdc0167cfa8960f872dc843e852c44baa03bbadcfc80e3a2",
+        "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "187bc443bbd28abce5c9dc12265ed621ceeb3684525330ffe74e0422b41757f7",
+        "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "ca3eb82cff6b35438822361bc4ad15122c0638dec40dbf6b601e5f5a60888beb",
+        "api/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+        "api/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+        "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+        "api/index.html": "60ffd3519d5bfacab78beea825daee4140b38e15a96a2c782e759819dbbb9cf4",
+        "api/presentation.json": "c47e152b765d46fd63881f7601917e47d5c40319b994a27122f14b63d6318af1"
+      },
+      "inventory": {
+        "native_declaration_sections": 38,
+        "project": "OpenCV Features Ada",
+        "public_packages": [
+          "OpenCV.Features",
+          "OpenCV.Features.Correspondences",
+          "OpenCV.Features.Matching",
+          "OpenCV.Features.ORB"
+        ]
+      },
+      "mutations": {
+        "injected external URL": "gnatdoc-enhancer: published file differs from reconstructed output: api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "injected script": "gnatdoc-enhancer: published file differs from reconstructed output: api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "native anchor id": "gnatdoc-enhancer: published file differs from reconstructed output: api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "native heading text": "gnatdoc-enhancer: published file differs from reconstructed output: api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "native stylesheet": "gnatdoc-enhancer: native GNATdoc stylesheet has changed",
+        "navigation asset": "gnatdoc-enhancer: published file differs from reconstructed output: api/gnatdoc-navigation.js",
+        "presentation manifest": "gnatdoc-enhancer: Expecting property name enclosed in double quotes: line 2 column 3 (char 4)",
+        "staged source comment": "gnatdoc-enhancer: source differs from qualified presentation manifest",
+        "staged source default value": "gnatdoc-enhancer: source differs from qualified presentation manifest",
+        "theme asset": "gnatdoc-enhancer: published file differs from reconstructed output: api/gnatdoc-theme.css",
+        "unapproved extra file": "gnatdoc-enhancer: unapproved output file: api/extra.html"
+      },
+      "native_comparison": {
+        "added_files": [
+          "gnatdoc-navigation.js",
+          "gnatdoc-theme.css",
+          "presentation.json"
+        ],
+        "errors": [],
+        "scripts": {
+          "index.html": [
+            "gnatdoc-navigation.js"
+          ]
+        }
+      },
+      "two_fresh_runs_identical": true,
+      "verify": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 0,
+        "linked_types": 0,
+        "links": 56,
+        "mode": "verified",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      }
+    },
+    "local-type-links": {
+      "byte_idempotent": true,
+      "dry_run": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 47,
+        "linked_types": 47,
+        "links": 103,
+        "mode": "dry-run",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      },
+      "dry_run_left_site_unchanged": true,
+      "enhance": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 47,
+        "linked_types": 47,
+        "links": 103,
+        "mode": "enhanced",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      },
+      "enhanced_site": {
+        "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "68ccd873f4f1cae094a6282a6f346e8711f5932d34b804ab1e1fecc3e41e07aa",
+        "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "bd3475083566736854bbf751d4f2525db74d8ec74c601962d676e0b9eb7e2fd0",
+        "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "7f07159f36cff3827ec11d10766a375b9203a996be6112867beecb965ddad938",
+        "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "0279845dab4b00d8d40d8ad22a4843ae2f9c8efd74719ead3dc7cb9382ef2f86",
+        "api/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+        "api/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+        "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+        "api/index.html": "60ffd3519d5bfacab78beea825daee4140b38e15a96a2c782e759819dbbb9cf4",
+        "api/presentation.json": "c09ddd31fe9c961d5d9dca4dcf8b2c23f2fa8a0d3dde8552c9613068f75e9040"
+      },
+      "inventory": {
+        "native_declaration_sections": 38,
+        "project": "OpenCV Features Ada",
+        "public_packages": [
+          "OpenCV.Features",
+          "OpenCV.Features.Correspondences",
+          "OpenCV.Features.Matching",
+          "OpenCV.Features.ORB"
+        ]
+      },
+      "native_comparison": {
+        "added_files": [
+          "gnatdoc-navigation.js",
+          "gnatdoc-theme.css",
+          "presentation.json"
+        ],
+        "errors": [],
+        "scripts": {
+          "index.html": [
+            "gnatdoc-navigation.js"
+          ]
+        }
+      },
+      "two_fresh_runs_identical": true,
+      "verify": {
+        "declaration_snippets": 38,
+        "files": 9,
+        "html_pages": 5,
+        "linked_external_types": 0,
+        "linked_local_types": 47,
+        "linked_types": 47,
+        "links": 103,
+        "mode": "verified",
+        "public_packages": 4,
+        "unrendered_renderer_exceptions": 0
+      }
+    }
+  },
+  "result": "pass",
+  "staged_public_specifications": [
+    "opencv-features.ads",
+    "opencv-features-orb.ads",
+    "opencv-features-matching.ads",
+    "opencv-features-correspondences.ads"
+  ],
+  "unstaged_repository_layout": "gnatdoc-enhancer: public package inventory mismatch: ['opencv.features.internal', 'opencv.features.internal.c_api']"
+}

@@ -1,0 +1,1 @@
+PASS: installed /tmp/features-doc-011/old-venv/bin/gnatdoc-enhancer from 23cf51d3765e7b3f68411e25a57f52f4c0efc7e1; installed files equal Git blobs

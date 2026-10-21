@@ -1,0 +1,115 @@
+{
+  "actual_upload_equals_qualified_site": true,
+  "actual_uploaded_archive_sha256": "91c6fc685b53abd39a324eff0631ece23eb1a078e098f196d5965270d041128e",
+  "artifacts": [
+    {
+      "archive_download_url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319385868/zip",
+      "created_at": "2026-10-21T03:39:05Z",
+      "digest": "sha256:382e2e72e07d7d4cb673499e6ce3843136f4e938a1979d322d203e100404253e",
+      "expired": false,
+      "expires_at": "2027-01-19T03:34:31Z",
+      "id": 12319385868,
+      "name": "gnatdoc-diagnostics-e29ba37d80a439e425acc34057cdc168625086ff",
+      "node_id": "MDg6QXJ0aWZhY3QxMjMxOTM4NTg2OA==",
+      "size_in_bytes": 35651,
+      "updated_at": "2026-10-21T03:39:05Z",
+      "url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319385868",
+      "workflow_run": {
+        "head_branch": "docs/011-adopt-enhancer-v0.1.0",
+        "head_repository_id": 1403791509,
+        "head_sha": "e29ba37d80a439e425acc34057cdc168625086ff",
+        "id": 39539323421,
+        "repository_id": 1403791509
+      }
+    },
+    {
+      "archive_download_url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319206046/zip",
+      "created_at": "2026-10-21T03:38:54Z",
+      "digest": "sha256:3788771cff1806ec378fcf10d335d764efe892d42f4b96da348f558869d13b7b",
+      "expired": false,
+      "expires_at": "2027-01-19T03:34:31Z",
+      "id": 12319206046,
+      "name": "features-api-e29ba37d80a439e425acc34057cdc168625086ff",
+      "node_id": "MDg6QXJ0aWZhY3QxMjMxOTIwNjA0Ng==",
+      "size_in_bytes": 15801,
+      "updated_at": "2026-10-21T03:38:54Z",
+      "url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319206046",
+      "workflow_run": {
+        "head_branch": "docs/011-adopt-enhancer-v0.1.0",
+        "head_repository_id": 1403791509,
+        "head_sha": "e29ba37d80a439e425acc34057cdc168625086ff",
+        "id": 39539323421,
+        "repository_id": 1403791509
+      }
+    },
+    {
+      "archive_download_url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319016254/zip",
+      "created_at": "2026-10-21T03:38:55Z",
+      "digest": "sha256:5f4c0b6e7ef32c5e4245b3d79a1a089f22f7101c6b336fa77acce0052b7aaaec",
+      "expired": false,
+      "expires_at": "2027-01-19T03:34:31Z",
+      "id": 12319016254,
+      "name": "features-api-enhanced-e29ba37d80a439e425acc34057cdc168625086ff",
+      "node_id": "MDg6QXJ0aWZhY3QxMjMxOTAxNjI1NA==",
+      "size_in_bytes": 60610,
+      "updated_at": "2026-10-21T03:38:55Z",
+      "url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319016254",
+      "workflow_run": {
+        "head_branch": "docs/011-adopt-enhancer-v0.1.0",
+        "head_repository_id": 1403791509,
+        "head_sha": "e29ba37d80a439e425acc34057cdc168625086ff",
+        "id": 39539323421,
+        "repository_id": 1403791509
+      }
+    },
+    {
+      "archive_download_url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319001473/zip",
+      "created_at": "2026-10-21T03:39:03Z",
+      "digest": "sha256:e9c581a5d176a1acae131e23f8c9c14b01a5d02126e4e19d5fc3f37a0e3f4f2b",
+      "expired": false,
+      "expires_at": "2026-10-22T03:39:03Z",
+      "id": 12319001473,
+      "name": "github-pages",
+      "node_id": "MDg6QXJ0aWZhY3QxMjMxOTAwMTQ3Mw==",
+      "size_in_bytes": 44269,
+      "updated_at": "2026-10-21T03:39:03Z",
+      "url": "https://api.github.com/repos/zackboll/opencv_features_ada/actions/artifacts/12319001473",
+      "workflow_run": {
+        "head_branch": "docs/011-adopt-enhancer-v0.1.0",
+        "head_repository_id": 1403791509,
+        "head_sha": "e29ba37d80a439e425acc34057cdc168625086ff",
+        "id": 39539323421,
+        "repository_id": 1403791509
+      }
+    }
+  ],
+  "enhanced_equals_local": true,
+  "files": {
+    "api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html": "68ccd873f4f1cae094a6282a6f346e8711f5932d34b804ab1e1fecc3e41e07aa",
+    "api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html": "bd3475083566736854bbf751d4f2525db74d8ec74c601962d676e0b9eb7e2fd0",
+    "api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html": "7f07159f36cff3827ec11d10766a375b9203a996be6112867beecb965ddad938",
+    "api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html": "0279845dab4b00d8d40d8ad22a4843ae2f9c8efd74719ead3dc7cb9382ef2f86",
+    "api/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+    "api/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+    "api/gnatdoc.css": "e86c483e8a66f80bd653129c7ceeec99e63848ecfc308e98ea9de1693fd32e0e",
+    "api/index.html": "60ffd3519d5bfacab78beea825daee4140b38e15a96a2c782e759819dbbb9cf4",
+    "api/presentation.json": "396ac0b9d8ef3fbeb9aaaefe14dfd1bddba7becfed2cb5bb95a80c2028ee1896",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "guides/binary-matching.html": "11e82e580ce628013631cb350f24d3a374efd624b6a45401e6518201bcc98c72",
+    "guides/candidate-correspondences.html": "353d961c8efa417a97216a2ac1126b2bac55ffb5d27ba4d39e7f54aa8e8fc70d",
+    "guides/getting-started.html": "fbe171fcccf6f091d9da511957a98dadb7059c757189924996f44a304762afa1",
+    "guides/limitations-roadmap.html": "6015d123d655d670dfc6719e15564c82e1ee481686140c374f256fce83c49b76",
+    "guides/orb-extraction.html": "8df438a6ace34cd7fc2c15b03baa16971ed46b7f61d90a1b59140a82163e9647",
+    "guides/ownership-lifecycle.html": "a44e0a900e795e3df5f5138b9c93d20cde60609f8af7c68b9e41d7446819ffd4",
+    "guides/platform-compatibility.html": "fcc6911ebe42b4a11ff263f96fe62be162694060d7ea5e158300046db531aff8",
+    "index.html": "31c286befe39a58e784de45d0b078ca1f3d4b858dc2b300fa86ff64a5933271a"
+  },
+  "native_equals_local": true,
+  "run": {
+    "event": "pull_request",
+    "head": "e29ba37d80a439e425acc34057cdc168625086ff",
+    "run_url": "https://github.com/zackboll/opencv_features_ada/actions/runs/39539323421"
+  },
+  "tested_head": "e29ba37d80a439e425acc34057cdc168625086ff",
+  "tested_tree": "03bd5323b8e303b58cc3508c547ab0998f53c450"
+}

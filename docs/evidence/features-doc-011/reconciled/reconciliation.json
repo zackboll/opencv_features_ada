@@ -1,0 +1,25 @@
+{
+  "native_outputs_byte_identical_to_before_merge": true,
+  "normal_merge_head": "364dd94804dcef985e1ad945bc526445e0b393c3",
+  "pr15_merge": "2026-10-21T03:42:30Z",
+  "refreshed_main": "e6d977f0bba02c526920834ef6e88905366ed1b9",
+  "release_output_byte_identical_to_before_merge": true,
+  "unchanged_from_refreshed_main": {
+    "alire.toml": "8e543b2a3225d1075d82eea19bc57736bcb9f93a",
+    "cpp": "b4f4bbaf95f15d01d7d2bc8b128ddee5d184a73c",
+    "docs/gnatdoc-enhance.toml": "ddd67402c550a2123a835197a01b5353aa9568fb",
+    "docs/gnatdoc-guides-requirements.txt": "4263f922f29fa77dbf6237854a51aef229d725c0",
+    "docs/gnatdoc-native-anchors.json": "2b7d3bac5a31ca0fe17dc52c0c234e067e8ba272",
+    "docs/release-0.1.0-qualification.md": "4b04572e5c10b6b3ee393b1e89e57a393651cbd8",
+    "examples": "189745be517443f6cfbf50973fb5f25343eba009",
+    "scripts/check_gnatdoc.py": "adb36d9f26d5a0efb4ac1c94db44481f46792e19",
+    "scripts/check_pages_site.py": "b3e8b4c8b14f04d852395b871de97b0060c5bf1c",
+    "scripts/check_repository.py": "4824eb09d89744131ef1397660c35eef9fce42d0",
+    "scripts/generate_docs.sh": "83bd268a7ab35727b67faf2a5d1e40184dc09ef7",
+    "scripts/install_resolved_consumer.sh": "89130aff9bd16f39116fdf571dea07e822dd5c9b",
+    "scripts/validate_core_manifest.py": "08e213612b7fe74dc50413b177b4b45100d5953d",
+    "src": "62864506d14a581cf0ac4a611bce6a095c7c8983",
+    "tests/alire.toml": "e0e4fb320d18bf87d2fd8f61b74a4f9a4fdba7a5",
+    "tests/configuration": "6a35f98a6c51291c64aeee42008eead822b41a38"
+  }
+}

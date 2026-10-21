@@ -1,4 +1,66 @@
-# Shared GNATdoc enhancer integration (DOC-004 through DOC-010)
+# Shared GNATdoc enhancer integration (DOC-004 through DOC-011)
+
+## Active dependency: official v0.1.0 (DOC-011)
+
+Features now installs the **published GitHub release wheel**, not a development
+checkout or a locally built substitute. This is a documentation-tool upgrade;
+the Features library, Alire version and indexed Core dependency are unchanged.
+The DOC-004–010 sections below remain historical evidence; this section supersedes
+their active-pin and installation instructions.
+
+| Identity | Approved value |
+| --- | --- |
+| Release | [ada-gnatdoc-enhancer v0.1.0](https://github.com/zackboll/ada-gnatdoc-enhancer/releases/tag/v0.1.0) |
+| Annotated tag object | `14463739818eb4c78b93ad42ecc4a4077cbec2bc` |
+| Source commit | `4ee95e8c95b8c7f54397a07e3e1c507783c115aa` |
+| Source tree | `c5cff2cff52e595f71202bf97c513b7e0f46c918` |
+| Package / module / CLI version | `0.1.0` |
+| Wheel | `ada_gnatdoc_enhancer-0.1.0-py3-none-any.whl` |
+| Wheel SHA-256 | `b0949aba6736515bf2ebe14fc7cc30c816a176257fc4524564285397b8aaf97d` |
+| Release provenance SHA-256 | `7d08f56d7566416009bcd0595ecaa186cc7701e1aa1c5e9d8349d6e601c1a269` |
+| Source archive SHA-256 (not installed) | `b5114c9d186dc6d230f1d48c139739b32e83a037d7fe7e7516c46755916e854a` |
+
+`docs/gnatdoc-enhancer-release.json` is the Features-owned approval inventory.
+Its wheel hashes were compared with the official download, the hash-approved
+release provenance and (for all 35 package members) independently fetched tagged
+Git blobs. Downloaded checksums and mutable installation receipts cannot authorize
+new bytes. The unsigned annotated tag establishes object identity, not a signing
+claim. The three default presentation asset hashes remain unchanged.
+
+The installer checks HTTPS and every redirect against exact approved hosts,
+complete byte counts, SHA-256, the exact 41-member wheel inventory, metadata,
+release provenance and independently fetched tag/commit/tree **before** creating
+the private environment. Installation is non-editable, `--no-index --no-deps`;
+core has no runtime dependencies. Optional guide dependencies retain the unchanged
+`--require-hashes --only-binary=:all: --no-deps` requirements. The durable receipt
+and retained release provenance are rechecked on every enhancement against
+source-owned identities. Python modules, bundled assets, distribution metadata,
+launcher and renderer files are verified; bytecode caches are discarded before
+package imports. Rewriting a receipt cannot approve altered installed files.
+
+```sh
+# After the existing indexed-Core configuration and strict native generation:
+python3 scripts/install_gnatdoc_enhancer.py --venv /tmp/gnatdoc-enhancer --with-guides
+python3 scripts/enhance_docs.py --venv /tmp/gnatdoc-enhancer
+python3 scripts/check_pages_site.py
+```
+
+Fresh old-versus-release qualification uses byte-identical independently generated
+native input. All 17 other site files are byte-identical; `api/presentation.json`
+changes **only** `enhancer_version` from `0.1.0.dev0` to `0.1.0`. Both inventories
+independently recount 248 resolved references, 13 HTML pages and 18 files. Four
+packages, 38 declarations, 127/127 documented elements, zero warnings, native CSS,
+anchors, type identities, seven guides and all presentation settings are preserved.
+No symbol-bookmark, generic-instance or external Core-link mode is enabled.
+The independent JavaScript authority check is unchanged.
+
+See [DOC-011 evidence](evidence/features-doc-011/README.md) for fresh versus reused
+inputs, security mutations, Chromium, source integrity, Pages archive checks and
+exact-head hosted qualification. Source-release PR #15 merged into main as
+`e6d977f0bba02c526920834ef6e88905366ed1b9` during this campaign. Its changes were
+preserved by a normal merge, including the two overlapping documentation files;
+the reconciled head is independently requalified without rewriting its branch or
+duplicating its source-release changes.
 
 ## DOC-010 qualification
 
