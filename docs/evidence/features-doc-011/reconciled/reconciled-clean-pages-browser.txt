@@ -1,0 +1,200 @@
+PASS metadata light portal: source-owned title, language and UTF-8
+PASS light portal: /opencv_features_ada/ loads with its heading
+PASS light portal: stylesheets load from the prefix and the theme applies
+PASS light portal: every request stays under the prefix, without failures or errors
+PASS metadata light API index: source-owned title, language and UTF-8
+PASS metadata light loaded iframe: source-owned title, language and UTF-8
+PASS light API index: /opencv_features_ada/api/index.html loads with its heading
+PASS light API index: stylesheets load from the prefix and the theme applies
+PASS light API index: every request stays under the prefix, without failures or errors
+PASS metadata light guides/getting-started.html: source-owned title, language and UTF-8
+PASS light guides/getting-started.html: /opencv_features_ada/guides/getting-started.html loads with its heading
+PASS light guides/getting-started.html: stylesheets load from the prefix and the theme applies
+PASS light guides/getting-started.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS light guides/orb-extraction.html: /opencv_features_ada/guides/orb-extraction.html loads with its heading
+PASS light guides/orb-extraction.html: stylesheets load from the prefix and the theme applies
+PASS light guides/orb-extraction.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/binary-matching.html: source-owned title, language and UTF-8
+PASS light guides/binary-matching.html: /opencv_features_ada/guides/binary-matching.html loads with its heading
+PASS light guides/binary-matching.html: stylesheets load from the prefix and the theme applies
+PASS light guides/binary-matching.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS light guides/candidate-correspondences.html: /opencv_features_ada/guides/candidate-correspondences.html loads with its heading
+PASS light guides/candidate-correspondences.html: stylesheets load from the prefix and the theme applies
+PASS light guides/candidate-correspondences.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS light guides/ownership-lifecycle.html: /opencv_features_ada/guides/ownership-lifecycle.html loads with its heading
+PASS light guides/ownership-lifecycle.html: stylesheets load from the prefix and the theme applies
+PASS light guides/ownership-lifecycle.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS light guides/platform-compatibility.html: /opencv_features_ada/guides/platform-compatibility.html loads with its heading
+PASS light guides/platform-compatibility.html: stylesheets load from the prefix and the theme applies
+PASS light guides/platform-compatibility.html: every request stays under the prefix, without failures or errors
+PASS metadata light guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS light guides/limitations-roadmap.html: /opencv_features_ada/guides/limitations-roadmap.html loads with its heading
+PASS light guides/limitations-roadmap.html: stylesheets load from the prefix and the theme applies
+PASS light guides/limitations-roadmap.html: every request stays under the prefix, without failures or errors
+PASS metadata light OpenCV.Features: source-owned title, language and UTF-8
+PASS light OpenCV.Features: /opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html loads with its heading
+PASS light OpenCV.Features: stylesheets load from the prefix and the theme applies
+PASS light OpenCV.Features: every request stays under the prefix, without failures or errors
+PASS metadata light OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS light OpenCV.Features.Correspondences: /opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html loads with its heading
+PASS light OpenCV.Features.Correspondences: stylesheets load from the prefix and the theme applies
+PASS light OpenCV.Features.Correspondences: every request stays under the prefix, without failures or errors
+PASS metadata light OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS light OpenCV.Features.Matching: /opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html loads with its heading
+PASS light OpenCV.Features.Matching: stylesheets load from the prefix and the theme applies
+PASS light OpenCV.Features.Matching: every request stays under the prefix, without failures or errors
+PASS metadata light OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS light OpenCV.Features.ORB: /opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html loads with its heading
+PASS light OpenCV.Features.ORB: stylesheets load from the prefix and the theme applies
+PASS light OpenCV.Features.ORB: every request stays under the prefix, without failures or errors
+PASS metadata dark portal: source-owned title, language and UTF-8
+PASS dark portal: /opencv_features_ada/ loads with its heading
+PASS dark portal: stylesheets load from the prefix and the theme applies
+PASS dark portal: every request stays under the prefix, without failures or errors
+PASS metadata dark API index: source-owned title, language and UTF-8
+PASS metadata dark loaded iframe: source-owned title, language and UTF-8
+PASS dark API index: /opencv_features_ada/api/index.html loads with its heading
+PASS dark API index: stylesheets load from the prefix and the theme applies
+PASS dark API index: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/getting-started.html: source-owned title, language and UTF-8
+PASS dark guides/getting-started.html: /opencv_features_ada/guides/getting-started.html loads with its heading
+PASS dark guides/getting-started.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/getting-started.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS dark guides/orb-extraction.html: /opencv_features_ada/guides/orb-extraction.html loads with its heading
+PASS dark guides/orb-extraction.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/orb-extraction.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/binary-matching.html: source-owned title, language and UTF-8
+PASS dark guides/binary-matching.html: /opencv_features_ada/guides/binary-matching.html loads with its heading
+PASS dark guides/binary-matching.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/binary-matching.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS dark guides/candidate-correspondences.html: /opencv_features_ada/guides/candidate-correspondences.html loads with its heading
+PASS dark guides/candidate-correspondences.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/candidate-correspondences.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS dark guides/ownership-lifecycle.html: /opencv_features_ada/guides/ownership-lifecycle.html loads with its heading
+PASS dark guides/ownership-lifecycle.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/ownership-lifecycle.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS dark guides/platform-compatibility.html: /opencv_features_ada/guides/platform-compatibility.html loads with its heading
+PASS dark guides/platform-compatibility.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/platform-compatibility.html: every request stays under the prefix, without failures or errors
+PASS metadata dark guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS dark guides/limitations-roadmap.html: /opencv_features_ada/guides/limitations-roadmap.html loads with its heading
+PASS dark guides/limitations-roadmap.html: stylesheets load from the prefix and the theme applies
+PASS dark guides/limitations-roadmap.html: every request stays under the prefix, without failures or errors
+PASS metadata dark OpenCV.Features: source-owned title, language and UTF-8
+PASS dark OpenCV.Features: /opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html loads with its heading
+PASS dark OpenCV.Features: stylesheets load from the prefix and the theme applies
+PASS dark OpenCV.Features: every request stays under the prefix, without failures or errors
+PASS metadata dark OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS dark OpenCV.Features.Correspondences: /opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html loads with its heading
+PASS dark OpenCV.Features.Correspondences: stylesheets load from the prefix and the theme applies
+PASS dark OpenCV.Features.Correspondences: every request stays under the prefix, without failures or errors
+PASS metadata dark OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS dark OpenCV.Features.Matching: /opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html loads with its heading
+PASS dark OpenCV.Features.Matching: stylesheets load from the prefix and the theme applies
+PASS dark OpenCV.Features.Matching: every request stays under the prefix, without failures or errors
+PASS metadata dark OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS dark OpenCV.Features.ORB: /opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html loads with its heading
+PASS dark OpenCV.Features.ORB: stylesheets load from the prefix and the theme applies
+PASS dark OpenCV.Features.ORB: every request stays under the prefix, without failures or errors
+PASS links portal: all 26 references resolve under the prefix
+PASS links API index: all 10 references resolve under the prefix
+PASS links guides/getting-started.html: all 15 references resolve under the prefix
+PASS links guides/orb-extraction.html: all 27 references resolve under the prefix
+PASS links guides/binary-matching.html: all 21 references resolve under the prefix
+PASS links guides/candidate-correspondences.html: all 15 references resolve under the prefix
+PASS links guides/ownership-lifecycle.html: all 17 references resolve under the prefix
+PASS links guides/platform-compatibility.html: all 13 references resolve under the prefix
+PASS links guides/limitations-roadmap.html: all 11 references resolve under the prefix
+PASS links OpenCV.Features: all 26 references resolve under the prefix
+PASS links OpenCV.Features.Correspondences: all 9 references resolve under the prefix
+PASS links OpenCV.Features.Matching: all 34 references resolve under the prefix
+PASS links OpenCV.Features.ORB: all 24 references resolve under the prefix
+PASS links: 248 references from 13 pages crawled
+PASS redirect: /opencv_features_ada without a slash reaches the portal
+PASS redirect: relative navigation from the redirected portal stays under the prefix
+PASS navigation: portal opens guides/getting-started.html under the prefix
+PASS navigation: portal opens guides/orb-extraction.html under the prefix
+PASS navigation: portal opens guides/binary-matching.html under the prefix
+PASS navigation: portal opens guides/candidate-correspondences.html under the prefix
+PASS navigation: portal opens guides/ownership-lifecycle.html under the prefix
+PASS navigation: portal opens guides/platform-compatibility.html under the prefix
+PASS navigation: portal opens guides/limitations-roadmap.html under the prefix
+PASS navigation: guide Home returns to the portal under the prefix
+PASS JavaScript: the default package bookmark keeps the prefixed path
+PASS JavaScript: package navigation pushes ?package on the prefixed path and loads ORB
+PASS JavaScript: Back restores the previous package on the prefixed path
+PASS bookmark: a prefixed ?package URL opens that package
+PASS JavaScript: no page or console errors
+PASS overload: the masked Detect_And_Compute link lands on its section under the prefix
+PASS bookmark: a prefixed declaration URL targets and scrolls to Create
+PASS metadata mobile JS=true portal: source-owned title, language and UTF-8
+PASS metadata reload JS=true portal: source-owned title, language and UTF-8
+PASS metadata mobile JS=true API index: source-owned title, language and UTF-8
+PASS metadata reload JS=true API index: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/getting-started.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/getting-started.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/binary-matching.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/binary-matching.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS metadata reload JS=true guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=true OpenCV.Features: source-owned title, language and UTF-8
+PASS metadata reload JS=true OpenCV.Features: source-owned title, language and UTF-8
+PASS metadata mobile JS=true OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS metadata reload JS=true OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS metadata mobile JS=true OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS metadata reload JS=true OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS metadata mobile JS=true OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS metadata reload JS=true OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS metadata guide navigation JS=true: source-owned title, language and UTF-8
+PASS metadata Back JS=true: source-owned title, language and UTF-8
+PASS metadata Forward JS=true: source-owned title, language and UTF-8
+PASS metadata loaded native iframe JS=true: source-owned title, language and UTF-8
+PASS metadata navigation JS=true: no errors or prefix escapes
+PASS metadata mobile JS=false portal: source-owned title, language and UTF-8
+PASS metadata reload JS=false portal: source-owned title, language and UTF-8
+PASS metadata mobile JS=false API index: source-owned title, language and UTF-8
+PASS metadata reload JS=false API index: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/getting-started.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/getting-started.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/orb-extraction.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/binary-matching.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/binary-matching.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/candidate-correspondences.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/ownership-lifecycle.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/platform-compatibility.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS metadata reload JS=false guides/limitations-roadmap.html: source-owned title, language and UTF-8
+PASS metadata mobile JS=false OpenCV.Features: source-owned title, language and UTF-8
+PASS metadata reload JS=false OpenCV.Features: source-owned title, language and UTF-8
+PASS metadata mobile JS=false OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS metadata reload JS=false OpenCV.Features.Correspondences: source-owned title, language and UTF-8
+PASS metadata mobile JS=false OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS metadata reload JS=false OpenCV.Features.Matching: source-owned title, language and UTF-8
+PASS metadata mobile JS=false OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS metadata reload JS=false OpenCV.Features.ORB: source-owned title, language and UTF-8
+PASS metadata guide navigation JS=false: source-owned title, language and UTF-8
+PASS metadata Back JS=false: source-owned title, language and UTF-8
+PASS metadata Forward JS=false: source-owned title, language and UTF-8
+PASS metadata loaded native iframe JS=false: source-owned title, language and UTF-8
+PASS metadata navigation JS=false: no errors or prefix escapes
+Chromium 156.0.8078.4, Playwright 1.64.1: 199/199 assertions passed

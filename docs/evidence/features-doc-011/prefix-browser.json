@@ -1,0 +1,446 @@
+{
+  "versions": {
+    "chromium": "156.0.8078.4",
+    "playwright": "1.64.1",
+    "node": "v20.19.2"
+  },
+  "url": "http://127.0.0.1:8176/opencv_features_ada/api/index.html",
+  "passed": 64,
+  "failed": 0,
+  "assertions": [
+    {
+      "name": "light: index lists exactly the four public packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "light: default package loads in the frame",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "light: default package is bookmarked with replaceState",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/index.html?package=OpenCV.Features"
+    },
+    {
+      "name": "light: aria-current marks the selected package",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "light: themed index background",
+      "pass": true,
+      "detail": "rgb(255, 255, 255)"
+    },
+    {
+      "name": "navigation: package link loads ORB in the frame",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "navigation: package click pushes a ?package bookmark",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/index.html?package=OpenCV.Features.ORB"
+    },
+    {
+      "name": "history: Back restores the previous package and URL",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/index.html?package=OpenCV.Features"
+    },
+    {
+      "name": "history: Forward returns to ORB",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/index.html?package=OpenCV.Features.ORB"
+    },
+    {
+      "name": "search: filters the package list",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features.Matching"
+      ]
+    },
+    {
+      "name": "search: announces the result count",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "search: Clear restores every entry",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "keyboard: a focused link shows a visible outline",
+      "pass": true,
+      "detail": {
+        "tag": "A",
+        "style": "solid",
+        "width": "3px",
+        "text": "OpenCV.Features"
+      }
+    },
+    {
+      "name": "light: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "light: declaration bookmark targets and scrolls to Create",
+      "pass": true,
+      "detail": {
+        "matches": true,
+        "top": 18.875,
+        "height": 900,
+        "text": "Create"
+      }
+    },
+    {
+      "name": "light: Ada keywords are highlighted",
+      "pass": true,
+      "detail": {
+        "keyword": "rgb(116, 66, 167)",
+        "code": "rgb(36, 50, 71)",
+        "weight": "700",
+        "count": 28
+      }
+    },
+    {
+      "name": "light: themed declaration page background",
+      "pass": true,
+      "detail": "rgb(255, 255, 255)"
+    },
+    {
+      "name": "type link: navigates to the Configuration declaration anchor",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "declaration pages run no scripts",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "light mobile: stacked layout without horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "display": "flex",
+        "overflow": 0,
+        "frame": 481.09375
+      }
+    },
+    {
+      "name": "light mobile: package frame loads",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "light mobile: declaration page has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "snippetScroll": "auto"
+      }
+    },
+    {
+      "name": "light portal: home page heading",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "light portal: navigation lists Home, API Reference and every guide",
+      "pass": true,
+      "detail": [
+        "Home",
+        "API Reference",
+        "Getting started",
+        "ORB feature extraction",
+        "Binary matching",
+        "Candidate correspondences",
+        "Ownership and lifecycle",
+        "Platform compatibility",
+        "Limitations and roadmap"
+      ]
+    },
+    {
+      "name": "light portal: package directory lists the four packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "light portal: themed background",
+      "pass": true,
+      "detail": "rgb(255, 255, 255)"
+    },
+    {
+      "name": "light portal: home and guides run no scripts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "portal: API Reference opens the enhanced package index",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "portal: guide navigation opens the guide",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "guide: embedded Ada example is the real orb_synthetic.adb",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "guide: api: overload link lands on the masked Detect_And_Compute section",
+      "pass": true,
+      "detail": {
+        "id": "07eb80b590b7f97f4c088474add72fc7d2b3f9a09f745f293468ca8cf358c2df",
+        "text": "Detect_And_Compute",
+        "target": true,
+        "code": "function Detect_And_Compute\n  (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set\n"
+      }
+    },
+    {
+      "name": "guide: first Tab focuses a visible skip link",
+      "pass": true,
+      "detail": {
+        "text": "Skip to content",
+        "position": "static",
+        "outline": "solid"
+      }
+    },
+    {
+      "name": "light portal: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "light mobile: ../index.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/binary-matching.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/orb-extraction.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "light mobile: ../guides/platform-compatibility.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark: index lists exactly the four public packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "dark: default package loads in the frame",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark: default package is bookmarked with replaceState",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/index.html?package=OpenCV.Features"
+    },
+    {
+      "name": "dark: aria-current marks the selected package",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark: themed index background",
+      "pass": true,
+      "detail": "rgb(20, 27, 38)"
+    },
+    {
+      "name": "dark: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "dark: declaration bookmark targets and scrolls to Create",
+      "pass": true,
+      "detail": {
+        "matches": true,
+        "top": 18.875,
+        "height": 900,
+        "text": "Create"
+      }
+    },
+    {
+      "name": "dark: Ada keywords are highlighted",
+      "pass": true,
+      "detail": {
+        "keyword": "rgb(207, 168, 255)",
+        "code": "rgb(227, 234, 245)",
+        "weight": "700",
+        "count": 28
+      }
+    },
+    {
+      "name": "dark: themed declaration page background",
+      "pass": true,
+      "detail": "rgb(20, 27, 38)"
+    },
+    {
+      "name": "dark mobile: stacked layout without horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "display": "flex",
+        "overflow": 0,
+        "frame": 481.09375
+      }
+    },
+    {
+      "name": "dark mobile: package frame loads",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark mobile: declaration page has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "snippetScroll": "auto"
+      }
+    },
+    {
+      "name": "dark portal: home page heading",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark portal: navigation lists Home, API Reference and every guide",
+      "pass": true,
+      "detail": [
+        "Home",
+        "API Reference",
+        "Getting started",
+        "ORB feature extraction",
+        "Binary matching",
+        "Candidate correspondences",
+        "Ownership and lifecycle",
+        "Platform compatibility",
+        "Limitations and roadmap"
+      ]
+    },
+    {
+      "name": "dark portal: package directory lists the four packages",
+      "pass": true,
+      "detail": [
+        "OpenCV.Features",
+        "OpenCV.Features.Correspondences",
+        "OpenCV.Features.Matching",
+        "OpenCV.Features.ORB"
+      ]
+    },
+    {
+      "name": "dark portal: themed background",
+      "pass": true,
+      "detail": "rgb(20, 27, 38)"
+    },
+    {
+      "name": "dark portal: home and guides run no scripts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "dark portal: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "dark mobile: ../index.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/binary-matching.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/orb-extraction.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "dark mobile: ../guides/platform-compatibility.html has no horizontal page overflow",
+      "pass": true,
+      "detail": {
+        "overflow": 0,
+        "pre": true
+      }
+    },
+    {
+      "name": "bookmark: ?package opens that package directly",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "bookmark: an unknown package falls back to the first package",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no JavaScript: search controls stay hidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no JavaScript: native package link loads the page into the frame",
+      "pass": true,
+      "detail": "http://127.0.0.1:8176/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html"
+    },
+    {
+      "name": "no JavaScript: tagged-type link keeps its native fragment",
+      "pass": true,
+      "detail": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html#f4314b0abccfb7f63bc3e099aa214a2b08985cac7490e6c97d49f0cf580a8cbe"
+    }
+  ]
+}

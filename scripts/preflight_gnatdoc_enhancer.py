@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Optional, isolated compatibility preflight of the shared GNATdoc enhancer.
 
-Nothing here is a production or documentation-build dependency. Given a local
-ada-gnatdoc-enhancer Git checkout and an exact reviewed revision, the driver:
+Nothing here is a production or documentation-build dependency. Using the
+approved official release wheel and exact source identity, the driver:
 
-1. exports that revision with ``git archive`` into a new workspace, installs it
-   (non-editable) into a private virtual environment and proves that every
-   installed module and asset is byte-identical to the reviewed Git blobs;
+1. downloads and verifies the release, installs it non-editably into a private
+   virtual environment and checks every installed member against Features-owned
+   wheel identities (independently compared with tagged Git blobs);
 2. stages byte-identical copies of the four public specifications listed in
    docs_api.gpr (the enhancer's discovery is recursive, and src/internal holds
    internal units that are never published);
@@ -135,12 +135,15 @@ def mutations(tool: Path, enhanced: Path, workspace: Path, page: str) -> dict:
     return result
 
 
-def preflight(checkout: Path, revision: str, site: Path, workspace: Path) -> dict:
+def preflight(revision: str, site: Path, workspace: Path) -> dict:
     if workspace.exists():
         raise PreflightError(f"{workspace} must not exist")
     workspace.mkdir(parents=True)
     pristine_hashes = tree_hashes(site)
-    tool = install(checkout, revision, workspace / "venv")
+    from gnatdoc_enhancer_support import PINNED_REVISION
+    if revision != PINNED_REVISION:
+        raise PreflightError(f"only the approved release source {PINNED_REVISION} is authorized")
+    tool = install(workspace / "venv")
     record = json.loads((workspace / "venv/gnatdoc-enhancer-provenance.json").read_text())
     provenance = {"revision": revision, "version": record["version"],
                   "installed_files": len(record["files"]), "installed_equals_revision": True,
@@ -202,7 +205,6 @@ def preflight(checkout: Path, revision: str, site: Path, workspace: Path) -> dic
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--enhancer", type=Path, required=True, help="enhancer Git checkout")
     parser.add_argument("--revision", required=True, help="full reviewed commit SHA")
     parser.add_argument("--site", type=Path, default=ROOT / "_site",
                         help="pristine native site containing api/ (default _site)")
@@ -210,7 +212,7 @@ def main(argv=None) -> int:
     parser.add_argument("--report", type=Path, help="JSON report destination")
     args = parser.parse_args(argv)
     try:
-        report = preflight(args.enhancer.resolve(), args.revision, args.site.resolve(),
+        report = preflight(args.revision, args.site.resolve(),
                            args.workspace.resolve())
     except (PreflightError, OSError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
         print(f"FAIL: {error}", file=sys.stderr)

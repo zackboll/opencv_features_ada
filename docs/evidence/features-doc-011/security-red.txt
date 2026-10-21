@@ -1,0 +1,79 @@
+test_development_module_and_metadata_are_rejected (test_enhancer_release.InstalledReleaseTests.test_development_module_and_metadata_are_rejected) ... skipped 'set FEATURES_ENHANCER_VENV'
+test_installed_mutations_and_rewritten_same_run_hashes_are_rejected (test_enhancer_release.InstalledReleaseTests.test_installed_mutations_and_rewritten_same_run_hashes_are_rejected) ... skipped 'set FEATURES_ENHANCER_VENV'
+test_official_installation_is_accepted (test_enhancer_release.InstalledReleaseTests.test_official_installation_is_accepted) ... skipped 'set FEATURES_ENHANCER_VENV'
+test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) ... 
+  test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='http://github.com/a') ... ERROR
+  test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://evil.example/a') ... ERROR
+  test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://github.com.evil.example/a') ... ERROR
+  test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://github.com:8443/a') ... ERROR
+  test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://user@github.com/a') ... ERROR
+test_wrong_tag_source_tree_and_version_are_rejected (test_enhancer_release.ReleaseTests.test_wrong_tag_source_tree_and_version_are_rejected) ... ERROR
+test_wrong_wheel_hash_is_rejected_before_installation (test_enhancer_release.ReleaseTests.test_wrong_wheel_hash_is_rejected_before_installation) ... ERROR
+
+======================================================================
+ERROR: test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='http://github.com/a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 51, in test_unapproved_redirects_are_rejected
+    support.validate_download_url(url)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'validate_download_url'
+
+======================================================================
+ERROR: test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://evil.example/a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 51, in test_unapproved_redirects_are_rejected
+    support.validate_download_url(url)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'validate_download_url'
+
+======================================================================
+ERROR: test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://github.com.evil.example/a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 51, in test_unapproved_redirects_are_rejected
+    support.validate_download_url(url)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'validate_download_url'
+
+======================================================================
+ERROR: test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://github.com:8443/a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 51, in test_unapproved_redirects_are_rejected
+    support.validate_download_url(url)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'validate_download_url'
+
+======================================================================
+ERROR: test_unapproved_redirects_are_rejected (test_enhancer_release.ReleaseTests.test_unapproved_redirects_are_rejected) (url='https://user@github.com/a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 51, in test_unapproved_redirects_are_rejected
+    support.validate_download_url(url)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'validate_download_url'
+
+======================================================================
+ERROR: test_wrong_tag_source_tree_and_version_are_rejected (test_enhancer_release.ReleaseTests.test_wrong_tag_source_tree_and_version_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 26, in test_wrong_tag_source_tree_and_version_are_rejected
+    approved = support.approval()
+               ^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'approval'
+
+======================================================================
+ERROR: test_wrong_wheel_hash_is_rejected_before_installation (test_enhancer_release.ReleaseTests.test_wrong_wheel_hash_is_rejected_before_installation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-011/tests/documentation/test_enhancer_release.py", line 22, in test_wrong_wheel_hash_is_rejected_before_installation
+    support.verify_wheel(wheel)
+    ^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'gnatdoc_enhancer_support' has no attribute 'verify_wheel'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+FAILED (errors=7, skipped=3)

@@ -1,0 +1,59 @@
+{
+  "base": "71eb93f45b3ee833d4cb2b96a10095aaf0541acd",
+  "historical_evidence_unchanged": true,
+  "implementation_head": "3685fb176a505cc9bc87012776947aa08397a778",
+  "pr15_overlap": [
+    "docs/github-pages.md",
+    "docs/gnatdoc-enhancer-integration.md"
+  ],
+  "unchanged_paths": {
+    "alire.toml": {
+      "base_git_object": "3d9c05ad095f1477b3f90cbeb8c8a33bf23c03fa",
+      "head_git_object": "3d9c05ad095f1477b3f90cbeb8c8a33bf23c03fa"
+    },
+    "docs/gnatdoc-enhance.toml": {
+      "base_git_object": "ddd67402c550a2123a835197a01b5353aa9568fb",
+      "head_git_object": "ddd67402c550a2123a835197a01b5353aa9568fb"
+    },
+    "docs/gnatdoc-guides-requirements.txt": {
+      "base_git_object": "4263f922f29fa77dbf6237854a51aef229d725c0",
+      "head_git_object": "4263f922f29fa77dbf6237854a51aef229d725c0"
+    },
+    "docs/gnatdoc-native-anchors.json": {
+      "base_git_object": "2b7d3bac5a31ca0fe17dc52c0c234e067e8ba272",
+      "head_git_object": "2b7d3bac5a31ca0fe17dc52c0c234e067e8ba272"
+    },
+    "docs_api.gpr": {
+      "base_git_object": "5c99592a3c98a92bd241653f52fe2d3245df9a5a",
+      "head_git_object": "5c99592a3c98a92bd241653f52fe2d3245df9a5a"
+    },
+    "examples": {
+      "base_git_object": "29c4e884be54910cb5d6cc3c248bf05c12aaccaa",
+      "head_git_object": "29c4e884be54910cb5d6cc3c248bf05c12aaccaa"
+    },
+    "opencv_features.gpr": {
+      "base_git_object": "f9409ff0df6d54b77dc078d869079ef82d9aa45e",
+      "head_git_object": "f9409ff0df6d54b77dc078d869079ef82d9aa45e"
+    },
+    "scripts/check_gnatdoc.py": {
+      "base_git_object": "adb36d9f26d5a0efb4ac1c94db44481f46792e19",
+      "head_git_object": "adb36d9f26d5a0efb4ac1c94db44481f46792e19"
+    },
+    "scripts/check_pages_site.py": {
+      "base_git_object": "b3e8b4c8b14f04d852395b871de97b0060c5bf1c",
+      "head_git_object": "b3e8b4c8b14f04d852395b871de97b0060c5bf1c"
+    },
+    "scripts/generate_docs.sh": {
+      "base_git_object": "83bd268a7ab35727b67faf2a5d1e40184dc09ef7",
+      "head_git_object": "83bd268a7ab35727b67faf2a5d1e40184dc09ef7"
+    },
+    "src": {
+      "base_git_object": "62864506d14a581cf0ac4a611bce6a095c7c8983",
+      "head_git_object": "62864506d14a581cf0ac4a611bce6a095c7c8983"
+    },
+    "tests/alire.toml": {
+      "base_git_object": "5e481f724db5aa0729acc7c043c51aebc824572a",
+      "head_git_object": "5e481f724db5aa0729acc7c043c51aebc824572a"
+    }
+  }
+}

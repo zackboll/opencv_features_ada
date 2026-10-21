@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Install the pinned ada-gnatdoc-enhancer from a local Git checkout.
+"""Install the independently approved official enhancer v0.1.0 release wheel.
 
-The revision must equal the reviewed pin in gnatdoc_enhancer_support.py. The
-package is built from ``git archive`` of that commit (never a branch or a
-working tree) into a new virtual environment, and every installed module and
-asset is compared with the commit's Git blobs. A provenance record is written
-into the environment for scripts/enhance_docs.py to re-check. With
---with-guides, the hash-pinned Markdown renderer wheels used by the enhancer's
-guide mode are installed too, without dependency resolution.
+HTTPS downloads, annotated tag/source identity, archive digest, provenance and
+every wheel member are checked before installation. Subsequent invocations of
+enhance_docs.py recheck installed bytes against Features-owned identities.
+--with-guides installs the existing hash-pinned optional Markdown wheels.
 """
 from __future__ import annotations
 
@@ -24,8 +21,6 @@ import gnatdoc_enhancer_support as support  # noqa: E402
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--checkout", type=Path, required=True,
-                        help="ada-gnatdoc-enhancer Git checkout containing the revision")
     parser.add_argument("--venv", type=Path, required=True, help="new environment directory")
     parser.add_argument("--revision", default=support.PINNED_REVISION)
     parser.add_argument("--with-guides", action="store_true",
@@ -38,12 +33,11 @@ def main(argv=None) -> int:
     try:
         requirements = (support.ROOT / "docs/gnatdoc-guides-requirements.txt"
                         if args.with_guides else None)
-        tool = support.install(args.checkout.resolve(), args.revision, args.venv.resolve(),
-                               requirements)
+        tool = support.install(args.venv.resolve(), requirements)
     except (support.SupportError, OSError, subprocess.CalledProcessError) as error:
         print(f"FAIL: {error}", file=sys.stderr)
         return 1
-    print(f"PASS: installed {tool} from {args.revision}; installed files equal Git blobs")
+    print(f"PASS: installed {tool} from official v0.1.0; approved wheel and installed bytes verified")
     return 0
 
 

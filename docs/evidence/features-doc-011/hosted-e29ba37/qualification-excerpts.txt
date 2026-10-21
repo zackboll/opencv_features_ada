@@ -1,0 +1,42 @@
+native-gnatdoc	Documentation tooling unit tests	2026-10-21T03:38:12.2662225Z Ran 104 tests in 2.808s
+native-gnatdoc	Mutation and strict-qualification tests against the generated site	2026-10-21T03:38:17.1246583Z Ran 104 tests in 3.483s
+native-gnatdoc	Install the verified official enhancer v0.1.0 wheel (documentation-only)	2026-10-21T03:38:22.8013293Z PASS: installed /home/runner/work/_temp/gnatdoc-enhancer/bin/gnatdoc-enhancer from official v0.1.0; approved wheel and installed bytes verified
+native-gnatdoc	Enhance an isolated copy of the native site with guides and verify it	2026-10-21T03:38:24.5349411Z PASS: enhanced copy verified; byte-idempotent; fresh run identical; native identities preserved; 13 pages with resolved links; added ['api/gnatdoc-navigation.js', 'api/gnatdoc-theme.css', 'api/presentation.json', 'assets/gnatdoc-guides.css', 'guides/binary-matching.html', 'guides/candidate-correspondences.html', 'guides/getting-started.html', 'guides/limitations-roadmap.html', 'guides/orb-extraction.html', 'guides/ownership-lifecycle.html', 'guides/platform-compatibility.html', 'index.html']
+native-gnatdoc	Enhanced-site mutation tests	2026-10-21T03:38:35.9690813Z Ran 104 tests in 11.345s
+native-gnatdoc	Chromium qualification of the enhanced site	2026-10-21T03:38:53.1037870Z Chromium 156.0.8078.4, Playwright 1.64.1: 64/64 assertions passed
+native-gnatdoc	Documentation-only source integrity (docs/* branches)	2026-10-21T03:38:53.1710088Z PASS: 42 changed paths; production tokens and bytes unchanged
+native-gnatdoc	Qualify the Pages artifact under the project-site prefix	2026-10-21T03:38:55.2274324Z PASS: 18 files (13 pages); 248 references and 13 routes resolve under https://zackboll.github.io/opencv_features_ada/; publication ready
+native-gnatdoc	Qualify the Pages artifact under the project-site prefix	2026-10-21T03:39:01.0125029Z Chromium 156.0.8078.4, Playwright 1.64.1: 199/199 assertions passed
+native-gnatdoc	Qualify the Pages artifact under the project-site prefix	2026-10-21T03:39:03.0675007Z Chromium 156.0.8078.4, Playwright 1.64.1: 64/64 assertions passed
+native-gnatdoc	Verify the uploaded Pages archive is byte-identical to the qualified site	2026-10-21T03:39:04.0891956Z PASS: 18 files (13 pages); 248 references and 13 routes resolve under https://zackboll.github.io/opencv_features_ada/; uploaded archive identical; publication ready
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	﻿2026-10-21T03:39:04.0968464Z ##[group]Run actions/download-artifact@v4
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0968664Z with:
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0968797Z   artifact-ids: 12319001473
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0968967Z   path: /home/runner/work/_temp/uploaded-pages
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0969305Z   merge-multiple: true
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0969462Z   repository: zackboll/opencv_features_ada
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0969626Z   run-id: 39539323421
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0969760Z env:
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0969914Z   GNATDOC_PREFIX: /home/runner/work/_temp/gnatdoc-26.0.0
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.0970100Z ##[endgroup]
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.2049988Z Downloading artifacts by ID
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.2146338Z (node:7930) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.2146889Z (Use `node --trace-deprecation ...` to show where the warning was created)
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.3735766Z Found 3 artifact(s)
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.3736398Z Preparing to download the following artifacts:
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.3737199Z - github-pages (ID: 12319001473, Size: 44269, Expected Digest: sha256:e9c581a5d176a1acae131e23f8c9c14b01a5d02126e4e19d5fc3f37a0e3f4f2b)
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.5437016Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/5122e70c-dec8-8251-a495-d8134f56a97e/workflow-job-run-6bf6ff47-bcc7-542c-8ca5-e78480a9008f/artifacts/afa28766d3caf497f6ad369ac6c5505dd8db6689a300a79784c20dcaaf97018f.zip
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.5438256Z Starting download of artifact to: /home/runner/work/_temp/uploaded-pages
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.7013490Z (node:7930) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.7342094Z SHA256 digest of downloaded artifact is e9c581a5d176a1acae131e23f8c9c14b01a5d02126e4e19d5fc3f37a0e3f4f2b
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.7342530Z Artifact download completed successfully.
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.7342742Z Total of 1 artifact(s) downloaded
+native-gnatdoc	Download the actual uploaded Pages artifact by immutable ID	2026-10-21T03:39:04.7345768Z Download artifact has finished successfully
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	﻿2026-10-21T03:39:04.7462795Z ##[group]Run cmp "$RUNNER_TEMP/artifact.tar" "$RUNNER_TEMP/uploaded-pages/artifact.tar"
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7463155Z [36;1mcmp "$RUNNER_TEMP/artifact.tar" "$RUNNER_TEMP/uploaded-pages/artifact.tar"[0m
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7463595Z [36;1mpython3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/uploaded-pages/artifact.tar" --report obj/docs/pages-uploaded-archive.json[0m
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7506082Z shell: /usr/bin/bash -e {0}
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7506247Z env:
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7506416Z   GNATDOC_PREFIX: /home/runner/work/_temp/gnatdoc-26.0.0
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7506619Z ##[endgroup]
+native-gnatdoc	Verify the downloaded upload against the qualified site and local archive	2026-10-21T03:39:04.7961227Z PASS: 18 files (13 pages); 248 references and 13 routes resolve under https://zackboll.github.io/opencv_features_ada/; uploaded archive identical; publication ready

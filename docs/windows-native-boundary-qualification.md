@@ -5,12 +5,13 @@
 The approved **0.1.0** source remains merge commit
 `e6d977f0bba02c526920834ef6e88905366ed1b9`, tree
 `0265f6e39de174722cfe8ff59d7663dddbcf8cbd`. Fresh main equalled that commit
-when this correction began. No release tag exists. PR #26 is unrelated and
-is not incorporated into this branch. During local qualification a fresh fetch
+when this correction began. No release tag exists. During initial local qualification a fresh fetch
 observed that it was merged externally into main at
 `782e33ef6822887c45e607c5934032d9d856b3ad` (tree
-`a505c57ef1eb2f385bd40d6198801bdbaf2d810e`). This task did not merge or modify
-that PR; the correction remains based on the main verified at branch creation.
+`a505c57ef1eb2f385bd40d6198801bdbaf2d810e`). The initial correction did not
+incorporate that PR. FEATURES-CI-016R1 subsequently integrates that fresh main
+by normal merge into the existing branch, preserving its official released
+GNATdoc Enhancer installation. This merges existing main, not PR #26 itself.
 No newer main commit substitutes for the pinned release source.
 
 [Windows run 39540052561](https://github.com/zackboll/opencv_features_ada/actions/runs/39540052561),
@@ -114,6 +115,51 @@ Linux runner digests. These Linux-runnable fixtures **do not execute Windows
 algorithms**. Existing 67 AUnit registrations and 17 native exports are unchanged.
 
 ## Local qualification and review gate
+
+### FEATURES-CI-016R1 — reconcile released documentation tooling
+
+Starting PR #27 head `95b8fc83fda09228954e4e6a8fc88e38eb791eca` normally merges
+main `782e33ef6822887c45e607c5934032d9d856b3ad`, with no conflicts and no rebase,
+amend, reset or force-push. Documentation run
+[39543589137](https://github.com/zackboll/opencv_features_ada/actions/runs/39543589137),
+job `119036644757`, step 12 failed because the newer official-wheel workflow
+invoked the old branch installer without its required `--checkout`. Steps 9–11
+had already passed native generation, coverage/warnings, mutations and
+deterministic regeneration. This was not a production Ada or Windows failure.
+
+R1 preserves main's documentation files, wheel approval inventory/security
+checks and workflow byte-for-byte. All Windows harness files, 15 added fixtures,
+mandatory campaigns and pinned release identities remain unchanged from the
+starting PR head. No production/manifests/Linux-runner changes occur.
+
+Fresh integrated local qualification passed:
+
+- 101 configuration tests; repository, shell and fixed-profile checks.
+- Native build, AUnit 67/67, both ordinary raw variants and actual-shim
+  production/fault ASan/UBSan; both examples; six GPRinstall/two link-metadata
+  regressions; source/installed/relocated consumers and audits.
+- Strict GNATdoc 26.0.0: 127/127 documented/rendered elements, zero warnings;
+  independent generation and diagnostic log byte-identical.
+- Official Enhancer v0.1.0 wheel installed through the exact workflow interface
+  (`--venv ... --with-guides`, no `--checkout`). Source/tag/tree, wheel/provenance
+  hashes, installed modules/assets/renderer/launcher verified against main's
+  unchanged approval inventory. Compatibility preflight: zero failures.
+- Complete documentation suite: 104 executed / 104 passed, no skips, including
+  real regeneration and installed security mutations. Enhancement deterministic,
+  byte-idempotent, pristine/native identities preserved.
+- Chromium 156.0.8078.4 / Playwright 1.64.1: 64/64 root, 199/199 project-prefix,
+  64/64 prefix API assertions. Local Pages archive: 18 files, 13 pages,
+  248 references, byte-identical. Hosted uploaded-artifact verification remains
+  a separate final-head CI requirement, not inferred from the local tar.
+
+An agent-side optional-preflight invocation initially used the wrong interface;
+it was corrected to the documented `--revision`/`--workspace` arguments and
+passed without source changes. Main's historical security evidence has one
+existing trailing space; it is preserved unchanged, and the PR diff against
+main is whitespace-clean. Final commit/tree and final-head hosted results are
+recorded in PR #27. Real Windows execution remains post-merge only.
+
+### Initial FEATURES-CI-016 local evidence
 
 Local Linux: Alire 2.1.1, selected GNAT 16.1.0 / GPRbuild crate 26.0.1,
 g++ 14.2.0, native OpenCV 4.10.0/features2d, indexed Core 0.5.0 origin

@@ -13,8 +13,8 @@
     "guides/platform-compatibility.html",
     "index.html"
   ],
-  "enhancer_revision": "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1",
-  "enhancer_version": "0.1.0.dev0",
+  "enhancer_revision": "4ee95e8c95b8c7f54397a07e3e1c507783c115aa",
+  "enhancer_version": "0.1.0",
   "guide_renderer": {
     "markdown-it-py": "3.0.0",
     "mdurl": "0.1.2"
