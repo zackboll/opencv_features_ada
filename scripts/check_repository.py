@@ -6,6 +6,7 @@ import sys
 import tomllib
 
 from workflow_topology import check_workflows
+from check_windows_boundary import check_windows_boundary_file
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -127,6 +128,7 @@ def main() -> None:
     check_correspondences(ROOT)
     check_clean_consumer(ROOT, manifests)
     check_workflows(ROOT / ".github/workflows")
+    check_windows_boundary_file(ROOT)
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()
     registrations = re.findall(r"Result\.Add_Test\s*\(Caller\.Create", tests)

@@ -84,6 +84,13 @@ two-step full upgrade (`pacman -Syu` twice) before
 `pacman -S --noconfirm --needed`. Do not return to a partial `pacman -Sy`
 transaction.
 
+The Windows workflow also requires separate production/fault raw-boundary
+campaigns on current main and the immutable approved 0.1.0 source. The external
+harness compiles the real implementation, not the Features DLL, and records
+source/harness/Core/compiler identities separately. See
+[Windows native-boundary qualification](windows-native-boundary-qualification.md)
+for repeatable commands, marker gates, diagnostics and outstanding review gates.
+
 ## CI routing
 
 PR CI (`cross-platform.yml`):

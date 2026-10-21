@@ -1,5 +1,16 @@
 # Architecture decisions
 
+## External release qualification harness
+
+Windows raw-boundary qualification may use a newer test harness outside an
+immutable release checkout. That harness must verify exact source commit/tree
+and compile both implementation and boundary driver from the selected checkout,
+using its generated native configuration and actual resolved Core. Harness and
+tested-source identities are recorded separately. Neither changing CI nor a
+successful updated-main test silently retargets an approved release. The
+production ABI/API/algorithms and Linux sanitizer campaigns remain unchanged;
+see [the qualification contract](windows-native-boundary-qualification.md).
+
 ## Module ownership
 
 `opencv_features` is a separate Ada crate. The public package name does not
