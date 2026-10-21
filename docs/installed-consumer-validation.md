@@ -1,14 +1,19 @@
 # Installed and clean-consumer qualification (Task 007)
 
-Version remains **0.1.0-dev**. This is packaging/integration qualification,
-not a release, index submission, algorithm extension or compatibility promise.
+The source candidate version is **0.1.0**. This document records packaging and
+integration qualification. It is not a tag, GitHub release, Alire index
+submission, algorithm extension, or compatibility promise.
+
+Current reconciled-candidate results and exact dependency provenance are in
+[release qualification](release-0.1.0-qualification.md). Task records below
+retain their original versions and platform limitations as historical evidence.
 
 ## Three separate claims
 
 1. **Index-resolved external consumer:** a fresh `alr init --bin` application
    adds `opencv_features --use=<candidate>`. Core resolves as indexed
-   `opencv_core` 0.5.0; no Features Git pin and no sibling Core checkout are
-   selected manually.
+   `opencv_core` satisfying `~0.5.0`; no Features Git pin and no sibling Core
+   checkout are selected manually.
 2. **Installed-prefix consumer:** Core and Features are recursively installed
    with real projects and `gprinstall -f -p -r --prefix=... -P ...`.
    A separate non-Alire GPR application builds/runs against installed projects
@@ -17,16 +22,25 @@ not a release, index submission, algorithm extension or compatibility promise.
    absolute prefix B, verify A is absent (no symlink), then compile/link/run a
    new application with no reused consumer objects.
 
-**Features itself is not an indexed release.** Bare `alr with opencv_features`
-is not documented as resolving from the community index. Core is: the
-production constraint is `opencv_core = "~0.5.0"`, and the consumer qualifier
-checks that the resolved manifest is version 0.5.0 and is not a Features
-workspace pin. Version remains **0.1.0-dev**.
+**Features 0.1.0 is a source candidate, not an indexed release.** Bare
+`alr with opencv_features` is not documented as resolving from the community
+index. Core is: the production constraint is `opencv_core = "~0.5.0"`, and the
+consumer qualifier parses the entire resolved TOML manifest, requires the exact
+crate identity `opencv_core`, and accepts stable SemVer versions **>=0.5.0 and
+<0.6.0**, including 0.5.1 and 0.5.2. Prereleases, malformed versions/TOML,
+missing manifests and wrong identities fail before evidence writes or either
+installation. SemVer build metadata does not affect compatibility. The existing
+Features workspace-pin rejection and source/linker audits remain mandatory.
+`scripts/install_resolved_consumer.sh` invokes `scripts/validate_core_manifest.py`
+with the existing platform Python convention (`python3` on Linux/macOS,
+`python` on MSYS2; Python 3.11+ standard-library `tomllib`, no added dependency).
+The script-file boundary still avoids reparsing escaped `alr exec` payloads.
+Windows run 39006138286 failed before that original script-file correction.
 
 ## Reproduce
 
 From a Git candidate checkout with Alire 2.1.1, GNAT Ada 2022/GPRbuild,
-Python 3, system OpenCV development libraries and pkg-config available:
+Python 3.11+, system OpenCV development libraries and pkg-config available:
 
 ```sh
 sh scripts/validate_clean_consumer.sh
@@ -117,8 +131,9 @@ moved to B. They do not certify Windows import-library resolution.
 The Windows executions show the stale option did not prevent those particular
 links/runs. They do not identify which Windows linker search entry selected
 each library; no claim about Windows search order is inferred from execution.
-The new Windows post-merge run must pass the full final audit. Core remains
-source-pinned, and none of this establishes official indexed resolution.
+That task's next Windows post-merge run had to pass the full final audit. Core
+was source-pinned at that historical baseline; current production Core resolves
+from the community index as recorded in the release qualification.
 
 Linux inspects executables with ldd/readelf. Static archives are proven by the
 link command, not expected in ldd. Runtime lookup includes installed directories
@@ -153,6 +168,6 @@ before merge. No Windows PR CI or merge to obtain evidence is authorized.
 The manual 4.1/4.10/5.0 matrix is not dispatched: these changes concern consumer
 qualification, not version-dependent native algorithm/link changes.
 
-Release/index submission, pin removal, version/tag/release changes, release
-tarballs and semantic-version policy remain deferred. This does not establish
-arbitrary cross-platform or future OpenCV safety.
+Release tagging, GitHub publication, and Alire index submission remain later
+gates. This record does not establish arbitrary cross-platform or future
+OpenCV safety.

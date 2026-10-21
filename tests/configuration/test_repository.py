@@ -8,11 +8,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from check_repository import check_bridge_ownership, check_correspondences, check_clean_consumer
 from workflow_topology import check_topology
+import tomllib
 
 
 class RepositoryTests(unittest.TestCase):
+    def manifests_for(self, root: Path):
+        return [tomllib.loads((root / path).read_text()) for path in
+                ("alire.toml", "tests/alire.toml", "examples/alire.toml")]
+
     def test_clean_consumer_contract(self):
-        check_clean_consumer(ROOT)
+        check_clean_consumer(ROOT, self.manifests_for(ROOT))
 
     def test_clean_consumer_rejects_private_packages_or_lookup(self):
         import shutil
@@ -26,12 +31,12 @@ class RepositoryTests(unittest.TestCase):
                             "OpenCV.Core.Module_Interop"):
                 fixture.write_text(original + f"\nwith {package};\n")
                 with self.subTest(package=package), self.assertRaises(ValueError):
-                    check_clean_consumer(root)
+                    check_clean_consumer(root, self.manifests_for(ROOT))
             fixture.write_text(original)
             validator = root / "scripts/validate_clean_consumer.sh"
             validator.write_text(validator.read_text().replace("unset GPR_PROJECT_PATH", "unset OMITTED"))
             with self.assertRaisesRegex(ValueError, "unset inherited GPR_PROJECT_PATH"):
-                check_clean_consumer(root)
+                check_clean_consumer(root, self.manifests_for(ROOT))
 
     def test_each_consumer_workflow_stage_is_required(self):
         import shutil
@@ -49,8 +54,27 @@ class RepositoryTests(unittest.TestCase):
                                     + "run: echo omitted"
                                     + "run: sh scripts/validate_clean_consumer.sh".join(parts[index + 1:]))
                     with self.subTest(workflow=name, stage=index), self.assertRaises(ValueError):
-                        check_clean_consumer(root)
+                        check_clean_consumer(root, self.manifests_for(ROOT))
                 path.write_text(original)
+
+    def test_installer_manifest_gate_cannot_be_removed_or_moved_after_writes(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "scripts", root / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / ".github", root / ".github")
+            path = root / "scripts/install_resolved_consumer.sh"
+            original = path.read_text()
+            gate = '"$python" "$script_dir/validate_core_manifest.py" "$manifest"'
+            for changed in (
+                original.replace(gate, "true"),
+                original.replace(gate, "true") + "\n" + gate + "\n",
+                original.replace("python=python3", "python=python"),
+                original.replace('"$work/unavailable-candidate"*|', ""),
+            ):
+                with self.subTest(changed=changed), self.assertRaises(ValueError):
+                    path.write_text(changed)
+                    check_clean_consumer(root, self.manifests_for(ROOT))
 
     def test_correspondences_public_ada_boundary(self):
         check_correspondences(ROOT)

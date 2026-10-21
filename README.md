@@ -6,13 +6,18 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 `OpenCV.Features.ORB`, `OpenCV.Features.Matching`, and
 `OpenCV.Features.Correspondences`.
 
-**Version: 0.1.0-dev. This is not a release.**
-ORB, binary BF one-best/KNN2/radius matching, pure-Ada ratio filtering and owned
-2-D correspondence conversion are included. The native AUnit inventory is 67
+**Version: 0.1.0 source candidate.** This tree prepares the first source
+release. Preparation, merge to `main`, a tagged GitHub release, and acceptance
+into the Alire community index are separate milestones. This candidate has not
+completed the latter three. See [current qualification](docs/release-0.1.0-qualification.md).
+ORB uses a fixed eight-level profile. Binary BF one-best, KNN2 and radius
+matching, pure-Ada ratio filtering, and owned 2-D correspondence conversion
+are included. Configurable ORB pyramid levels, RANSAC, homography, PnP and
+navigation estimation are not implemented. The native AUnit inventory is 67
 cases. Local Linux qualification against indexed OpenCV Core 0.5.0 and native
 OpenCV 4.10.0 is recorded in
 [the validation record](docs/bootstrap-validation.md). That record is not a
-cross-platform release claim. No CI badges imply success.
+completed cross-platform release claim. No CI badges imply success.
 
 ## Start here
 
@@ -41,8 +46,9 @@ sudo apt-get install -y build-essential pkg-config libopencv-dev
 Production Ada dependency: indexed `opencv_core ~0.5.0`. Alire resolves it from
 the community index; no sibling checkout and no Core Git pin are required. The
 tests and examples crates path-pin this Features crate only. Native OpenCV and
-pkg-config remain system packages. Version stays **0.1.0-dev**; this repository
-is not an Alire release. [Dependency and platform notes](docs/build-and-platforms.md).
+pkg-config remain system packages. The three crate versions are **0.1.0**.
+This candidate is not yet tagged or published to the Alire index.
+[Dependency and platform notes](docs/build-and-platforms.md).
 
 Task 007 added
 [installed and relocated consumer qualification](docs/installed-consumer-validation.md).
@@ -56,8 +62,8 @@ It builds a fresh Alire application that path-pins this crate while resolving
 Core from the index, recursively installs resolved Core and Features into an
 isolated prefix, then builds and runs separate installed GPR consumers before
 and after relocation. Installed consumers use `with "opencv_features";` and
-prefix-only lookup. This is consumer qualification, not a Features index
-release.
+prefix-only lookup. This qualifies the source candidate; it does not publish
+Features to the Alire index.
 
 ## Included API
 
@@ -89,11 +95,12 @@ The complete standalone program is `examples/src/orb_synthetic.adb`.
 It uses only Core and Features: no image files, GUI, camera, or Imgproc
 binding is needed to exercise extraction.
 
-The initial detector supports a requested feature target, HARRIS/FAST
-scoring, WTA_K 2/3/4, and a FAST threshold. Its structural profile is fixed
-at scale factor 1.2, eight pyramid levels, edge threshold 31, first level 0,
-and patch size 31. These are deliberately not exposed as unchecked tuning
-knobs yet. See [the ORB contract](docs/orb-contract.md).
+The detector supports a requested feature target, HARRIS/FAST scoring, WTA_K
+2/3/4, and a FAST threshold. Its structural profile is fixed at scale factor
+1.2, **eight pyramid levels**, edge threshold 31, first level 0, and patch
+size 31. Pyramid level count is not configurable in 0.1.0. These settings are
+deliberately not exposed as unchecked tuning knobs. See
+[the ORB contract](docs/orb-contract.md).
 
 A `Feature_Set` is limited and private. Keypoints are owned Ada values in a
 private heap-backed vector; descriptors live in a Core-owned Mat. Keypoint
@@ -240,11 +247,13 @@ site as a review artifact. See
 [enhancer integration](docs/gnatdoc-enhancer-integration.md) records.
 
 Documentation website: <https://zackboll.github.io/opencv_features_ada/>
-(**not yet published**). The workflow deploys the qualified site there from
-`main` only, once every page has an HTML `<title>`; until the first successful
-deployment the address serves nothing. It will describe the development
-sources on `main` (0.1.0-dev), not a release; Features 0.1.0 is not yet in the
-Alire index. [Publishing process](docs/github-pages.md).
+(**published**). Main documentation run
+[39196259148](https://github.com/zackboll/opencv_features_ada/actions/runs/39196259148)
+deployed `71eb93f45b3ee833d4cb2b96a10095aaf0541acd`; the portal and API route
+were independently fetched successfully during release reconciliation. The
+site describes development sources on `main` (0.1.0-dev), not this release
+candidate. Pages publication is not a GitHub release or Alire index acceptance.
+[Publishing process](docs/github-pages.md).
 
 ## Architecture
 
@@ -352,9 +361,17 @@ See `docs/orb-source-review.md` for pinned upstream source-derived bounds.
 Cross-platform CI runs Linux and macOS on pull requests and on main.
 Windows/MSYS2 runs only on pushes to main, never on pull requests or manual
 dispatch. A separate manual workflow builds native OpenCV 4.1.0, 4.10.0, and
-5.0.0; those jobs are targets, not results claimed by this tree. Windows
-qualification of indexed Core 0.5.0 has not been run and is not inferred from
-earlier Core 0.4.1 runs.
+5.0.0. Those jobs are qualification targets; a green badge is not claimed
+until that workflow has completed against this candidate. Historical Windows post-merge run
+[39006138286](https://github.com/zackboll/opencv_features_ada/actions/runs/39006138286)
+on `eb4af534d837221879ac6a56d7e0866e98a1d3dc` resolved indexed Core 0.5.0 and
+passed 67/67 AUnit, then failed while installing the consumer. That result is
+`WINDOWS_CORE_050_FAILED` and is not reused as release qualification.
+The later main run
+[39196259295](https://github.com/zackboll/opencv_features_ada/actions/runs/39196259295)
+passed on `71eb93f45b3ee833d4cb2b96a10095aaf0541acd`, including installed and
+relocated consumers and audits. It is baseline evidence only: Windows execution
+of the final candidate remains a post-merge gate.
 
 ## Navigation direction and exclusions
 

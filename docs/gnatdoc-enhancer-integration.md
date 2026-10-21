@@ -25,10 +25,12 @@ The installer still uses an immutable Git archive, private documentation-only
 environment and installed-module/asset Git-blob comparison. The Markdown
 renderer pins and distribution hashes are unchanged.
 
-Status: **Pages-qualified implementation, awaiting final evidence-head CI and
-independent review**. The implementation run passed including actual uploaded
-artifact verification; deployment was skipped. This is not a public deployment; see
-[Pages publication](github-pages.md) and the qualification record for hosted status.
+Status: **merged and publicly deployed from main**. Documentation run
+[39196259148](https://github.com/zackboll/opencv_features_ada/actions/runs/39196259148)
+qualified and deployed `71eb93f45b3ee833d4cb2b96a10095aaf0541acd`.
+The implementation qualification's skipped deployment remains historical; see
+[Pages publication](github-pages.md) for independent public-route verification.
+This does not publish the Features source release or submit it to Alire.
 
 DOC-004 adopts the reviewed shared `ada-gnatdoc-enhancer` for a presentation
 copy of the native Features API site. It was first qualified on the DOC-001

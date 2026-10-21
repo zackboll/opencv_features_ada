@@ -1,6 +1,6 @@
 name = "opencv_features"
 description = "Thick Ada binding to OpenCV feature detection and description"
-version = "0.1.0-dev"
+version = "0.1.0"
 authors = ["Zack Boll"]
 maintainers = ["Zack Boll <zackboll@gmail.com>"]
 maintainers-logins = ["zackboll"]
