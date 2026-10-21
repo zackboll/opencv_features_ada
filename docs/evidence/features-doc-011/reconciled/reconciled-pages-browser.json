@@ -1,0 +1,2220 @@
+{
+  "versions": {
+    "chromium": "156.0.8078.4",
+    "playwright": "1.64.1",
+    "node": "v20.19.2"
+  },
+  "url": "http://127.0.0.1:8376/opencv_features_ada/",
+  "passed": 199,
+  "failed": 0,
+  "assertions": [
+    {
+      "name": "metadata light portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light portal: /opencv_features_ada/ loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/",
+        "h1": "OpenCV Features for Ada"
+      }
+    },
+    {
+      "name": "light portal: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light portal: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata light loaded iframe: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light API index: /opencv_features_ada/api/index.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/index.html?package=OpenCV.Features",
+        "h1": "OpenCV.Features"
+      }
+    },
+    {
+      "name": "light API index: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light API index: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/getting-started.html: /opencv_features_ada/guides/getting-started.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+        "h1": "Getting started"
+      }
+    },
+    {
+      "name": "light guides/getting-started.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/getting-started.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/orb-extraction.html: /opencv_features_ada/guides/orb-extraction.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+        "h1": "ORB feature extraction"
+      }
+    },
+    {
+      "name": "light guides/orb-extraction.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/orb-extraction.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/binary-matching.html: /opencv_features_ada/guides/binary-matching.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+        "h1": "Binary matching"
+      }
+    },
+    {
+      "name": "light guides/binary-matching.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/binary-matching.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/candidate-correspondences.html: /opencv_features_ada/guides/candidate-correspondences.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+        "h1": "Candidate correspondences"
+      }
+    },
+    {
+      "name": "light guides/candidate-correspondences.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/candidate-correspondences.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/ownership-lifecycle.html: /opencv_features_ada/guides/ownership-lifecycle.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+        "h1": "Ownership and lifecycle"
+      }
+    },
+    {
+      "name": "light guides/ownership-lifecycle.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/ownership-lifecycle.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/platform-compatibility.html: /opencv_features_ada/guides/platform-compatibility.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+        "h1": "Platform compatibility"
+      }
+    },
+    {
+      "name": "light guides/platform-compatibility.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/platform-compatibility.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light guides/limitations-roadmap.html: /opencv_features_ada/guides/limitations-roadmap.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+        "h1": "Limitations and roadmap"
+      }
+    },
+    {
+      "name": "light guides/limitations-roadmap.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light guides/limitations-roadmap.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light OpenCV.Features: /opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+        "h1": "OpenCV.Features"
+      }
+    },
+    {
+      "name": "light OpenCV.Features: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light OpenCV.Features: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Correspondences: /opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+        "h1": "OpenCV.Features.Correspondences"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Correspondences: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Correspondences: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Matching: /opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+        "h1": "OpenCV.Features.Matching"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Matching: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.Matching: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata light OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "light OpenCV.Features.ORB: /opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "h1": "OpenCV.Features.ORB"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.ORB: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(255, 255, 255)"
+      }
+    },
+    {
+      "name": "light OpenCV.Features.ORB: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark portal: /opencv_features_ada/ loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/",
+        "h1": "OpenCV Features for Ada"
+      }
+    },
+    {
+      "name": "dark portal: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark portal: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata dark loaded iframe: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark API index: /opencv_features_ada/api/index.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/index.html?package=OpenCV.Features",
+        "h1": "OpenCV.Features"
+      }
+    },
+    {
+      "name": "dark API index: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark API index: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/getting-started.html: /opencv_features_ada/guides/getting-started.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+        "h1": "Getting started"
+      }
+    },
+    {
+      "name": "dark guides/getting-started.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/getting-started.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/orb-extraction.html: /opencv_features_ada/guides/orb-extraction.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+        "h1": "ORB feature extraction"
+      }
+    },
+    {
+      "name": "dark guides/orb-extraction.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/orb-extraction.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/binary-matching.html: /opencv_features_ada/guides/binary-matching.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+        "h1": "Binary matching"
+      }
+    },
+    {
+      "name": "dark guides/binary-matching.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/binary-matching.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/candidate-correspondences.html: /opencv_features_ada/guides/candidate-correspondences.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+        "h1": "Candidate correspondences"
+      }
+    },
+    {
+      "name": "dark guides/candidate-correspondences.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/candidate-correspondences.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/ownership-lifecycle.html: /opencv_features_ada/guides/ownership-lifecycle.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+        "h1": "Ownership and lifecycle"
+      }
+    },
+    {
+      "name": "dark guides/ownership-lifecycle.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/ownership-lifecycle.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/platform-compatibility.html: /opencv_features_ada/guides/platform-compatibility.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+        "h1": "Platform compatibility"
+      }
+    },
+    {
+      "name": "dark guides/platform-compatibility.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/platform-compatibility.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark guides/limitations-roadmap.html: /opencv_features_ada/guides/limitations-roadmap.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+        "h1": "Limitations and roadmap"
+      }
+    },
+    {
+      "name": "dark guides/limitations-roadmap.html: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 1,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+            "rules": 17
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark guides/limitations-roadmap.html: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark OpenCV.Features: /opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+        "h1": "OpenCV.Features"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Correspondences: /opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+        "h1": "OpenCV.Features.Correspondences"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Correspondences: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Correspondences: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Matching: /opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+        "h1": "OpenCV.Features.Matching"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Matching: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.Matching: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata dark OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.ORB: /opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html loads with its heading",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "h1": "OpenCV.Features.ORB"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.ORB: stylesheets load from the prefix and the theme applies",
+      "pass": true,
+      "detail": {
+        "linked": 2,
+        "sheets": [
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+            "rules": 17
+          },
+          {
+            "href": "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+            "rules": 54
+          }
+        ],
+        "background": "rgb(20, 27, 38)"
+      }
+    },
+    {
+      "name": "dark OpenCV.Features.ORB: every request stays under the prefix, without failures or errors",
+      "pass": true,
+      "detail": {
+        "outside": [],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "links portal: all 26 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links API index: all 10 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/getting-started.html: all 15 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/orb-extraction.html: all 27 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/binary-matching.html: all 21 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/candidate-correspondences.html: all 15 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/ownership-lifecycle.html: all 17 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/platform-compatibility.html: all 13 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links guides/limitations-roadmap.html: all 11 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links OpenCV.Features: all 26 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links OpenCV.Features.Correspondences: all 9 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links OpenCV.Features.Matching: all 34 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links OpenCV.Features.ORB: all 24 references resolve under the prefix",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "links: 248 references from 13 pages crawled",
+      "pass": true,
+      "detail": 248
+    },
+    {
+      "name": "redirect: /opencv_features_ada without a slash reaches the portal",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/"
+    },
+    {
+      "name": "redirect: relative navigation from the redirected portal stays under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/api/index.html?package=OpenCV.Features"
+    },
+    {
+      "name": "navigation: portal opens guides/getting-started.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html"
+    },
+    {
+      "name": "navigation: portal opens guides/orb-extraction.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html"
+    },
+    {
+      "name": "navigation: portal opens guides/binary-matching.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html"
+    },
+    {
+      "name": "navigation: portal opens guides/candidate-correspondences.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html"
+    },
+    {
+      "name": "navigation: portal opens guides/ownership-lifecycle.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html"
+    },
+    {
+      "name": "navigation: portal opens guides/platform-compatibility.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html"
+    },
+    {
+      "name": "navigation: portal opens guides/limitations-roadmap.html under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html"
+    },
+    {
+      "name": "navigation: guide Home returns to the portal under the prefix",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/index.html"
+    },
+    {
+      "name": "JavaScript: the default package bookmark keeps the prefixed path",
+      "pass": true,
+      "detail": {
+        "path": "/opencv_features_ada/api/index.html",
+        "packages": [
+          "OpenCV.Features"
+        ],
+        "frame": "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+      }
+    },
+    {
+      "name": "JavaScript: package navigation pushes ?package on the prefixed path and loads ORB",
+      "pass": true,
+      "detail": {
+        "path": "/opencv_features_ada/api/index.html",
+        "packages": [
+          "OpenCV.Features.ORB"
+        ],
+        "frame": "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+      }
+    },
+    {
+      "name": "JavaScript: Back restores the previous package on the prefixed path",
+      "pass": true,
+      "detail": {
+        "path": "/opencv_features_ada/api/index.html",
+        "packages": [
+          "OpenCV.Features"
+        ],
+        "frame": "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html"
+      }
+    },
+    {
+      "name": "bookmark: a prefixed ?package URL opens that package",
+      "pass": true,
+      "detail": "http://127.0.0.1:8376/opencv_features_ada/api/index.html?package=OpenCV.Features.Matching"
+    },
+    {
+      "name": "JavaScript: no page or console errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "overload: the masked Detect_And_Compute link lands on its section under the prefix",
+      "pass": true,
+      "detail": {
+        "path": "/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+        "id": "07eb80b590b7f97f4c088474add72fc7d2b3f9a09f745f293468ca8cf358c2df",
+        "text": "Detect_And_Compute",
+        "target": true,
+        "code": "function Detect_And_Compute\n  (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set\n"
+      }
+    },
+    {
+      "name": "bookmark: a prefixed declaration URL targets and scrolls to Create",
+      "pass": true,
+      "detail": {
+        "matches": true,
+        "top": 18.875,
+        "height": 900,
+        "text": "Create"
+      }
+    },
+    {
+      "name": "metadata mobile JS=true portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=true OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=true OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata guide navigation JS=true: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata Back JS=true: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata Forward JS=true: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata loaded native iframe JS=true: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata navigation JS=true: no errors or prefix escapes",
+      "pass": true,
+      "detail": {
+        "requests": [
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-navigation.js",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html?package=OpenCV.Features",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-navigation.js",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-navigation.js",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css"
+        ],
+        "failures": [],
+        "errors": []
+      }
+    },
+    {
+      "name": "metadata mobile JS=false portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false portal: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false API index: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "API Reference — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/getting-started.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/orb-extraction.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "ORB feature extraction — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/binary-matching.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Binary matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/candidate-correspondences.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Candidate correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/ownership-lifecycle.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Ownership and lifecycle — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/platform-compatibility.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Platform compatibility — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false guides/limitations-roadmap.html: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Limitations and roadmap — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false OpenCV.Features: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false OpenCV.Features.Correspondences: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Correspondences — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false OpenCV.Features.Matching: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata mobile JS=false OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata reload JS=false OpenCV.Features.ORB: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.ORB — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata guide navigation JS=false: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata Back JS=false: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV Features for Ada documentation",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata Forward JS=false: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "Getting started — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata loaded native iframe JS=false: source-owned title, language and UTF-8",
+      "pass": true,
+      "detail": {
+        "title": "OpenCV.Features.Matching — OpenCV Features Ada",
+        "titles": 1,
+        "lang": "en",
+        "charset": "UTF-8",
+        "heads": 1
+      }
+    },
+    {
+      "name": "metadata navigation JS=false: no errors or prefix escapes",
+      "pass": true,
+      "detail": {
+        "requests": [
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/orb-extraction.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/binary-matching.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/candidate-correspondences.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/ownership-lifecycle.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/platform-compatibility.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/limitations-roadmap.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/8aee7d25112f028c5446a96519872c18ad78baa4beac4c4e2a13798d7521472c.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/0276ad652f884946c096f409451e99a54a424134b0183a333688d154e443c58b.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/guides/getting-started.html",
+          "http://127.0.0.1:8376/opencv_features_ada/assets/gnatdoc-guides.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/index.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/f8c4f9ff8d48083e265efee6caac04d35ec5fd66029c3db2332e801220bed0dd.html",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc.css",
+          "http://127.0.0.1:8376/opencv_features_ada/api/gnatdoc-theme.css"
+        ],
+        "failures": [],
+        "errors": []
+      }
+    }
+  ]
+}

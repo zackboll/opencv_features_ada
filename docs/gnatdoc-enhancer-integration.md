@@ -56,9 +56,11 @@ The independent JavaScript authority check is unchanged.
 
 See [DOC-011 evidence](evidence/features-doc-011/README.md) for fresh versus reused
 inputs, security mutations, Chromium, source integrity, Pages archive checks and
-exact-head hosted qualification. PR #15 remains an independent source-release
-effort; overlapping documentation requires coordinated review without rewriting
-its branch or duplicating its changes.
+exact-head hosted qualification. Source-release PR #15 merged into main as
+`e6d977f0bba02c526920834ef6e88905366ed1b9` during this campaign. Its changes were
+preserved by a normal merge, including the two overlapping documentation files;
+the reconciled head is independently requalified without rewriting its branch or
+duplicating its source-release changes.
 
 ## DOC-010 qualification
 

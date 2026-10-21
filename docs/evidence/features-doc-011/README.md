@@ -159,6 +159,42 @@ remain the only jobs. PR/manual runs must show deployment skipped.
 
 ## Coordination and limitations
 
+### PR #15 reconciliation (supersedes the earlier open-PR observation)
+
+The required final fetch discovered PR #15 merged at `2026-10-21T03:42:30Z` as
+main `e6d977f0bba02c526920834ef6e88905366ed1b9`. A **normal Git merge** produced
+`364dd94804dcef985e1ad945bc526445e0b393c3`, tree
+`7283a4135e7696ad7947537d72db71f4f9090e66`. There were no merge conflicts;
+the two overlapping documentation files preserve the source-release edits and
+DOC-011's explicitly scoped additions. All source-release manifests, Core
+validation/installer logic and release records are identical to refreshed main.
+No rebase, force-push or source-release changes were made by DOC-011.
+
+`reconciled/` retains the fresh post-merge results: 104 documentation tests with
+no skips, **86** configuration tests (the three additional tests come from PR #15),
+repository/ABI checks, two byte-identical strict native generations, identical
+pre-/post-merge native and enhanced outputs, version-only old/release comparison,
+248 references, archive checks and Chromium 64/64 + 199/199 + 64/64. The iframe
+metadata timeout also recurred once on a reused local server; its failure log is
+retained alongside the clean-server 199/199 pass. Neither test nor product was
+changed or assertions relaxed. Final hosted qualification must independently pass.
+
+The pre-reconciliation final-head documentation run
+[39539900103](https://github.com/zackboll/opencv_features_ada/actions/runs/39539900103)
+passed on `3570b5af4043f5bdb7699bc69c51460f8ce39274`, with deployment skipped;
+agent-side Pages artifact `12318967942` had tar SHA-256
+`6cec2e23cdb68051cf889a343624a031968471dcfd6f3b90ee5008078c64bcdf`
+and all 18 file hashes equal the qualified site. This **does not substitute** for
+reconciled-head qualification. The final PR comment records the new head/tree,
+complete local rerun, new hosted run and actual uploaded artifact verification.
+
+One redundant pre-merge local browser rerun observed an unchanged harness iframe
+metadata timing failure (URL changed before document element existed). A scratch-only
+diagnostic captured this state; no tracked browser test or output was changed.
+The unchanged campaign on a clean server then passed 199/199, and both hosted
+pre-merge campaigns passed all 199 assertions. The final reconciled campaign
+is required again; a retry is not represented as an unbroken passing run.
+
 PR #15 was freshly checked and remains **OPEN**, source-release head
 `9c2b4e0377e10e2712c77a9b7cfb62a8fc1a2a2c` (`pr15.json`). Overlap is limited to
 `docs/github-pages.md` and `docs/gnatdoc-enhancer-integration.md`; DOC-011 prepends

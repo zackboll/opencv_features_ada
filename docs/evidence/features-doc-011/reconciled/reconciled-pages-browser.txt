@@ -1,0 +1,7 @@
+frame.waitForFunction: Timeout 30000ms exceeded.
+    at metadata (/home/zboll/git/opencv/features-doc-011/tests/documentation/test_pages_browser.cjs:41:18)
+    at metadataNavigation (/home/zboll/git/opencv/features-doc-011/tests/documentation/test_pages_browser.cjs:273:11)
+    at async /home/zboll/git/opencv/features-doc-011/tests/documentation/test_pages_browser.cjs:295:5 {
+  log: [],
+  name: 'TimeoutError'
+}

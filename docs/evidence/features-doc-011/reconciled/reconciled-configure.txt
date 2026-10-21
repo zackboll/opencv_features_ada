@@ -1,0 +1,10 @@
+Note: Synchronizing workspace...
+Nothing to update.
+
+Note: Running pre-build actions for opencv_core=0.5.0...
+Note: Running pre-build actions for opencv_features=0.1.0...
+OpenCV: 4.10.0 (opencv4), native backend: features2d
+Core bridge: /home/zboll/.local/share/alire/builds/opencv_core_0.5.0_f8aef00c/59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689/cpp
+Shim: Static_PIC
+Success: Partial build finished successfully in 0.04 seconds.
+Note: Build was requested to stop after stage: pre_build; build artifacts may be missing.
