@@ -12,8 +12,13 @@ case "$OPENCV_CORE_ALIRE_PREFIX" in
         exit 1 ;;
 esac
 manifest=$OPENCV_CORE_ALIRE_PREFIX/alire.toml
-[ -f "$manifest" ] || { echo 'error: resolved Core has no manifest' >&2; exit 1; }
-grep -E '^version *= *"0\.5\.0"' "$manifest"
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+python=python3
+case "$(uname -s)" in
+    MINGW*|MSYS*) python=python ;;
+esac
+# Parse the entire manifest before evidence writes or either gprinstall call.
+"$python" "$script_dir/validate_core_manifest.py" "$manifest"
 if git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse --verify HEAD >/dev/null 2>&1; then
     git -C "$OPENCV_CORE_ALIRE_PREFIX" rev-parse HEAD
 fi

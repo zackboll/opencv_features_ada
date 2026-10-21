@@ -12,8 +12,8 @@ retain their original versions and platform limitations as historical evidence.
 
 1. **Index-resolved external consumer:** a fresh `alr init --bin` application
    adds `opencv_features --use=<candidate>`. Core resolves as indexed
-   `opencv_core` 0.5.0; no Features Git pin and no sibling Core checkout are
-   selected manually.
+   `opencv_core` satisfying `~0.5.0`; no Features Git pin and no sibling Core
+   checkout are selected manually.
 2. **Installed-prefix consumer:** Core and Features are recursively installed
    with real projects and `gprinstall -f -p -r --prefix=... -P ...`.
    A separate non-Alire GPR application builds/runs against installed projects
@@ -25,15 +25,22 @@ retain their original versions and platform limitations as historical evidence.
 **Features 0.1.0 is a source candidate, not an indexed release.** Bare
 `alr with opencv_features` is not documented as resolving from the community
 index. Core is: the production constraint is `opencv_core = "~0.5.0"`, and the
-consumer qualifier checks that the resolved manifest is version 0.5.0 and is
-not a Features workspace pin. The version check lives in
-`scripts/install_resolved_consumer.sh` so `alr exec` does not reparse escaped
-quotes. Windows run 39006138286 failed before that correction.
+consumer qualifier parses the entire resolved TOML manifest, requires the exact
+crate identity `opencv_core`, and accepts stable SemVer versions **>=0.5.0 and
+<0.6.0**, including 0.5.1 and 0.5.2. Prereleases, malformed versions/TOML,
+missing manifests and wrong identities fail before evidence writes or either
+installation. SemVer build metadata does not affect compatibility. The existing
+Features workspace-pin rejection and source/linker audits remain mandatory.
+`scripts/install_resolved_consumer.sh` invokes `scripts/validate_core_manifest.py`
+with the existing platform Python convention (`python3` on Linux/macOS,
+`python` on MSYS2; Python 3.11+ standard-library `tomllib`, no added dependency).
+The script-file boundary still avoids reparsing escaped `alr exec` payloads.
+Windows run 39006138286 failed before that original script-file correction.
 
 ## Reproduce
 
 From a Git candidate checkout with Alire 2.1.1, GNAT Ada 2022/GPRbuild,
-Python 3, system OpenCV development libraries and pkg-config available:
+Python 3.11+, system OpenCV development libraries and pkg-config available:
 
 ```sh
 sh scripts/validate_clean_consumer.sh

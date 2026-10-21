@@ -51,6 +51,46 @@ all matching/ownership contracts must remain unchanged.
 
 ## Qualification status
 
+### FEATURES-REL-014R1 — stable Core 0.5.x manifest policy
+
+Starting release HEAD: `7e1da8283bb4b661a5fdd52f924f96f7616e852f`, tree
+`fd67c96d63c8d49cb288d980ebd06f40ee9aa6c0`. This correction replaces the exact
+0.5.0 line match with whole-manifest TOML parsing and exact `opencv_core` identity
+validation. Stable canonical SemVer versions >=0.5.0 and <0.6.0 are accepted;
+prereleases are rejected, build metadata is permitted per SemVer. Validation
+finishes before evidence writes or either recursive installation. Workspace-pin
+rejection, source sanitization and installed/relocated audits remain unchanged.
+
+The helper uses Python 3.11+ standard-library `tomllib` (already used by repository
+tooling), selected as `python3` on Linux/macOS and `python` on MSYS2. No production
+Ada/C++, API, ABI, manifest/dependency constraint, ORB or matching changes occur.
+Fixtures cover 0.5.0, 0.5.1, 0.5.2, valid TOML formatting and CRLF, both install
+calls, incompatible/malformed/missing versions/manifests, incorrect identities,
+unchanged prefixes on rejection, existing install failure propagation and all
+four forbidden workspace roots. Platform-name fixtures verify interpreter
+selection, not native Windows execution.
+
+Fresh upstream `stable-1.4.0` at
+`4635347cb4460e87ea70d6599aeff1eb615bd472` still indexes only **0.5.0** in the
+compatible Core series. Actual local resolution is **opencv_core=0.5.0**, origin
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. Core 0.5.1/0.5.2 acceptance is
+fixture evidence, **not** an indexed 0.5.2 integration claim. PR #15 records the
+correction's final identities, complete local qualification and exact-head
+hosted evidence; the original REL-014 results below remain historical.
+
+R1 local qualification passed: repository/manifests, 86 configuration tests,
+fixed-profile/shell checks, native build, AUnit 67/67 with zero assertions/errors,
+both production/fault boundary and ASan/UBSan variants, both examples, eight
+GPRinstall/link regressions, fresh source/installed/relocated consumers and
+independent source/linker audits, and clean exported-source build. Debian 12 /
+GNAT 12 build and AUnit 67/67 with both raw-boundary drivers passed separately.
+GNATdoc still reports 127/127 elements and zero warnings; regeneration is
+byte-identical. All 94 documentation tests pass without skips; immutable
+enhancement verification, browser campaigns (64/64, 199/199, 64/64), and the
+18-file/13-page/248-reference Pages site and archive checks pass. No validation
+gate or documentation inventory was weakened. Final-head publication validation
+and hosted workflow results are recorded in PR #15, not inferred from older runs.
+
 Local native and documentation qualification passed on the reconciled tree.
 The exact committed/tested/pushed identities and hosted run results are recorded
 in PR #15 to avoid a self-referential commit identity in this source file.

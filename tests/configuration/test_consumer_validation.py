@@ -1,7 +1,9 @@
 """Deterministic qualifier regressions, not native Windows certification."""
 from pathlib import Path
 import os
+import shlex
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -89,17 +91,36 @@ class ConsumerValidationTests(unittest.TestCase):
         self.assertIn('sh "$work/candidate/scripts/install_resolved_consumer.sh"', script)
         self.assertNotIn("sh -c", script)
         self.assertNotIn("\\\\", installer)
-        self.assertIn('grep -E \'^version *= *"0\\.5\\.0"\'', installer)
+        self.assertIn('"$script_dir/validate_core_manifest.py" "$manifest"', installer)
         cases = (
-            ("wrong-version", 'name = "opencv_core"\nversion = "0.4.1"\n', False),
+            *((f"version-{i}", f'name = "opencv_core"\nversion = "{version}"\n', False)
+              for i, version in enumerate((
+                  "0.4.9", "0.6.0", "1.5.2", "0.5", "0.5.2.1", "v0.5.2",
+                  "0.5.02", "00.5.2", "0.05.2", "0.5.-1", "0.5.2garbage",
+                  "0.5.2-dev", "0.5.2-rc.1+build", " 0.5.2", "0.5.2 ",
+                  "0.5.2+", "0.5.2+bad..metadata", "0.5.٢", "0.5.2\\n"))),
+            ("wrong-name", 'name = "other_core"\nversion = "0.5.2"\n', False),
+            ("name-substring", 'name = "opencv_core_extra"\nversion = "0.5.2"\n', False),
+            ("missing-name", 'version = "0.5.2"\n', False),
+            ("array-name", 'name = ["opencv_core"]\nversion = "0.5.2"\n', False),
+            ("missing-version", 'name = "opencv_core"\n', False),
+            ("numeric-version", 'name = "opencv_core"\nversion = 0.5\n', False),
+            ("array-version", 'name = "opencv_core"\nversion = ["0.5.2"]\n', False),
+            ("malformed-toml", 'name = "opencv_core"\nversion = "0.5.2"\n[broken\n', False),
+            ("duplicate-version", 'name = "opencv_core"\nversion = "0.5.2"\nversion = "0.6.0"\n', False),
+            ("duplicate-name", 'name = "opencv_core"\nname = "other"\nversion = "0.5.2"\n', False),
+            ("comment-only-version", 'name = "opencv_core"\n# version = "0.5.2"\n', False),
+            ("nested-identity", '[crate]\nname = "opencv_core"\nversion = "0.5.2"\n', False),
             ("missing-manifest", None, False),
-            ("workspace-pin", 'name = "opencv_core"\nversion = "0.5.0"\n', True),
+            *((workspace, 'name = "opencv_core"\nversion = "0.5.2"\n', workspace)
+              for workspace in ("candidate", "unavailable-candidate", "features_clean_consumer",
+                                "unavailable-source-consumer")),
         )
         for name, manifest, pin in cases:
             with self.subTest(name=name):
                 case = self.work / name
                 case.mkdir()
-                core = case / ("candidate" if pin else "core with space")
+                core = case / (pin if pin else "core with space")
                 core.mkdir()
                 if manifest is not None:
                     (core / "alire.toml").write_text(manifest)
@@ -107,15 +128,85 @@ class ConsumerValidationTests(unittest.TestCase):
                 (case / "candidate/opencv_features.gpr").parent.mkdir(exist_ok=True)
                 (case / "candidate/opencv_features.gpr").write_text(
                     "project OpenCV_Features is\nend OpenCV_Features;\n")
-                before = set(case.iterdir())
+                tools = case / "tools"
+                tools.mkdir()
+                (tools / "gprinstall").write_text(
+                    '#!/bin/sh\ntouch "$INSTALL_CALLED"\nexit 0\n')
+                (tools / "gprinstall").chmod(0o755)
+                prefix = case / "prefix-a"
+                prefix.mkdir()
+                (prefix / "sentinel").write_bytes(b"existing prefix must not change")
+                before = {p.relative_to(case): p.read_bytes()
+                          for p in case.rglob("*") if p.is_file()}
                 result = subprocess.run(
                     ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(case)],
                     capture_output=True, text=True,
-                    env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(core)})
+                    env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(core),
+                         "PATH": str(tools) + os.pathsep + os.environ["PATH"],
+                         "INSTALL_CALLED": str(case / "install-called")})
                 self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertNotIn("unexpected EOF", result.stdout + result.stderr)
                 self.assertFalse((case / "core-source.txt").exists())
-                self.assertEqual(set(case.iterdir()), before)
+                self.assertFalse((case / "toolchain-path.txt").exists())
+                self.assertFalse((case / "install-called").exists())
+                self.assertEqual({p.relative_to(case): p.read_bytes()
+                                  for p in case.rglob("*") if p.is_file()}, before)
+
+    def test_installer_accepts_stable_core_series_before_both_installations(self):
+        for version in ("0.5.0", "0.5.1", "0.5.2", "0.5.123", "0.5.2+build.1"):
+            with self.subTest(version=version):
+                case = self.work / version
+                core = case / "core with space"
+                core.mkdir(parents=True)
+                # CRLF, single quotes, quoted keys and comments are valid TOML.
+                (core / "alire.toml").write_bytes(
+                    f"'name' = 'opencv_core'\r\n'version' = '{version}' # selected\r\n".encode())
+                tools = case / "tools"
+                tools.mkdir()
+                (tools / "gprinstall").write_text(
+                    '#!/bin/sh\nprintf "%s\\n" "$*" >> "$INSTALL_LOG"\n')
+                (tools / "gprinstall").chmod(0o755)
+                log = case / "install.log"
+                result = subprocess.run(
+                    ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(case)],
+                    capture_output=True, text=True,
+                    env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(core),
+                         "PATH": str(tools) + os.pathsep + os.environ["PATH"],
+                         "INSTALL_LOG": str(log)})
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn(f'version = "{version}"', result.stdout)
+                calls = log.read_text().splitlines()
+                self.assertEqual(len(calls), 2)
+                self.assertIn(str(core / "opencv_core.gpr"), calls[0])
+                self.assertIn(str(case / "candidate/opencv_features.gpr"), calls[1])
+                self.assertTrue(all(f"--prefix={case}/prefix-a" in call for call in calls))
+                self.assertEqual((case / "core-source.txt").read_text().strip(), str(core))
+
+    def test_installer_selects_python_for_unix_and_msys_shells(self):
+        for platform, command in (("Linux", "python3"), ("Darwin", "python3"),
+                                  ("MINGW64_NT-10.0", "python"), ("MSYS_NT-10.0", "python")):
+            with self.subTest(platform=platform):
+                case = self.work / platform
+                tools = case / "tools"
+                tools.mkdir(parents=True)
+                core = case / "core with space"
+                core.mkdir()
+                (core / "alire.toml").write_text('name = "opencv_core"\nversion = "0.5.2"\n')
+                log = case / "python-called"
+                for name, body in (
+                    ("uname", f"printf '%s\\n' {shlex.quote(platform)}\n"),
+                    (command, f'touch {shlex.quote(str(log))}\nexec {shlex.quote(sys.executable)} "$@"\n'),
+                    ("gprinstall", "exit 0\n"),
+                ):
+                    (tools / name).write_text("#!/bin/sh\n" + body)
+                    (tools / name).chmod(0o755)
+                result = subprocess.run(
+                    ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(case)],
+                    capture_output=True, text=True,
+                    env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(core),
+                         "PATH": str(tools) + os.pathsep + os.environ["PATH"]})
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertTrue(log.is_file())
 
     def test_installer_preserves_each_gprinstall_failure(self):
         for failing in ("opencv_core.gpr", "opencv_features.gpr"):

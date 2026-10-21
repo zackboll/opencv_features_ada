@@ -1,5 +1,13 @@
 # Features binding coverage
 
+FEATURES-REL-014R1 aligns installed-consumer manifest validation with unchanged
+`opencv_core ~0.5.0`: parsed TOML identity and stable 0.5.x versions are required
+before any installation. Configuration fixtures cover 0.5.0/0.5.1/0.5.2 and
+incompatible/malformed/missing manifests, unchanged prefixes on failure, both
+installation calls, workspace-pin rejection and Unix/MSYS2 Python selection.
+These are packaging fixtures, not indexed 0.5.2 or Windows execution claims.
+The public API, **67 AUnit registrations and 17 native exports are unchanged**.
+
 The reconciled 0.1.0 source candidate retains all merged documentation and
 consumer corrections. **67 AUnit registrations and 17 native exports remain
 unchanged.** Indexed `opencv_core ~0.5.0` remains the production dependency.

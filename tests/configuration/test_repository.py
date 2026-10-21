@@ -57,6 +57,25 @@ class RepositoryTests(unittest.TestCase):
                         check_clean_consumer(root, self.manifests_for(ROOT))
                 path.write_text(original)
 
+    def test_installer_manifest_gate_cannot_be_removed_or_moved_after_writes(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "scripts", root / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / ".github", root / ".github")
+            path = root / "scripts/install_resolved_consumer.sh"
+            original = path.read_text()
+            gate = '"$python" "$script_dir/validate_core_manifest.py" "$manifest"'
+            for changed in (
+                original.replace(gate, "true"),
+                original.replace(gate, "true") + "\n" + gate + "\n",
+                original.replace("python=python3", "python=python"),
+                original.replace('"$work/unavailable-candidate"*|', ""),
+            ):
+                with self.subTest(changed=changed), self.assertRaises(ValueError):
+                    path.write_text(changed)
+                    check_clean_consumer(root, self.manifests_for(ROOT))
+
     def test_correspondences_public_ada_boundary(self):
         check_correspondences(ROOT)
 
