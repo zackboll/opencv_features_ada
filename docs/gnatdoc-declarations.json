@@ -1,0 +1,881 @@
+{
+  "internal_units": {
+    "OpenCV.Features.Internal": "src/internal/opencv-features-internal.ads",
+    "OpenCV.Features.Internal.C_API": "src/internal/opencv-features-internal-c_api.ads"
+  },
+  "public_packages": {
+    "OpenCV.Features": {
+      "declarations": [
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.Keypoint|type|type Keypoint is record Position : OpenCV.Float32_Point; Size : OpenCV.Float32_Value; Angle_Degrees : OpenCV.Float32_Value; Response : OpenCV.Float32_Value; Octave : OpenCV.Int32_Value; Class_Id : OpenCV.Int32_Value; end record",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "field",
+              "name": "Position",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Size",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Angle_Degrees",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Response",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Octave",
+              "subtype": "OpenCV.Int32_Value"
+            },
+            {
+              "kind": "field",
+              "name": "Class_Id",
+              "subtype": "OpenCV.Int32_Value"
+            }
+          ],
+          "name": "Keypoint",
+          "ownership_sensitive": [],
+          "signature": "type Keypoint is record Position : OpenCV.Float32_Point; Size : OpenCV.Float32_Value; Angle_Degrees : OpenCV.Float32_Value; Response : OpenCV.Float32_Value; Octave : OpenCV.Int32_Value; Class_Id : OpenCV.Int32_Value; end record"
+        },
+        {
+          "category": "array",
+          "identity": "OpenCV.Features.Keypoint_Array|type|type Keypoint_Array is array (Positive range <>) of Keypoint",
+          "kind": "type",
+          "members": [],
+          "name": "Keypoint_Array",
+          "ownership_sensitive": [],
+          "signature": "type Keypoint_Array is array (Positive range <>) of Keypoint"
+        },
+        {
+          "category": "enumeration",
+          "identity": "OpenCV.Features.Binary_Descriptor_Norm|type|type Binary_Descriptor_Norm is (Hamming, Hamming_2)",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Hamming"
+            },
+            {
+              "kind": "literal",
+              "name": "Hamming_2"
+            }
+          ],
+          "name": "Binary_Descriptor_Norm",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Descriptor_Norm is (Hamming, Hamming_2)"
+        },
+        {
+          "category": "private",
+          "identity": "OpenCV.Features.Feature_Set|type|type Feature_Set is limited private",
+          "kind": "type",
+          "members": [],
+          "name": "Feature_Set",
+          "ownership_sensitive": [],
+          "signature": "type Feature_Set is limited private"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Count|function|function Count (Features : Feature_Set) return Natural",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Count",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Count (Features : Feature_Set) return Natural"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Is_Empty|function|function Is_Empty (Features : Feature_Set) return Boolean",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Is_Empty",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Is_Empty (Features : Feature_Set) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Point|function|function Point (Features : Feature_Set; Index : Positive) return Keypoint",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "return",
+              "subtype": "Keypoint"
+            }
+          ],
+          "name": "Point",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Point (Features : Feature_Set; Index : Positive) return Keypoint"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Keypoints|function|function Keypoints (Features : Feature_Set) return Keypoint_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Keypoint_Array"
+            }
+          ],
+          "name": "Keypoints",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Keypoints (Features : Feature_Set) return Keypoint_Array"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Required_Norm|function|function Required_Norm (Features : Feature_Set) return Binary_Descriptor_Norm",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Binary_Descriptor_Norm"
+            }
+          ],
+          "name": "Required_Norm",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Required_Norm (Features : Feature_Set) return Binary_Descriptor_Norm"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Descriptor_Row|function|function Descriptor_Row (Features : Feature_Set; Index : Positive) return Natural",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "return",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Descriptor_Row",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Descriptor_Row (Features : Feature_Set; Index : Positive) return Natural"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Descriptor_Copy|function|function Descriptor_Copy (Features : Feature_Set) return OpenCV.Core.Mat",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Features",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "OpenCV.Core.Mat"
+            }
+          ],
+          "name": "Descriptor_Copy",
+          "ownership_sensitive": [
+            "in Features: limited private type OpenCV.Features.Feature_Set",
+            "result: Core-owned native matrix wrapper"
+          ],
+          "signature": "function Descriptor_Copy (Features : Feature_Set) return OpenCV.Core.Mat"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Native_Version|function|function Native_Version return String",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "return",
+              "subtype": "String"
+            }
+          ],
+          "name": "Native_Version",
+          "ownership_sensitive": [],
+          "signature": "function Native_Version return String"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Native_Backend|function|function Native_Backend return String",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "return",
+              "subtype": "String"
+            }
+          ],
+          "name": "Native_Backend",
+          "ownership_sensitive": [],
+          "signature": "function Native_Backend return String"
+        }
+      ],
+      "source": "src/opencv-features.ads"
+    },
+    "OpenCV.Features.Correspondences": {
+      "declarations": [
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.Correspondences.Point_Correspondence|type|type Point_Correspondence is record Query_Index : Positive; Train_Index : Positive; Query_Point : OpenCV.Float32_Point; Train_Point : OpenCV.Float32_Point; Distance : Matching.Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Query_Point",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Point",
+              "subtype": "OpenCV.Float32_Point"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Matching.Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Point_Correspondence",
+          "ownership_sensitive": [],
+          "signature": "type Point_Correspondence is record Query_Index : Positive; Train_Index : Positive; Query_Point : OpenCV.Float32_Point; Train_Point : OpenCV.Float32_Point; Distance : Matching.Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "array",
+          "identity": "OpenCV.Features.Correspondences.Point_Correspondence_Array|type|type Point_Correspondence_Array is array (Positive range <>) of Point_Correspondence",
+          "kind": "type",
+          "members": [],
+          "name": "Point_Correspondence_Array",
+          "ownership_sensitive": [],
+          "signature": "type Point_Correspondence_Array is array (Positive range <>) of Point_Correspondence"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Correspondences.From_Matches|function|function From_Matches (Query : Feature_Set; Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) return Point_Correspondence_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Matches",
+              "subtype": "Matching.Descriptor_Match_Array"
+            },
+            {
+              "kind": "return",
+              "subtype": "Point_Correspondence_Array"
+            }
+          ],
+          "name": "From_Matches",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function From_Matches (Query : Feature_Set; Train : Feature_Set; Matches : Matching.Descriptor_Match_Array) return Point_Correspondence_Array"
+        }
+      ],
+      "source": "src/opencv-features-correspondences.ads"
+    },
+    "OpenCV.Features.Matching": {
+      "declarations": [
+        {
+          "category": "enumeration",
+          "identity": "OpenCV.Features.Matching.Matching_Mode|type|type Matching_Mode is (Nearest, Mutual_Nearest)",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Nearest"
+            },
+            {
+              "kind": "literal",
+              "name": "Mutual_Nearest"
+            }
+          ],
+          "name": "Matching_Mode",
+          "ownership_sensitive": [],
+          "signature": "type Matching_Mode is (Nearest, Mutual_Nearest)"
+        },
+        {
+          "category": "range",
+          "identity": "OpenCV.Features.Matching.Binary_Descriptor_Distance|type|type Binary_Descriptor_Distance is range 0 .. 256",
+          "kind": "type",
+          "members": [],
+          "name": "Binary_Descriptor_Distance",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Descriptor_Distance is range 0 .. 256"
+        },
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.Matching.Descriptor_Match|type|type Descriptor_Match is record Query_Index : Positive; Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Descriptor_Match",
+          "ownership_sensitive": [],
+          "signature": "type Descriptor_Match is record Query_Index : Positive; Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "array",
+          "identity": "OpenCV.Features.Matching.Descriptor_Match_Array|type|type Descriptor_Match_Array is array (Positive range <>) of Descriptor_Match",
+          "kind": "type",
+          "members": [],
+          "name": "Descriptor_Match_Array",
+          "ownership_sensitive": [],
+          "signature": "type Descriptor_Match_Array is array (Positive range <>) of Descriptor_Match"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Matching.Brute_Force_Match|function|function Brute_Force_Match (Query : Feature_Set; Train : Feature_Set; Mode : Matching_Mode := Nearest) return Descriptor_Match_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "default": "Nearest",
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Mode",
+              "subtype": "Matching_Mode"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_Match",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_Match (Query : Feature_Set; Train : Feature_Set; Mode : Matching_Mode := Nearest) return Descriptor_Match_Array"
+        },
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.Matching.Binary_Neighbor|type|type Binary_Neighbor is record Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "field",
+              "name": "Train_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            }
+          ],
+          "name": "Binary_Neighbor",
+          "ownership_sensitive": [],
+          "signature": "type Binary_Neighbor is record Train_Index : Positive; Distance : Binary_Descriptor_Distance; end record"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Matching.Brute_Force_Radius_Match|function|function Brute_Force_Radius_Match (Query : Feature_Set; Train : Feature_Set; Maximum_Distance : Binary_Descriptor_Distance) return Descriptor_Match_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Distance",
+              "subtype": "Binary_Descriptor_Distance"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_Radius_Match",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_Radius_Match (Query : Feature_Set; Train : Feature_Set; Maximum_Distance : Binary_Descriptor_Distance) return Descriptor_Match_Array"
+        },
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.Matching.Two_Nearest_Match|type|type Two_Nearest_Match is record Query_Index : Positive; Nearest : Binary_Neighbor; Second_Nearest : Binary_Neighbor; end record",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "field",
+              "name": "Query_Index",
+              "subtype": "Positive"
+            },
+            {
+              "kind": "field",
+              "name": "Nearest",
+              "subtype": "Binary_Neighbor"
+            },
+            {
+              "kind": "field",
+              "name": "Second_Nearest",
+              "subtype": "Binary_Neighbor"
+            }
+          ],
+          "name": "Two_Nearest_Match",
+          "ownership_sensitive": [],
+          "signature": "type Two_Nearest_Match is record Query_Index : Positive; Nearest : Binary_Neighbor; Second_Nearest : Binary_Neighbor; end record"
+        },
+        {
+          "category": "array",
+          "identity": "OpenCV.Features.Matching.Two_Nearest_Match_Array|type|type Two_Nearest_Match_Array is array (Positive range <>) of Two_Nearest_Match",
+          "kind": "type",
+          "members": [],
+          "name": "Two_Nearest_Match_Array",
+          "ownership_sensitive": [],
+          "signature": "type Two_Nearest_Match_Array is array (Positive range <>) of Two_Nearest_Match"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Matching.Brute_Force_KNN_2|function|function Brute_Force_KNN_2 (Query : Feature_Set; Train : Feature_Set) return Two_Nearest_Match_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Query",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Train",
+              "subtype": "Feature_Set"
+            },
+            {
+              "kind": "return",
+              "subtype": "Two_Nearest_Match_Array"
+            }
+          ],
+          "name": "Brute_Force_KNN_2",
+          "ownership_sensitive": [
+            "in Query: limited private type OpenCV.Features.Feature_Set",
+            "in Train: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Brute_Force_KNN_2 (Query : Feature_Set; Train : Feature_Set) return Two_Nearest_Match_Array"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Matching.Passes_Ratio_Test|function|function Passes_Ratio_Test (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value) return Boolean",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Candidate",
+              "subtype": "Two_Nearest_Match"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Ratio",
+              "subtype": "OpenCV.Float64_Value"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Passes_Ratio_Test",
+          "ownership_sensitive": [],
+          "signature": "function Passes_Ratio_Test (Candidate : Two_Nearest_Match; Maximum_Ratio : OpenCV.Float64_Value) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.Matching.Filter_By_Ratio|function|function Filter_By_Ratio (Candidates : Two_Nearest_Match_Array; Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Candidates",
+              "subtype": "Two_Nearest_Match_Array"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Maximum_Ratio",
+              "subtype": "OpenCV.Float64_Value"
+            },
+            {
+              "kind": "return",
+              "subtype": "Descriptor_Match_Array"
+            }
+          ],
+          "name": "Filter_By_Ratio",
+          "ownership_sensitive": [],
+          "signature": "function Filter_By_Ratio (Candidates : Two_Nearest_Match_Array; Maximum_Ratio : OpenCV.Float64_Value) return Descriptor_Match_Array"
+        }
+      ],
+      "source": "src/opencv-features-matching.ads"
+    },
+    "OpenCV.Features.ORB": {
+      "declarations": [
+        {
+          "category": "enumeration",
+          "identity": "OpenCV.Features.ORB.Tuple_Size|type|type Tuple_Size is (Two_Samples, Three_Samples, Four_Samples)",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Two_Samples"
+            },
+            {
+              "kind": "literal",
+              "name": "Three_Samples"
+            },
+            {
+              "kind": "literal",
+              "name": "Four_Samples"
+            }
+          ],
+          "name": "Tuple_Size",
+          "ownership_sensitive": [],
+          "signature": "type Tuple_Size is (Two_Samples, Three_Samples, Four_Samples)"
+        },
+        {
+          "category": "enumeration",
+          "identity": "OpenCV.Features.ORB.Score_Kind|type|type Score_Kind is (Harris_Score, FAST_Score)",
+          "kind": "type",
+          "members": [
+            {
+              "kind": "literal",
+              "name": "Harris_Score"
+            },
+            {
+              "kind": "literal",
+              "name": "FAST_Score"
+            }
+          ],
+          "name": "Score_Kind",
+          "ownership_sensitive": [],
+          "signature": "type Score_Kind is (Harris_Score, FAST_Score)"
+        },
+        {
+          "category": "record",
+          "identity": "OpenCV.Features.ORB.Configuration|type|type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record",
+          "kind": "type",
+          "members": [
+            {
+              "default": "500",
+              "kind": "field",
+              "name": "Maximum_Features",
+              "subtype": "Positive"
+            },
+            {
+              "default": "Two_Samples",
+              "kind": "field",
+              "name": "Tuple",
+              "subtype": "Tuple_Size"
+            },
+            {
+              "default": "Harris_Score",
+              "kind": "field",
+              "name": "Score",
+              "subtype": "Score_Kind"
+            },
+            {
+              "default": "20",
+              "kind": "field",
+              "name": "FAST_Threshold",
+              "subtype": "Natural"
+            }
+          ],
+          "name": "Configuration",
+          "ownership_sensitive": [],
+          "signature": "type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record"
+        },
+        {
+          "category": "private",
+          "identity": "OpenCV.Features.ORB.Detector|type|type Detector is tagged limited private",
+          "kind": "type",
+          "members": [],
+          "name": "Detector",
+          "ownership_sensitive": [],
+          "signature": "type Detector is tagged limited private"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Create|function|function Create (Parameters : Configuration := (others => <>)) return Detector",
+          "kind": "function",
+          "members": [
+            {
+              "default": "(others => <>)",
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Parameters",
+              "subtype": "Configuration"
+            },
+            {
+              "kind": "return",
+              "subtype": "Detector"
+            }
+          ],
+          "name": "Create",
+          "ownership_sensitive": [
+            "result: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Create (Parameters : Configuration := (others => <>)) return Detector"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Close|procedure|procedure Close (Self : in out Detector)",
+          "kind": "procedure",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in out",
+              "name": "Self",
+              "subtype": "Detector"
+            }
+          ],
+          "name": "Close",
+          "ownership_sensitive": [
+            "in out Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "procedure Close (Self : in out Detector)"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Is_Ready|function|function Is_Ready (Self : Detector) return Boolean",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "return",
+              "subtype": "Boolean"
+            }
+          ],
+          "name": "Is_Ready",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Is_Ready (Self : Detector) return Boolean"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Parameters|function|function Parameters (Self : Detector) return Configuration",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "return",
+              "subtype": "Configuration"
+            }
+          ],
+          "name": "Parameters",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Parameters (Self : Detector) return Configuration"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Image",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "return",
+              "subtype": "Feature_Set"
+            }
+          ],
+          "name": "Detect_And_Compute",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector",
+            "in Image: Core-owned native matrix wrapper",
+            "result: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Image",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Mask",
+              "subtype": "OpenCV.Core.Mat"
+            },
+            {
+              "kind": "return",
+              "subtype": "Feature_Set"
+            }
+          ],
+          "name": "Detect_And_Compute",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector",
+            "in Image: Core-owned native matrix wrapper",
+            "in Mask: Core-owned native matrix wrapper",
+            "result: limited private type OpenCV.Features.Feature_Set"
+          ],
+          "signature": "function Detect_And_Compute (Self : Detector; Image, Mask : OpenCV.Core.Mat) return Feature_Set"
+        }
+      ],
+      "source": "src/opencv-features-orb.ads"
+    }
+  },
+  "schema_version": 1
+}

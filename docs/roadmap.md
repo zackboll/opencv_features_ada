@@ -6,7 +6,11 @@ a GitHub release, and an Alire index submission remain outside this candidate.
 Windows Core 0.5.0 qualification on
 `eb4af534d837221879ac6a56d7e0866e98a1d3dc` is `WINDOWS_CORE_050_FAILED`:
 indexed resolution and 67/67 AUnit passed, then consumer installation failed.
-That post-merge evidence is not release qualification. Configurable ORB levels,
+That historical failure was superseded by successful main Windows run
+[39196259295](https://github.com/zackboll/opencv_features_ada/actions/runs/39196259295)
+on `71eb93f45b3ee833d4cb2b96a10095aaf0541acd`. Neither run qualifies final
+candidate Windows execution, which remains post-merge only. See
+[current release qualification](release-0.1.0-qualification.md). Configurable ORB levels,
 RANSAC, homography, PnP, and navigation estimation remain deferred.
 
 ## 001 — qualify the bootstrap

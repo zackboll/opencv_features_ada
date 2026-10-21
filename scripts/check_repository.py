@@ -72,6 +72,8 @@ def check_clean_consumer(root: Path, manifests: list) -> None:
           "crate identities must stay independent")
     check(all(manifest["version"] == "0.1.0" for manifest in manifests),
           "release manifests must be version 0.1.0")
+    check("alr -n exec -- sh" in validator and "install_resolved_consumer.sh" in validator,
+          "installer must run through alr exec as a script file")
     cross = (root / ".github/workflows/cross-platform.yml").read_text()
     for job in ("linux", "macos"):
         block = re.search(r"^  " + job + r":\n(.*?)(?=^  \S|\Z)",

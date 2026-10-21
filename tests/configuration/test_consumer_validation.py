@@ -83,26 +83,100 @@ class ConsumerValidationTests(unittest.TestCase):
         self.assertEqual((self.work / "inventory.raw").read_text(), "partial evidence\n")
         self.assertFalse((self.work / "inventory").exists())
 
-    def test_core_version_check_is_not_an_escaped_alr_exec_payload(self):
+    def test_installer_rejects_bad_core_before_writing_prefix_evidence(self):
         script = (ROOT / "scripts/validate_clean_consumer.sh").read_text()
         installer = (ROOT / "scripts/install_resolved_consumer.sh").read_text()
         self.assertIn('sh "$work/candidate/scripts/install_resolved_consumer.sh"', script)
         self.assertNotIn("sh -c", script)
         self.assertNotIn("\\\\", installer)
         self.assertIn('grep -E \'^version *= *"0\\.5\\.0"\'', installer)
-        manifest = self.work / "alire.toml"
-        manifest.write_text('name = "opencv_core"\nversion = "0.4.1"\n')
-        (self.work / "opencv_core.gpr").write_text("project OpenCV_Core is\nend OpenCV_Core;\n")
+        cases = (
+            ("wrong-version", 'name = "opencv_core"\nversion = "0.4.1"\n', False),
+            ("missing-manifest", None, False),
+            ("workspace-pin", 'name = "opencv_core"\nversion = "0.5.0"\n', True),
+        )
+        for name, manifest, pin in cases:
+            with self.subTest(name=name):
+                case = self.work / name
+                case.mkdir()
+                core = case / ("candidate" if pin else "core with space")
+                core.mkdir()
+                if manifest is not None:
+                    (core / "alire.toml").write_text(manifest)
+                (core / "opencv_core.gpr").write_text("project OpenCV_Core is\nend OpenCV_Core;\n")
+                (case / "candidate/opencv_features.gpr").parent.mkdir(exist_ok=True)
+                (case / "candidate/opencv_features.gpr").write_text(
+                    "project OpenCV_Features is\nend OpenCV_Features;\n")
+                before = set(case.iterdir())
+                result = subprocess.run(
+                    ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(case)],
+                    capture_output=True, text=True,
+                    env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(core)})
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertNotIn("unexpected EOF", result.stdout + result.stderr)
+                self.assertFalse((case / "core-source.txt").exists())
+                self.assertEqual(set(case.iterdir()), before)
+
+    def test_installer_preserves_each_gprinstall_failure(self):
+        for failing in ("opencv_core.gpr", "opencv_features.gpr"):
+            with self.subTest(failing=failing):
+                case = self.work / failing
+                tools = case / "tools"
+                tools.mkdir(parents=True)
+                (tools / "gprinstall").write_text(
+                    "#!/bin/sh\n"
+                    "printf '%s\\n' \"$*\" >&2\n"
+                    "for argument; do\n"
+                    "    case \"$argument\" in\n"
+                    f"*{failing}) exit 7 ;;\n"
+                    "    esac\n"
+                    "done\n"
+                    "exit 0\n")
+                (tools / "gprinstall").chmod(0o755)
+                core = case / "core with space"
+                core.mkdir()
+                (core / "alire.toml").write_text(
+                    "name = \"opencv_core\"\nversion = \"0.5.0\"\n")
+                (core / "opencv_core.gpr").write_text(
+                    "project OpenCV_Core is\nend OpenCV_Core;\n")
+                (case / "candidate").mkdir()
+                (case / "candidate/opencv_features.gpr").write_text(
+                    "project OpenCV_Features is\nend OpenCV_Features;\n")
+                env = os.environ.copy()
+                env["OPENCV_CORE_ALIRE_PREFIX"] = str(core)
+                env["PATH"] = str(tools) + os.pathsep + env["PATH"]
+                result = subprocess.run(
+                    ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(case)],
+                    capture_output=True, text=True, env=env)
+                self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+                self.assertIn(failing, result.stderr)
+                self.assertIn("version = \"0.5.0\"", result.stdout)
+                self.assertTrue((case / "core-source.txt").is_file())
+
+    def test_windows_style_evidence_path_is_not_a_quote_failure(self):
+        tools = self.work / "windows-tools"
+        tools.mkdir()
+        (tools / "gprinstall").write_text("#!/bin/sh\nexit 0\n")
+        (tools / "gprinstall").chmod(0o755)
+        core = self.work / "windows core"
+        core.mkdir()
+        (core / "alire.toml").write_text(
+            "name = \"opencv_core\"\nversion = \"0.5.0\"\n")
+        (core / "opencv_core.gpr").write_text(
+            "project OpenCV_Core is\nend OpenCV_Core;\n")
         (self.work / "candidate").mkdir()
         (self.work / "candidate/opencv_features.gpr").write_text(
             "project OpenCV_Features is\nend OpenCV_Features;\n")
+        env = os.environ.copy()
+        env["OPENCV_CORE_ALIRE_PREFIX"] = str(core)
+        env["PATH"] = str(tools) + os.pathsep + env["PATH"]
         result = subprocess.run(
-            ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"), str(self.work)],
-            capture_output=True, text=True,
-            env={**os.environ, "OPENCV_CORE_ALIRE_PREFIX": str(self.work)})
+            ["sh", str(ROOT / "scripts/install_resolved_consumer.sh"),
+             "C:\\Program Files\\features-consumer"],
+            capture_output=True, text=True, env=env)
         self.assertNotEqual(result.returncode, 0)
+        self.assertIn("version = \"0.5.0\"", result.stdout)
         self.assertNotIn("unexpected EOF", result.stdout + result.stderr)
-        self.assertFalse((self.work / "core-source.txt").exists())
 
     def test_qualifier_uses_checked_helpers(self):
         script = (ROOT / "scripts/validate_clean_consumer.sh").read_text()
@@ -119,6 +193,7 @@ class ConsumerValidationTests(unittest.TestCase):
         artifact = workflow.split("uses: actions/upload-artifact@v4", 1)[1]
         self.assertIn("/installed-projects.log", artifact)
         self.assertIn("/installed-build.log", artifact)
+        self.assertIn("/install.log", artifact)
         self.assertIn("/relocated-resolution.log", artifact)
         self.assertIn("/path-audit-failure.log", artifact)
         for excluded in ("resolved-environment.log", "toolchain-path.txt", "/**\n", "continue-on-error"):

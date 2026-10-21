@@ -1,0 +1,25 @@
+# Presentation profile for the pinned ada-gnatdoc-enhancer (see
+# docs/gnatdoc-enhancer-integration.md). Sources are byte-identical staged
+# copies of the four docs_api.gpr specifications: the enhancer discovers
+# sources recursively, and src/internal units are never published.
+schema_version = 1
+project = "OpenCV Features Ada"
+[gnatdoc]
+version = "26.0.0"
+[sources]
+directories = ["obj/docs/enhancer-sources"]
+packages = ["OpenCV.Features", "OpenCV.Features.Correspondences", "OpenCV.Features.Matching", "OpenCV.Features.ORB"]
+comment_style = "leading"
+[navigation]
+mode = "packages"
+[presentation]
+theme = true
+syntax_highlighting = true
+# Local Features type references only; no external_types or dependency
+# manifests, so no OpenCV Core URL can be generated.
+type_links = true
+[guides]
+mode = "markdown"
+manifest = "docs/site-map.json"
+[security]
+external_hosts = []

@@ -1,0 +1,191 @@
+name: Ada API Documentation
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Superseded pull-request runs are cancelled; runs on main queue instead, so
+  # that a GitHub Pages deployment in progress always completes.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  native-gnatdoc:
+    runs-on: ubuntu-24.04
+    outputs:
+      publication_ready: ${{ steps.pages.outputs.publication_ready }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Record checkout
+        run: |
+          git rev-parse HEAD
+          mkdir -p obj/docs
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          Path("obj/docs/qualification-head.json").write_text(json.dumps({
+              "head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "event": os.environ["GITHUB_EVENT_NAME"],
+              "run_url": os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"]
+                         + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+          }, indent=2) + "\n")
+          PY
+      - name: Install native dependencies for Core configuration
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ pkg-config libopencv-dev
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: "2.1.1"
+          toolchain: "gnat_native gprbuild"
+      - name: Select Ada toolchain and install GNATdoc 26.0.0
+        run: |
+          alr -n --force toolchain --select gnat_native=16.1.0 gprbuild=26.0.1
+          alr toolchain
+          alr -n install --prefix="$RUNNER_TEMP/gnatdoc-26.0.0" gnatdoc_bin=26.0.0
+          echo "GNATDOC_PREFIX=$RUNNER_TEMP/gnatdoc-26.0.0" >> "$GITHUB_ENV"
+      - name: Resolve indexed Core and generate crate configuration (no compilation)
+        run: |
+          alr -n build --stop-after=pre-build
+          alr -n show --solve | grep -E 'opencv_core'
+      - name: Documentation tooling unit tests
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Generate native site and run Features-owned checks
+        run: sh scripts/generate_docs.sh
+      - name: Mutation and strict-qualification tests against the generated site
+        env:
+          FEATURES_DOCS_API: ${{ github.workspace }}/_site/api
+          FEATURES_DOCS_LOG: ${{ github.workspace }}/obj/docs/gnatdoc.log
+          FEATURES_DOCS_END_TO_END: "1"
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Qualify deterministic regeneration in a separate clean directory
+        run: |
+          cp obj/docs/gnatdoc.log "$RUNNER_TEMP/gnatdoc-first.log"
+          sh scripts/generate_docs.sh "$RUNNER_TEMP/docs-second"
+          diff -r _site "$RUNNER_TEMP/docs-second"
+          cmp "$RUNNER_TEMP/gnatdoc-first.log" obj/docs/gnatdoc.log
+          (cd _site/api && sha256sum *)
+      - name: Install the pinned shared enhancer (documentation-only)
+        run: |
+          git clone --quiet https://github.com/zackboll/ada-gnatdoc-enhancer.git "$RUNNER_TEMP/ada-gnatdoc-enhancer"
+          python3 scripts/install_gnatdoc_enhancer.py --checkout "$RUNNER_TEMP/ada-gnatdoc-enhancer" --venv "$RUNNER_TEMP/gnatdoc-enhancer" --with-guides
+      - name: Enhance an isolated copy of the native site with guides and verify it
+        run: python3 scripts/enhance_docs.py --venv "$RUNNER_TEMP/gnatdoc-enhancer"
+      - name: Enhanced-site mutation tests
+        env:
+          FEATURES_DOCS_API: ${{ github.workspace }}/_site/api
+          FEATURES_DOCS_LOG: ${{ github.workspace }}/obj/docs/gnatdoc.log
+          FEATURES_ENHANCED_SITE: ${{ github.workspace }}/_site-enhanced
+          FEATURES_ENHANCER_VENV: ${{ runner.temp }}/gnatdoc-enhancer
+        run: python3 -m unittest discover -s tests/documentation -v
+      - name: Chromium qualification of the enhanced site
+        run: |
+          npm install --prefix "$RUNNER_TEMP/doc-browser" --no-package-lock playwright@1.64.1
+          "$RUNNER_TEMP/doc-browser/node_modules/.bin/playwright" install --with-deps chromium
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/doc-browser/node_modules/playwright"
+          export DOC_URL=http://127.0.0.1:8072/api/index.html
+          python3 -m http.server 8072 --bind 127.0.0.1 --directory _site-enhanced &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 "$DOC_URL" --output /dev/null
+          BROWSER_REPORT=obj/docs/browser.json node tests/documentation/test_enhanced_browser.cjs
+      - name: Documentation-only source integrity (docs/* branches)
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'docs/')
+        run: |
+          base=$(git merge-base "${{ github.event.pull_request.base.sha }}" HEAD)
+          python3 scripts/check_doc_source_integrity.py "$base" HEAD
+      - name: Coverage and warning summary
+        if: always()
+        run: |
+          if [ -f obj/docs/coverage.json ] && [ -f obj/docs/warnings.json ]; then
+            python3 scripts/check_gnatdoc.py markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
+          git diff --exit-code
+          git diff --check
+      - name: Upload native site for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: features-api-${{ github.event.pull_request.head.sha || github.sha }}
+          path: _site/
+          if-no-files-found: error
+      - name: Upload enhanced site for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: features-api-enhanced-${{ github.event.pull_request.head.sha || github.sha }}
+          path: _site-enhanced/
+          if-no-files-found: error
+      - name: Qualify the Pages artifact under the project-site prefix
+        id: pages
+        run: |
+          python3 scripts/check_pages_site.py --github-output "$GITHUB_OUTPUT"
+          mkdir "$RUNNER_TEMP/pages-root"
+          cp -R _site-enhanced "$RUNNER_TEMP/pages-root/opencv_features_ada"
+          diff -r _site-enhanced "$RUNNER_TEMP/pages-root/opencv_features_ada"
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/doc-browser/node_modules/playwright"
+          export PAGES_URL=http://127.0.0.1:8076/opencv_features_ada/
+          python3 -m http.server 8076 --bind 127.0.0.1 --directory "$RUNNER_TEMP/pages-root" &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 "$PAGES_URL" --output /dev/null
+          BROWSER_REPORT=obj/docs/pages-browser.json node tests/documentation/test_pages_browser.cjs
+          DOC_URL="${PAGES_URL}api/index.html" BROWSER_REPORT=obj/docs/pages-prefix-browser.json \
+            node tests/documentation/test_enhanced_browser.cjs
+      - name: Report the Pages publication gate
+        if: steps.pages.outputs.publication_ready != 'true'
+        env:
+          BLOCKERS: ${{ steps.pages.outputs.blockers }}
+        run: echo "::warning title=GitHub Pages deployment blocked::$BLOCKERS"
+      - name: Upload the qualified enhanced site as the GitHub Pages artifact
+        id: pages-upload
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site-enhanced/
+      - name: Verify the uploaded Pages archive is byte-identical to the qualified site
+        run: python3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/artifact.tar" --report obj/docs/pages-archive.json
+      - name: Download the actual uploaded Pages artifact by immutable ID
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.pages-upload.outputs.artifact_id }}
+          path: ${{ runner.temp }}/uploaded-pages
+          merge-multiple: true
+      - name: Verify the downloaded upload against the qualified site and local archive
+        run: |
+          cmp "$RUNNER_TEMP/artifact.tar" "$RUNNER_TEMP/uploaded-pages/artifact.tar"
+          python3 scripts/check_pages_site.py --archive "$RUNNER_TEMP/uploaded-pages/artifact.tar" --report obj/docs/pages-uploaded-archive.json
+      - name: Upload diagnostics and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnatdoc-diagnostics-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            obj/docs/gnatdoc.log
+            obj/docs/*.json
+          if-no-files-found: ignore
+  deploy-pages:
+    # Publication is allowed only from a successful push to main whose
+    # artifact meets every publication requirement. Pull requests and manual
+    # dispatches never deploy; the github-pages environment also accepts
+    # main only.
+    needs: native-gnatdoc
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.native-gnatdoc.outputs.publication_ready == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy the qualified Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

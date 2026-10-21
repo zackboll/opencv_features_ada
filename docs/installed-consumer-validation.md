@@ -4,6 +4,10 @@ The source candidate version is **0.1.0**. This document records packaging and
 integration qualification. It is not a tag, GitHub release, Alire index
 submission, algorithm extension, or compatibility promise.
 
+Current reconciled-candidate results and exact dependency provenance are in
+[release qualification](release-0.1.0-qualification.md). Task records below
+retain their original versions and platform limitations as historical evidence.
+
 ## Three separate claims
 
 1. **Index-resolved external consumer:** a fresh `alr init --bin` application
@@ -120,8 +124,9 @@ moved to B. They do not certify Windows import-library resolution.
 The Windows executions show the stale option did not prevent those particular
 links/runs. They do not identify which Windows linker search entry selected
 each library; no claim about Windows search order is inferred from execution.
-The new Windows post-merge run must pass the full final audit. Core remains
-source-pinned, and none of this establishes official indexed resolution.
+That task's next Windows post-merge run had to pass the full final audit. Core
+was source-pinned at that historical baseline; current production Core resolves
+from the community index as recorded in the release qualification.
 
 Linux inspects executables with ldd/readelf. Static archives are proven by the
 link command, not expected in ldd. Runtime lookup includes installed directories

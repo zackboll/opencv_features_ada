@@ -1,0 +1,32 @@
+with "opencv_core.gpr";
+with "config/opencv_features_config.gpr";
+
+--  Documentation-only project for the four public specifications. It never
+--  imports the production library project, and the specifications need no
+--  internal unit, so src/internal is not visible to GNATdoc at all. The
+--  indexed Core release and the generated crate configuration are used for
+--  semantic resolution and Ada 2022 switches, but are never documented here.
+project Docs_API is
+   for Languages use ("Ada");
+   for Source_Dirs use ("src");
+   for Source_Files use
+     ("opencv-features.ads",
+      "opencv-features-orb.ads",
+      "opencv-features-matching.ads",
+      "opencv-features-correspondences.ads");
+   for Object_Dir use "obj/docs";
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        OpenCV_Features_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Documentation is
+      for Excluded_Project_Files use
+        ("config/opencv_features_config.gpr",
+         OpenCV_Core'Project_Dir & "opencv_core.gpr",
+         OpenCV_Core'Project_Dir & "opencv_core_shim.gpr",
+         OpenCV_Core'Project_Dir & "config/opencv_core_config.gpr",
+         OpenCV_Core'Project_Dir & "config/opencv_core_install.gpr");
+   end Documentation;
+end Docs_API;

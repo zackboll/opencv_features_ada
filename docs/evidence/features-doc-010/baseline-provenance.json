@@ -1,0 +1,36 @@
+{
+  "files": {
+    "__init__.py": "21896c73fca800e37688baf29579a31a9a19f232fdc2845dfd2bc3caa085c17b",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "adapters/__init__.py": "bc7839c1ed01b2d028cbb28537f7ab636ae839e11e9c6fba0c82ae9669a882d3",
+    "adapters/mel.py": "4e3d20173d81a03a18d1027814334100f00d9159ba3031d5a94f2f85a3a9bef8",
+    "adapters/opencv.py": "7f45fca90c6c8656398a56ff02bf4aacbde19a96dc4f81d553e7d16a87c55410",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c",
+    "assets/gnatdoc-navigation.js": "61eac070e65b38ac63242a54ed0546a8f4a27b25d8958c2824557860623f40b2",
+    "assets/gnatdoc-theme.css": "63c1e9c9a6f2e17cbf64287592dcad5d68f2de9064408bd9963b81ae99d17371",
+    "cli.py": "2236a2c01928a42772ddb3a8b4e16f02fdbec63fb30f396a8ddd3366d6a1789e",
+    "config.py": "3e22e70fac701798b5bfea7e4ca80988f2b9ab653c96547c2c2d6d95bb3ae69b",
+    "conformance.py": "ae2f04143abf23dd70f0c56ff82fe500af6111b1a8abbff18cff904778d4507d",
+    "coverage.py": "b5e78be5f070f65731bcc16e1338ad034e6feac4420b2ed3ed31c91d737fdecf",
+    "errors.py": "6fa7d9eab4bac0a32a114685606f11fd1e8838fc8463c8852766edacf8a480da",
+    "external_types.py": "86333d6a961a5f02af71f14cb276e888f35ef4fbd531921f2ea71ae4fc85bc33",
+    "guides.py": "1b489eb7b7310eccfecac86406514b33f15c8a1538939ee4c15591ce8d346a10",
+    "inventory.py": "d8e29273e8960cee5cf435eaa7a52ba266a8ad9d2fc8ceb1e0fa4eb13e01b593",
+    "native_html.py": "1e29e589c7ed30de1933c7902fa920894d5b4f2decb77502d3dbc337cb8193ca",
+    "navigation.py": "eb0ff6420781901297afb898702e55630576c3d89e74b93a7cdc7e99eda34a0b",
+    "pipeline.py": "0fd06f6e2609e49c08177949472b92b517a592c14edeb833cdee438581b6a7e0",
+    "profiles.py": "be0fa1b79f2a522d6c830841709906953c7f746c1a021bc9fdda11a6642c6ab2",
+    "qualification.py": "c2f4e582763ab23b0cbb89cfcd58920e8e190009df44eb008a712dd322781838",
+    "syntax.py": "3d4868b5efa69799b32c5af29ae0690838c45d10a24a6e0c8263f8c73f589848",
+    "theme.py": "ec24fcdd209c976a8d17473544f2ad5ed1b6e92ae4d7a6c85d5500697680d55e",
+    "util.py": "c5206e9cb7dd61ed39b6665aa50f15d9786b75bacec161005655cc047adc8695",
+    "validation.py": "a8c29c8e06915fbabdaf7bed6a638b2aea0e9c4f91b44b8e3211d9fb59f65b32",
+    "warnings.py": "3e3e2090f541c5872b08594e72af4fedb39301cd66c919cf040d63ba9e6e15fc"
+  },
+  "guide_renderer": {
+    "markdown-it-py": "3.0.0",
+    "mdurl": "0.1.2"
+  },
+  "revision": "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
+  "version": "0.1.0.dev0"
+}

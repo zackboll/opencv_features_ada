@@ -64,9 +64,15 @@ esac
 cp "$work/candidate/scripts/features_clean_consumer.adb" "$work/fixture.adb"
 # Canonicalize while sources exist so cygpath can expand Windows 8.3 aliases.
 # Native Alire/sh and Git Bash can expose different PATH list representations.
+# core-source.txt is the indexed Core checkout, outside the candidate tree.
+# Its lib entry otherwise survives into the GPRls PATH diagnostic.
+test -s "$work/core-source.txt"
+IFS= read -r core_source < "$work/core-source.txt"
+test -n "$core_source"
 set -- "$work/toolchain-path.txt" --remove "$work/candidate" \
     --remove "$work/features_clean_consumer" --remove "$source_root" \
-    --remove "$work/prefix-a"
+    --remove "$work/prefix-a" \
+    --remove "$core_source"
 case "$(uname -s)" in
     MINGW*|MSYS*) set -- "$@" --windows ;;
 esac

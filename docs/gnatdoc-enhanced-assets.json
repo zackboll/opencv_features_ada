@@ -1,0 +1,38 @@
+{
+  "added_files": [
+    "api/gnatdoc-navigation.js",
+    "api/gnatdoc-theme.css",
+    "api/presentation.json",
+    "assets/gnatdoc-guides.css",
+    "guides/binary-matching.html",
+    "guides/candidate-correspondences.html",
+    "guides/getting-started.html",
+    "guides/limitations-roadmap.html",
+    "guides/orb-extraction.html",
+    "guides/ownership-lifecycle.html",
+    "guides/platform-compatibility.html",
+    "index.html"
+  ],
+  "enhancer_revision": "23cf51d3765e7b3f68411e25a57f52f4c0efc7e1",
+  "enhancer_version": "0.1.0.dev0",
+  "guide_renderer": {
+    "markdown-it-py": "3.0.0",
+    "mdurl": "0.1.2"
+  },
+  "packaged_assets": {
+    "api/gnatdoc-navigation.js": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+    "api/gnatdoc-theme.css": "cf06637732a8b047a7191bfb991a5c3da7cd31a52076876880d5f8a3f63929bc",
+    "assets/gnatdoc-guides.css": "79f3fc6d5f1e854eb42d225f9bec113b7a41fa833b12d3bd70ca089ba5df0a8c"
+  },
+  "public_packages": [
+    "OpenCV.Features",
+    "OpenCV.Features.Correspondences",
+    "OpenCV.Features.Matching",
+    "OpenCV.Features.ORB"
+  ],
+  "scripts": {
+    "api/index.html": [
+      "gnatdoc-navigation.js"
+    ]
+  }
+}

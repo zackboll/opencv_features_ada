@@ -1,0 +1,41 @@
+test_archive_links_and_escapes_are_rejected (test_pages_site.CheckerTests.test_archive_links_and_escapes_are_rejected) ... ok
+test_build_paths_and_credentials_are_errors (test_pages_site.CheckerTests.test_build_paths_and_credentials_are_errors) ... ok
+test_inventory_file_type_link_and_hidden_mutations_are_errors (test_pages_site.CheckerTests.test_inventory_file_type_link_and_hidden_mutations_are_errors) ... ok
+test_missing_title_blocks_publication_without_an_error (test_pages_site.CheckerTests.test_missing_title_blocks_publication_without_an_error) ... ok
+test_reference_mutations_are_errors (test_pages_site.CheckerTests.test_reference_mutations_are_errors) ... ok
+test_relative_site_passes_and_is_ready (test_pages_site.CheckerTests.test_relative_site_passes_and_is_ready) ... ok
+test_site_must_equal_the_verified_enhancement (test_pages_site.CheckerTests.test_site_must_equal_the_verified_enhancement) ... ok
+test_uploaded_archive_must_be_byte_identical (test_pages_site.CheckerTests.test_uploaded_archive_must_be_byte_identical) ... ok
+test_exact_reviewed_navigation_passes (test_pages_site.NavigationSecurityTests.test_exact_reviewed_navigation_passes) ... FAIL
+test_filename_alone_does_not_authorize_the_expression (test_pages_site.NavigationSecurityTests.test_filename_alone_does_not_authorize_the_expression) ... ok
+test_original_regex_rejects_the_approved_separator (test_pages_site.NavigationSecurityTests.test_original_regex_rejects_the_approved_separator) ... ok
+test_rewrites_and_malformed_expressions_are_rejected (test_pages_site.NavigationSecurityTests.test_rewrites_and_malformed_expressions_are_rejected) ... ok
+test_rewritten_output_manifests_cannot_authorize_modified_javascript (test_pages_site.NavigationSecurityTests.test_rewritten_output_manifests_cannot_authorize_modified_javascript) ... ok
+test_unsafe_literals_cannot_hide_beside_the_approved_expression (test_pages_site.NavigationSecurityTests.test_unsafe_literals_cannot_hide_beside_the_approved_expression) ... ok
+test_real_site_is_a_qualified_pages_artifact (test_pages_site.RealSiteTests.test_real_site_is_a_qualified_pages_artifact) ... skipped 'set FEATURES_ENHANCED_SITE'
+test_inventory_has_the_portal_api_assets_and_seven_guides (test_pages_site.ReviewedInventoryTests.test_inventory_has_the_portal_api_assets_and_seven_guides) ... ok
+test_artifact_is_uploaded_after_qualification_and_verified (test_pages_site.WorkflowTests.test_artifact_is_uploaded_after_qualification_and_verified) ... ok
+test_deployment_only_from_a_ready_push_to_main (test_pages_site.WorkflowTests.test_deployment_only_from_a_ready_push_to_main) ... ok
+test_least_privilege_permissions (test_pages_site.WorkflowTests.test_least_privilege_permissions) ... ok
+
+======================================================================
+FAIL: test_exact_reviewed_navigation_passes (test_pages_site.NavigationSecurityTests.test_exact_reviewed_navigation_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zboll/git/opencv/features-doc-010/tests/documentation/test_pages_site.py", line 215, in test_exact_reviewed_navigation_passes
+    self.assertEqual(self.check()["errors"], [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['api/gnatdoc-navigation.js: JavaScript co[44 chars]ral'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'api/gnatdoc-navigation.js: JavaScript contains an absolute or root-relative URL literal'
+
++ []
+- ['api/gnatdoc-navigation.js: JavaScript contains an absolute or root-relative '
+-  'URL literal']
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.036s
+
+FAILED (failures=1, skipped=1)

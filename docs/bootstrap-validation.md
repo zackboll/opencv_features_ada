@@ -142,6 +142,56 @@ synthetic examples matched the host counts above. This is one Debian
 
 The manual OpenCV 4.1.0/4.10.0/5.0.0 matrix and a repeated Windows run are
 not claimed by this section.
+## Task 013-W1 — Windows consumer installer correction
+
+This correction stays on `0.1.0-dev` and does not change the release version.
+It moves the resolved Core/Features `gprinstall` commands from an escaped
+`sh -c` payload into `scripts/install_resolved_consumer.sh`. The validator
+invokes that file with `alr -n exec -- sh`. The Windows failure artifact also
+retains `install.log`, which exists before installed-consumer logs.
+
+Linux qualification after removing Alire caches, OpenCV 4.10.0/features2d,
+indexed `opencv_core=0.5.0`: configuration discovery passed, AUnit was 67/67,
+both synthetic examples and both ASan/UBSan variants passed, and source,
+installed, and relocated consumers passed at
+`/tmp/features-consumer.O9JCEhqu`. These Linux results do not qualify Windows.
+
+After this correction merges to main, the automatic Windows workflow must show
+all of the following before Windows qualification can be claimed:
+
+1. Indexed Core 0.5.0 resolution, with no Features Git pin.
+2. Native AUnit 67 run / 67 passed.
+3. Features and Core-shim DLL and import-library linkage.
+4. External GPRinstall regressions.
+5. Source consumer success.
+6. Installed consumer success.
+7. Relocated consumer success.
+8. Source-path and linker-metadata audits.
+
+If that run fails, record the first failing stage and retain `install.log`.
+Do not report Windows qualification from this section.
+
+## Task 013-W3 — indexed Core source PATH exclusion
+
+Merged main `a62484ccc0242944005455f7b20728f99da96614` ran Windows
+[39045824241](https://github.com/zackboll/opencv_features_ada/actions/runs/39045824241),
+job `117434219628`. AUnit was 67/67. DLL/import checks, external GPRinstall
+regressions, and the source, installed, and relocated consumers passed. The
+final source-path audit failed. Artifact `12105542473` shows the indexed Core
+checkout recorded in `core-source.txt`:
+
+`C:\Users\runneradmin\AppData\Local\alire\cache\builds\opencv_core_0.5.0_f8aef00c\f0441d76a402296da21d8c1fdb7cdf8741f80dbc21a43c18aead6e61e003889c`
+
+Its `lib` child is the first entry of the GPRls `PATH =` diagnostic at lines
+228 and 2582 of both project logs. It is absent from the GPRbuild logs and
+installed GPR metadata. The previous sanitizer removed the candidate, source
+consumer, repository, and prefix A, but not this separately resolved Core root.
+This is inherited PATH text, not an OpenCV algorithm or ABI defect.
+
+The validator now reads that recorded root verbatim and passes it to the
+existing component-aware sanitizer before hiding sources. The audit still
+rejects the Core root if it survives. Linux consumer results do not qualify
+Windows. The next post-merge Windows run must pass the same final audit.
 
 ## Task 007 — installation research and local qualification
 
