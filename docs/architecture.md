@@ -11,6 +11,13 @@ successful updated-main test silently retargets an approved release. The
 production ABI/API/algorithms and Linux sanitizer campaigns remain unchanged;
 see [the qualification contract](windows-native-boundary-qualification.md).
 
+Qualification cleanliness uses Git's tracked edits and all nonignored untracked
+paths, not a filtered allowlist in code. Known root tool output is excluded only
+by reviewed ignore rules (`/alire_install/` in the newer harness checkout).
+Immutable checkouts retain their own rules. Bounded relative status diagnostics
+must preserve fatal failures without exposing file contents; no success marker
+may precede final source-integrity verification.
+
 ## Module ownership
 
 `opencv_features` is a separate Ada crate. The public package name does not

@@ -1,5 +1,76 @@
 # FEATURES-CI-016 — Windows native-boundary qualification
 
+## FEATURES-CI-017 — strict Git cleanliness correction
+
+Starting main is `d57a86e805f978840053b0a52a02beb04679233d`, tree
+`67935bcc398c50c56c0a0b7cc780946ecb636091`. No overlapping open PR or existing
+publication was found. The approved release commit/tree below is unchanged.
+
+[Run 39699379940](https://github.com/zackboll/opencv_features_ada/actions/runs/39699379940),
+job `119564604824`, passed step 8 (67/67 AUnit), then failed step 9 before any
+boundary compilation: `qualification source must have no tracked edits or
+unignored files`. Step 10, the immutable-release campaign, was skipped. Artifact
+`12393125026` contains only campaign/failure logs, no qualification JSON, symbol
+or execution logs. It cannot qualify either native campaign.
+
+The runner invoked Alire from repository-local `alire_install/bin/alr.exe`.
+The exact setup-alire action revision used was
+`1ff7d9224297858cc9ecce29b08bc6109f93e49a`; its `src/main.ts` sets
+`install_dir = "alire_install"` and extracts the archive there. In a real Git
+fixture with the original ignore rules, creating that executable reproduces
+`?? alire_install/bin/alr.exe`. Committing only `/alire_install/` restores clean
+status. This establishes the false-rejection mechanism, not an exhaustive list
+of dirty paths on the historical runner: the old harness discarded those paths.
+Any further dirty path must be diagnosed independently, not silently exempted.
+
+Only the corrected harness checkout gains the repository-root ignore rule.
+Nested unexpected installations, tracked changes (even under ignored paths),
+unexpected files/directories and wrong commit/tree identities remain rejected.
+The original immutable release's `.gitignore` is not changed or overlaid. Its
+checkout uses the externally installed Alire executable, not a new setup-alire
+installation inside that checkout.
+
+Failure diagnostics retain the two-column index/worktree status category and
+at most 20 repository-relative path samples, each capped at 240 characters,
+plus the omitted-entry count. JSON escaping prevents terminal control output;
+no file contents, environment or filesystem inventory is printed. Diagnostics
+remain in campaign/failure logs collected by the existing artifact glob.
+Source status and identity are checked before and after execution. Both PASS
+markers are now withheld until the final integrity check and JSON write succeed.
+Stale success JSON is removed before shell setup and Python preflight; previous
+variant objects, executables and logs are removed before Python preflight.
+
+Eleven added tests (26 Windows harness/policy tests total) cover actual Git
+status/ignore behavior, tracked Ada/C++ changes, unexpected files/directories,
+staged/deleted files, bounded escaped diagnostics, CLI nonzero failure/artifact
+writes, stale success removal and late source mutation. Original-rule strictness
+is fixed by the approved ignore-file digest, so shallow CI checkouts work.
+Existing tests continue to require both variants, symbol controls and pinned
+independent release checks. These Linux fixtures are not Windows execution.
+
+Local Linux qualification: Alire 2.1.1, GNAT 16.1.0, GPRbuild crate 26.0.1
+(binary 26.0.0), Alire-environment g++ 16.1.0, OpenCV 4.10.0/features2d,
+indexed Core 0.5.0 origin `f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`.
+Native build, 67/67 AUnit, both ordinary raw variants, both ASan/UBSan variants,
+both examples, six external GPRinstall/two installed-link regressions and all
+source/installed/relocated consumers passed. The pre-existing unused
+`Common_Cxx_Switches` include is still reported as non-load-bearing; no audit
+exception changed. Additional local results:
+repository/profile/shell checks passed; **112 configuration tests passed**;
+GNATdoc 26.0.0 documented/rendered **127/127**, zero warnings, independent second
+generation/site/log byte-identical; official Enhancer v0.1.0 installation and
+deterministic/idempotent enhancement passed; **104 documentation tests executed
+and passed, no skips**, including native regeneration and installed mutations.
+Exact pushed head and hosted results belong in the PR qualification record,
+not a self-referential source commit. Local browser tests were not rerun by
+CI-017; final-head hosted browser/artifact checks remain required.
+
+Final-head hosted repository/Linux/macOS/sanitizer/documentation success is
+required for review readiness. After independent review and eventual merge,
+**both actual Windows campaigns and their JSON/symbol/execution evidence remain
+mandatory**, including the exact original-source completion marker. Publication
+remains blocked. This task does not authorize merging, tagging or publishing.
+
 ## Release identity and original gap
 
 The approved **0.1.0** source remains merge commit

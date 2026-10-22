@@ -1,5 +1,13 @@
 # Features binding coverage
 
+FEATURES-CI-017 adds eleven strict-cleanliness regressions (26 Windows harness/
+policy tests total): real Git ignores/status, tracked Ada/C++ edits, unexpected
+files/directories, staged/deleted paths, bounded diagnostics, stale-report/CLI
+failure, immutable original rules and late mutations. Existing mandatory
+variant/identity checks remain. These fixtures are not Windows algorithms;
+**67 AUnit registrations, 17 native ABI entries and 127 documented public
+elements are unchanged**. See the Windows qualification record for evidence.
+
 FEATURES-CI-016 adds an external Windows/MSYS2 raw-boundary harness using the
 unchanged real C++ driver/Features implementation and indexed Core. Mandatory
 main and independently pinned-release campaigns require production and fault

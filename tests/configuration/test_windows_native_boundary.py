@@ -1,6 +1,8 @@
 """Linux-runnable harness/control-flow fixtures. NOT Windows native execution."""
 from pathlib import Path
+from contextlib import redirect_stdout
 import hashlib
+import io
 import os
 import shutil
 import subprocess
@@ -174,6 +176,21 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
             self.qualify()
         self.assertFalse((self.output / 'qualification.json').exists())
 
+    def test_late_dirty_source_rejected_without_any_success_marker(self):
+        real_run = boundary.run
+        def dirty_after_execution(args, *a, **kw):
+            result = real_run(args, *a, **kw)
+            if str(args[-1]).endswith('fault-injection/native_boundary.exe') and args[0] == 'sh':
+                (self.source / 'unexpected.txt').write_text('not source evidence')
+            return result
+        captured = io.StringIO()
+        with patch.object(boundary, 'run', side_effect=dirty_after_execution), \
+                redirect_stdout(captured), self.assertRaisesRegex(ValueError, 'unexpected.txt'):
+            self.qualify()
+        self.assertFalse((self.output / 'qualification.json').exists())
+        for marker in boundary.MARKERS.values():
+            self.assertNotIn(marker, captured.getvalue())
+
     def test_wrong_compiler_and_import_selection_rejected(self):
         original = self.config.read_text()
         for old, new in ((str(self.driver), str(self.driver).replace('mingw64', 'gnat_native')),
@@ -239,10 +256,13 @@ esac
                        {'FIXTURE_STAGE': 'boundary'}):
             with self.subTest(change=change):
                 trace.write_text('')
+                self.output.mkdir(exist_ok=True)
+                (self.output / 'qualification.json').write_text('stale success')
                 result = subprocess.run(['sh', str(ROOT / 'scripts/qualify_windows_release.sh'),
                                          str(self.output)], env={**env, **change},
                                         capture_output=True, text=True)
                 self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((self.output / 'qualification.json').exists())
                 self.assertNotIn('WINDOWS_RELEASE_SOURCE_QUALIFIED', result.stdout)
                 if 'FIXTURE_TREE' in change:
                     self.assertNotIn('alr ', trace.read_text())
@@ -266,10 +286,184 @@ exit "${FIXTURE_EXIT:-0}"
         for change in ({}, {'FIXTURE_OMIT': 'production'}, {'FIXTURE_OMIT': 'fault'},
                        {'FIXTURE_EXIT': '21'}):
             with self.subTest(change=change):
+                self.output.mkdir(exist_ok=True)
+                (self.output / 'qualification.json').write_text('stale success')
                 result = subprocess.run(['sh', str(ROOT / 'scripts/run_windows_native_boundary.sh'),
                                          str(self.source), str(self.output)],
                                         env={**env, **change}, capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, not change, result.stdout + result.stderr)
+                self.assertFalse((self.output / 'qualification.json').exists())
+
+
+class CleanlinessTests(unittest.TestCase):
+    """Real Git status and ignore semantics, not mocked Windows algorithms."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='cleanliness fixture ')
+        self.addCleanup(self.temp.cleanup)
+        self.source = Path(self.temp.name) / 'source'
+        self.source.mkdir()
+        self.output = Path(self.temp.name) / 'output'
+        self.git('init', '-q')
+        shutil.copy(ROOT / '.gitignore', self.source / '.gitignore')
+        for name in ('src/features.adb', 'cpp/features.cpp'):
+            path = self.source / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('tracked fixture, not native source\n')
+        self.commit()
+        self.identity = boundary.source_identity(self.source)
+        self.expected = [self.identity['commit'], self.identity['tree']]
+
+    def git(self, *args):
+        return subprocess.check_output(['git', '-C', str(self.source), *args], text=True)
+
+    def commit(self):
+        self.git('add', '.')
+        self.git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+                 'commit', '-qm', 'Cleanliness fixture, not release evidence')
+
+    def dirty(self):
+        with self.assertRaisesRegex(ValueError, 'no tracked edits') as failure:
+            boundary.source_identity(self.source, self.expected)
+        return str(failure.exception)
+
+    def test_clean_checkout_passes(self):
+        self.assertEqual(self.git('status', '--porcelain', '--untracked-files=all'), '')
+        self.assertEqual(boundary.source_identity(self.source, self.expected), self.identity)
+
+    def test_root_alire_install_is_ignored_but_nested_install_is_not(self):
+        path = self.source / 'alire_install/bin/alr.exe'
+        path.parent.mkdir(parents=True)
+        path.write_text('tool fixture\n')
+        self.assertEqual(boundary.source_identity(self.source, self.expected), self.identity)
+        self.assertIn('/alire_install/', self.git('check-ignore', '-v', 'alire_install/bin/alr.exe'))
+        nested = self.source / 'unexpected/alire_install/bin/alr.exe'
+        nested.parent.mkdir(parents=True)
+        nested.write_text('tool fixture\n')
+        self.assertIn('unexpected/alire_install/bin/alr.exe', self.dirty())
+
+    def test_original_rules_reproduce_tool_install_rejection(self):
+        ignore = self.source / '.gitignore'
+        corrected = ignore.read_text()
+        self.assertEqual(corrected.count('/alire_install/\n'), 1)
+        ignore.write_text(corrected.replace('/alire_install/\n', ''))
+        self.commit()
+        path = self.source / 'alire_install/bin/alr.exe'
+        path.parent.mkdir(parents=True)
+        path.touch()
+        self.assertEqual(self.git('status', '--porcelain', '--untracked-files=all'),
+                         '?? alire_install/bin/alr.exe\n')
+        with self.assertRaisesRegex(ValueError, 'alire_install/bin/alr.exe'):
+            boundary.source_identity(self.source)
+
+    def test_tracked_ada_and_cpp_edits_rejected_even_inside_ignored_directory(self):
+        for name in ('src/features.adb', 'cpp/features.cpp', 'alire_install/tracked.adb'):
+            with self.subTest(name=name):
+                path = self.source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                if name.startswith('alire_install/'):
+                    path.write_text('tracked fixture\n')
+                    self.git('add', '-f', name)
+                    self.commit()
+                    identity = boundary.source_identity(self.source)
+                    self.expected = [identity['commit'], identity['tree']]
+                original = path.read_text()
+                path.write_text('SECRET SOURCE CONTENT MUST NOT APPEAR\n')
+                diagnostic = self.dirty()
+                self.assertIn('status=" M"', diagnostic)
+                self.assertIn(name, diagnostic)
+                self.assertNotIn('SECRET SOURCE CONTENT', diagnostic)
+                self.assertNotIn(str(self.source), diagnostic)
+                path.write_text(original)
+
+    def test_unexpected_file_and_directory_rejected_with_relative_status(self):
+        for name in ('unexpected.txt', 'unexpected directory/nested/file.txt'):
+            with self.subTest(name=name):
+                path = self.source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('SECRET CONTENT\n')
+                diagnostic = self.dirty()
+                self.assertIn('status="??"', diagnostic)
+                self.assertIn(name, diagnostic)
+                self.assertNotIn('SECRET CONTENT', diagnostic)
+                path.unlink()
+
+    def test_staged_changes_and_deletions_rejected(self):
+        path = self.source / 'src/features.adb'
+        path.write_text('changed\n')
+        self.git('add', 'src/features.adb')
+        self.assertIn('status="M "', self.dirty())
+        self.git('reset', '-q', 'HEAD', '--', 'src/features.adb')
+        path.unlink()
+        self.assertIn('status=" D"', self.dirty())
+
+    def test_commit_and_tree_mismatches_rejected(self):
+        for index in (0, 1):
+            wrong = self.expected.copy()
+            wrong[index] = '0' * 40
+            with self.subTest(index=index), self.assertRaisesRegex(ValueError, 'identity mismatch'):
+                boundary.source_identity(self.source, wrong)
+
+    def test_diagnostics_are_bounded_and_escape_unusual_names(self):
+        for index in range(boundary.STATUS_SAMPLE_LIMIT + 5):
+            (self.source / f'offender-{index:03d}.txt').touch()
+        diagnostic = self.dirty()
+        self.assertEqual(diagnostic.count('  status='), boundary.STATUS_SAMPLE_LIMIT)
+        self.assertIn('5 additional entries omitted', diagnostic)
+        self.assertLess(len(diagnostic), 7000)
+        for path in self.source.glob('offender-*'):
+            path.unlink()
+        (self.source / ('x' * 250)).touch()
+        self.assertNotIn('x' * (boundary.STATUS_PATH_LIMIT + 1), self.dirty())
+        (self.source / 'unusual\nname.txt').touch()
+        self.assertIn('unusual', self.dirty())
+        self.assertNotIn('unusual\nname', self.dirty())
+
+    def test_dirty_cli_preserves_failure_diagnostics_removes_stale_success(self):
+        self.output.mkdir()
+        (self.output / 'qualification.json').write_text('stale success')
+        for variant in boundary.MARKERS:
+            directory = self.output / variant
+            directory.mkdir()
+            (directory / 'execution.log').write_text(boundary.MARKERS[variant])
+            (directory / 'native_boundary.exe').touch()
+        (self.source / 'unexpected.txt').write_text('DO NOT DISCLOSE CONTENT')
+        # Only the platform entry gate is adapted for this Linux subprocess.
+        # Actual Git status, CLI error handling and artifact writes are unchanged.
+        code = ('import runpy, sys; import windows_native_boundary; '
+                'sys.platform="win32"; sys.argv=sys.argv[1:]; '
+                'runpy.run_path(sys.argv[0], run_name="__main__")')
+        result = subprocess.run([sys.executable, '-c', code,
+                                 str(ROOT / 'scripts/windows_native_boundary.py'),
+                                 str(self.source), str(self.output), *self.expected],
+                                env={**os.environ, 'PYTHONPATH': str(ROOT / 'scripts')},
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('WINDOWS_NATIVE_BOUNDARY_FAILED', result.stderr)
+        diagnostic = (self.output / 'qualification-failure.log').read_text()
+        self.assertIn('status="??" path="unexpected.txt"', diagnostic)
+        self.assertNotIn('DO NOT DISCLOSE CONTENT', diagnostic)
+        self.assertFalse((self.output / 'qualification.json').exists())
+        for variant, marker in boundary.MARKERS.items():
+            self.assertNotIn(marker, result.stdout + result.stderr)
+            self.assertFalse((self.output / variant / 'execution.log').exists())
+            self.assertFalse((self.output / variant / 'native_boundary.exe').exists())
+
+    def test_immutable_source_uses_its_original_ignore_rules(self):
+        # The digest fixes the original release rules without requiring history
+        # in the repository-check workflow's shallow checkout.
+        original = (ROOT / '.gitignore').read_text().replace('/alire_install/\n', '')
+        self.assertEqual(hashlib.sha256(original.encode()).hexdigest(),
+                         'ae93e92ea06b3111bb27219c69aa960d3efc41ed4f96ee2e1fb4aeb8e32bc990')
+        self.assertNotIn('/alire_install/', original)
+        (self.source / '.gitignore').write_text(original)
+        self.commit()
+        identity = boundary.source_identity(self.source)
+        self.expected = [identity['commit'], identity['tree']]
+        path = self.source / 'alire_install/bin/alr.exe'
+        path.parent.mkdir(parents=True)
+        path.touch()
+        self.assertIn('alire_install/bin/alr.exe', self.dirty())
 
 
 class BoundaryPolicyTests(unittest.TestCase):

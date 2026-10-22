@@ -11,6 +11,7 @@ harness=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 output=$(cygpath -u "$1")
 mkdir -p "$output"
 output=$(CDPATH= cd -- "$output" && pwd)
+rm -f "$output/qualification.json"
 commit=e6d977f0bba02c526920834ef6e88905366ed1b9
 tree=0265f6e39de174722cfe8ff59d7663dddbcf8cbd
 temporary=$(cygpath -u "${RUNNER_TEMP:-${TMPDIR:-/tmp}}")
