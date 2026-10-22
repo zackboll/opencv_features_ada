@@ -1,5 +1,17 @@
 # Bootstrap validation record
 
+## FEATURES-CI-016 — Windows boundary infrastructure
+
+The original merged Windows workflow passed but omitted raw production/fault
+boundary execution. The corrective branch adds explicit current-main and
+independent immutable-release campaigns without modifying approved production
+source. Local Linux validation and fixture counts, the filesystem failure and
+successful disk-backed rerun, public documentation deployment verification,
+and the mandatory outstanding real Windows post-merge gate are recorded in
+[`windows-native-boundary-qualification.md`](windows-native-boundary-qualification.md).
+This is infrastructure preparation, not a claim of Windows execution or release
+publication.
+
 ## Task 012 — indexed OpenCV Core 0.5.0
 
 Starting fetched `origin/main`: `495e385f91022735d5c52ba766f8d25164c7a900`

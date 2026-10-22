@@ -16,6 +16,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: alire-project/setup-alire@latest
         with:
           version: "2.1.1"
@@ -45,6 +47,23 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "MSYS2 package dependency consistency check failed: $LASTEXITCODE" }
       - name: Build and run with isolated native runtime
         run: sh scripts/test.sh
+      - name: Qualify Windows production and fault native boundaries
+        run: alr -n exec -- sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
+      - name: Qualify immutable 0.1.0 release native boundaries
+        run: sh scripts/qualify_windows_release.sh obj/windows-release-boundary
+      - name: Preserve Windows native-boundary diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-native-boundary-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          # Reports and diagnostics only; no executables, objects or environment dumps.
+          path: |
+            obj/windows-native-boundary/**/*.log
+            obj/windows-native-boundary/qualification.json
+            obj/windows-release-boundary/**/*.log
+            obj/windows-release-boundary/qualification.json
       - name: Inspect external Features DLL
         run: |
           set -eu

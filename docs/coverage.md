@@ -1,5 +1,13 @@
 # Features binding coverage
 
+FEATURES-CI-016 adds an external Windows/MSYS2 raw-boundary harness using the
+unchanged real C++ driver/Features implementation and indexed Core. Mandatory
+main and independently pinned-release campaigns require production and fault
+execution markers, symbol checks and immutable source reports. Fifteen new
+configuration tests are control-flow/policy fixtures, not Windows execution.
+The Linux native/ASan/UBSan campaigns, **67 AUnit registrations and 17 exports**
+remain unchanged. See [Windows qualification](windows-native-boundary-qualification.md).
+
 FEATURES-REL-014R1 aligns installed-consumer manifest validation with unchanged
 `opencv_core ~0.5.0`: parsed TOML identity and stable 0.5.x versions are required
 before any installation. Configuration fixtures cover 0.5.0/0.5.1/0.5.2 and
