@@ -18,6 +18,17 @@ Immutable checkouts retain their own rules. Bounded relative status diagnostics
 must preserve fatal failures without exposing file contents; no success marker
 may precede final source-integrity verification.
 
+Core resource prefixes are build locations, not source-manifest authorities.
+The Windows qualification harness cross-checks the solved unpinned Alire lock
+against exact-version indexed JSON, then binds the release to the freshly
+exported workspace environment, Alire's shared build/vault locations and the
+recorded dependency/build hashes. Only the exact selected vault deployment is
+consulted for a source manifest; no recursive cache search is permitted. The
+actual bridge headers must agree with that source deployment. Both provenance
+and Features source identity are checked again before publishing success.
+This is qualification-only Alire 2.1.1 support, not a production dependency or
+a cryptographic attestation of arbitrary local cache contents.
+
 ## Module ownership
 
 `opencv_features` is a separate Ada crate. The public package name does not

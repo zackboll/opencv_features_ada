@@ -6,9 +6,8 @@ import os
 import re
 import subprocess
 import sys
-import tomllib
 
-from validate_core_manifest import validate_core_manifest
+from resolve_core_provenance import resolve_core_provenance
 
 
 VARIANTS = ("production", "fault-injection")
@@ -129,16 +128,7 @@ def qualify(source, output, expected=None):
             (output / variant / name).unlink(missing_ok=True)
     identity = source_identity(source, expected)
     core = Path(os.environ["OPENCV_CORE_ALIRE_PREFIX"]).resolve()
-    core_version = validate_core_manifest(core / "alire.toml")
-    with (core / "alire.toml").open("rb") as stream:
-        origin = tomllib.load(stream).get("origin", {})
-    if (origin.get("url") != "git+https://github.com/zackboll/opencv_core_ada.git"
-            or not re.fullmatch(r"[0-9a-f]{40}", origin.get("commit", ""))):
-        raise ValueError("require indexed Core public Git origin and immutable commit")
-    with (source / "alire.toml").open("rb") as stream:
-        manifest = tomllib.load(stream)
-    if any("opencv_core" in pin for pin in manifest.get("pins", [])):
-        raise ValueError("Core workspace/Git pins are forbidden")
+    provenance = resolve_core_provenance(source, core)
     driver, nm, include, bridge, libraries, version = configuration(source, core)
     env = os.environ.copy()
     for name in ("CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
@@ -151,7 +141,7 @@ def qualify(source, output, expected=None):
     harness = Path(__file__).resolve().parents[1]
     harness_identity = source_identity(harness) if harness != source else identity
     report = {"source": identity, "harness": harness_identity,
-              "core": {"version": core_version, "origin": origin}, "compiler": str(driver),
+              "core": provenance, "compiler": str(driver),
               "compiler_version": compiler, "compiler_target": target, "opencv": version,
               "import_libraries": [str(p) for p in libraries], "results": {}}
     print(json.dumps(report, indent=2), flush=True)
@@ -183,6 +173,8 @@ def qualify(source, output, expected=None):
     require_complete(report["results"])
     if source_identity(source, expected) != identity:
         raise ValueError("tested source identity changed during qualification")
+    if resolve_core_provenance(source, core) != provenance:
+        raise ValueError("Core provenance changed during qualification")
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     for variant in VARIANTS:
         print(MARKERS[variant], flush=True)

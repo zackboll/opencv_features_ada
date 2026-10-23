@@ -1,5 +1,23 @@
 # Bootstrap validation record
 
+## FEATURES-CI-018 — Core build-cache provenance resolution
+
+Starting fetched main: `c5a372d1ec802dcd91aaf92972921f122b92f57c`, tree
+`37199d381a1ced2658892142d5b92fc1dd9928c4`. Windows run `39900729214`
+failed by treating the Core build prefix as a source-manifest directory.
+The resolver now cross-checks structured selected/indexed metadata and exact
+Alire 2.1.1 build/vault/environment associations without requiring a build-root
+manifest. Local repository checks, 129 configuration tests, shell/profile,
+native build, 67/67 AUnit, ordinary and ASan/UBSan production/fault boundaries,
+both examples, six GPRinstall/two installed-link regressions and all three
+consumer modes passed. Documentation: 104/104 tests without skips, strict
+127/127 coverage and zero warnings, identical second generation, official
+enhancer installation, deterministic/idempotent enhancement and Pages checks
+passed. See [the detailed evidence and limitations](windows-native-boundary-qualification.md).
+Hosted final-head CI remains a separate gate. Actual Windows corrected-main
+and immutable-release execution remains mandatory after independent review and
+eventual merge. FEATURES-REL-015 publication stays paused.
+
 ## FEATURES-CI-017 — Windows cleanliness correction
 
 The merged harness failed before boundary compilation in run `39699379940`;
