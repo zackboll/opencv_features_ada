@@ -3,6 +3,7 @@ from pathlib import Path
 from contextlib import redirect_stdout
 import hashlib
 import io
+import json
 import os
 import shutil
 import subprocess
@@ -14,6 +15,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 import windows_native_boundary as boundary
+import resolve_core_provenance as provenance
 from check_windows_boundary import check_windows_boundary
 
 
@@ -24,7 +26,14 @@ class BoundaryFixtures(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.source = self.root / "source"
         self.output = self.root / "output"
-        self.core = self.root / "indexed core"
+        self.cache = self.root / "alire/cache"
+        self.deployment = "opencv_core_0.5.0_f8aef00c"
+        # Actual Alire 2.1.1 hash algorithm: sorted inputs, each NUL-terminated.
+        inputs = 'profile:opencv_core=RELEASE\nversion:gnat_native=16.1.0\n'
+        digest = hashlib.sha256(b''.join(s.encode() + b'\0'
+                                       for s in inputs.splitlines())).hexdigest()
+        self.core = self.cache / "builds" / self.deployment / digest
+        self.checkout = self.cache / "releases" / self.deployment
         self.native = self.root / "native/mingw64"
         for directory in (self.source / "cpp", self.source / "tests/cpp",
                           self.source / "scripts", self.source / "config", self.core / "cpp",
@@ -33,10 +42,40 @@ class BoundaryFixtures(unittest.TestCase):
             directory.mkdir(parents=True)
         for name in ("opencv_core_module_bridge.hpp", "opencv_core_shim.h"):
             (self.core / "cpp" / name).write_text("// fixture, never native evidence\n")
-        (self.core / "alire.toml").write_text(
+        self.checkout.mkdir(parents=True)
+        (self.checkout / "alire.toml").write_text(
             'name="opencv_core"\nversion="0.5.0"\n[origin]\n'
             'url="git+https://github.com/zackboll/opencv_core_ada.git"\n'
             'commit="f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f"\n')
+        shutil.copytree(self.core / 'cpp', self.checkout / 'cpp')
+        (self.core / 'alire').mkdir()
+        (self.core / 'alire/build_hash_inputs').write_text(inputs)
+        (self.source / 'alire').mkdir()
+        (self.source / 'alire/build_hash_inputs').write_text(
+            f'dependency:opencv_core=0.5.0={digest}\nprofile:opencv_features=RELEASE\n')
+        self.lock = self.source / 'alire/alire.lock'
+        # Structure observed from a real 2.1.1 solution, not show --solve text.
+        self.lock.write_text('''[solution.context]
+solved = true
+[[solution.state]]
+crate = "opencv_core"
+fulfilment = "solved"
+pinned = false
+transitivity = "direct"
+versions = "~0.5.0"
+[solution.state.release]
+''' + (self.checkout / 'alire.toml').read_text().replace(
+            '[origin]', '[solution.state.release.origin]'))
+        self.indexed = provenance.load(self.checkout / 'alire.toml')
+        self.info = [{'key': k, 'value': v} for k, v in {
+            'alr version': '2.1.1', 'root status': 'VALID',
+            'root folder': str(self.source), 'build folder': str(self.cache / 'builds'),
+            'vault folder': str(self.cache / 'releases')}.items()]
+        self.fresh = {'OPENCV_CORE_ALIRE_PREFIX': str(self.core),
+                      'OPENCV_FEATURES_ALIRE_PREFIX': str(self.source)}
+        self.metadata = patch.object(provenance, 'alire_json', side_effect=self.alire_json)
+        self.metadata.start()
+        self.addCleanup(self.metadata.stop)
         for name in ("libopencv_core_shim.dll.a", "libopencv_core_shim.dll"):
             (self.core / "lib" / name).touch()
         for name in ("libopencv_features2d.dll.a", "libopencv_core.dll.a"):
@@ -45,7 +84,7 @@ class BoundaryFixtures(unittest.TestCase):
         (self.source / "cpp/opencv_features_shim.cpp").write_text("// fixture source\n")
         (self.source / "tests/cpp/native_boundary.cpp").write_text("// fixture driver\n")
         (self.source / "alire.toml").write_text('name="opencv_features"\nversion="0.1.0"\n')
-        (self.source / ".gitignore").write_text("/config/\n")
+        (self.source / ".gitignore").write_text("/config/\n/alire/\n")
         shutil.copy(ROOT / "scripts/run_native.sh", self.source / "scripts/run_native.sh")
         self.driver = self.native / "bin/g++.exe"
         self.driver.write_text("""#!/usr/bin/env python3
@@ -94,12 +133,22 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
         self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
                  "commit", "-qm", "Fixture, not release evidence")
         self.identity = boundary.source_identity(self.source)
-        self.environment = patch.dict(os.environ, OPENCV_CORE_ALIRE_PREFIX=str(self.core))
+        self.environment = patch.dict(os.environ, **self.fresh)
         self.environment.start()
         self.addCleanup(self.environment.stop)
 
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.source), *args], text=True).strip()
+
+    def alire_json(self, source, *args):
+        self.assertEqual(source, self.source)
+        if args[:2] == ('--format=JSON', 'show'):
+            return self.indexed
+        if args == ('--format=JSON', 'version'):
+            return self.info
+        if args[:2] == ('exec', '--') and args[-1] == '--environment':
+            return self.fresh
+        self.fail(f'unexpected Alire query: {args}')
 
     def qualify(self):
         real_identity = boundary.source_identity
@@ -109,6 +158,7 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
             boundary.qualify(self.source, self.output)
 
     def test_both_variants_compile_actual_selected_files_and_complete(self):
+        self.assertFalse((self.core / 'alire.toml').exists())
         calls = []
         real_run = boundary.run
         def capture(args, *a, **kw):
@@ -130,6 +180,195 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
             self.assertEqual(len(links), 1)
             self.assertNotIn('libopencv_features_shim.dll.a', ' '.join(links[0]))
         self.assertEqual(self.git('status', '--porcelain'), '')
+
+    def test_real_layout_provenance_without_build_manifest(self):
+        result = provenance.resolve_core_provenance(self.source, self.core)
+        self.assertEqual(result['version'], '0.5.0')
+        self.assertEqual(result['origin']['commit'],
+                         'f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f')
+        self.assertEqual(result['source_prefix'], str(self.checkout))
+        self.assertEqual(result['build_prefix'], str(self.core))
+
+    def test_stable_patch_release_is_not_hardcoded_to_050(self):
+        # Alire deployment strips SemVer build metadata, but the lock retains it.
+        version = '0.5.12+build.1'
+        old_core, old_checkout = self.core, self.checkout
+        deployment = 'opencv_core_0.5.12_f8aef00c'
+        self.core = old_core.parent.parent / deployment / old_core.name
+        self.core.parent.mkdir()
+        old_core.rename(self.core)
+        self.checkout = old_checkout.parent / deployment
+        old_checkout.rename(self.checkout)
+        for path in (self.lock, self.source / 'alire/build_hash_inputs',
+                     self.checkout / 'alire.toml'):
+            path.write_text(path.read_text().replace('0.5.0', version).replace(
+                'versions = "~' + version + '"', 'versions = "~0.5.0"'))
+        self.indexed['version'] = version
+        self.fresh['OPENCV_CORE_ALIRE_PREFIX'] = str(self.core)
+        result = provenance.resolve_core_provenance(self.source, self.core)
+        self.assertEqual(result['version'], version)
+
+    def test_incompatible_versions_rejected_before_index_query(self):
+        original = self.lock.read_text()
+        for version in ('0.4.9', '0.6.0', '1.5.0', '0.5.1-rc1', '00.5.0'):
+            with self.subTest(version=version), patch.object(provenance, 'alire_json') as query:
+                self.lock.write_text(original.replace('version="0.5.0"', f'version="{version}"'))
+                with self.assertRaisesRegex(ValueError, 'stable version'):
+                    self.qualify()
+                query.assert_not_called()
+
+    def test_bad_selected_identity_origin_and_commit_rejected(self):
+        original = self.lock.read_text()
+        for old, new in (('name="opencv_core"', 'name="unrelated"'),
+                         (provenance.UPSTREAM, 'git+https://example.invalid/core.git'),
+                         ('f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f', 'f8aef00c'),
+                         ('pinned = false', 'pinned = true'),
+                         ('fulfilment = "solved"', 'fulfilment = "linked"'),
+                         ('solved = true', 'solved = false')):
+            with self.subTest(new=new):
+                self.lock.write_text(original.replace(old, new))
+                with self.assertRaises(ValueError):
+                    self.qualify()
+
+    def test_missing_ambiguous_or_malformed_solution_rejected(self):
+        original = self.lock.read_text()
+        for text in ('[solution]\n', original + original[original.index('[[solution.state]]'):],
+                     original.replace('crate = "opencv_core"', 'crate = "other"'),
+                     'solution = "invalid"', 'not valid toml'):
+            with self.subTest(text=text[:30]):
+                self.lock.write_text(text)
+                with self.assertRaises(ValueError):
+                    self.qualify()
+        self.lock.unlink()
+        with self.assertRaises(OSError):
+            self.qualify()
+
+    def test_index_disagreement_and_command_failure_propagate(self):
+        original = json.loads(json.dumps(self.indexed))
+        for key, value in (('name', 'wrong'), ('version', '0.5.1'),
+                           ('origin', {'url': provenance.UPSTREAM, 'commit': 'a' * 40})):
+            self.indexed = {**original, key: value}
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.qualify()
+        with patch.object(provenance, 'alire_json', side_effect=ValueError('Alire failed')):
+            with self.assertRaisesRegex(ValueError, 'Alire failed'):
+                self.qualify()
+
+    def test_unrelated_environment_build_and_source_rejected(self):
+        for key in self.fresh:
+            original = self.fresh[key]
+            self.fresh[key] = str(self.root / 'unrelated')
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, 'unrelated'):
+                self.qualify()
+            self.fresh[key] = original
+        for key in ('root folder', 'build folder', 'vault folder'):
+            row = next(r for r in self.info if r['key'] == key)
+            original = row['value']
+            row['value'] = str(self.root / 'unrelated')
+            with self.subTest(key=key), self.assertRaises((ValueError, OSError)):
+                self.qualify()
+            row['value'] = original
+        self.info.append(self.info[0])
+        with self.assertRaisesRegex(ValueError, 'unambiguous'):
+            self.qualify()
+
+    def test_build_hash_and_dependency_associations_required(self):
+        for path in (self.source / 'alire/build_hash_inputs', self.core / 'alire/build_hash_inputs'):
+            original = path.read_text()
+            for text in ('', original.replace('opencv_core', 'unrelated'), original + original):
+                path.write_text(text)
+                with self.subTest(path=path, text=text), self.assertRaises(ValueError):
+                    self.qualify()
+            path.unlink()
+            with self.assertRaises(OSError):
+                self.qualify()
+            path.write_text(original)
+
+    def test_source_and_optional_build_manifests_must_agree(self):
+        actual = self.checkout / 'alire.toml'
+        original = actual.read_text()
+        for path in (actual, self.core / 'alire.toml'):
+            for old, new in (('0.5.0', '0.5.1'), ('opencv_core', 'unrelated'),
+                             ('f8aef00c', 'a8aef00c')):
+                path.write_text(original.replace(old, new))
+                with self.subTest(path=path, new=new), self.assertRaises(ValueError):
+                    self.qualify()
+            path.write_text(original)
+        (self.core / 'alire.toml').unlink()
+        actual.unlink()
+        with self.assertRaises(OSError):
+            self.qualify()
+
+    def test_missing_or_different_bridge_and_missing_dll_import_fail(self):
+        for name in ('cpp/opencv_core_module_bridge.hpp', 'cpp/opencv_core_shim.h',
+                     'lib/libopencv_core_shim.dll', 'lib/libopencv_core_shim.dll.a'):
+            path = self.core / name
+            original = path.read_bytes()
+            path.unlink()
+            with self.subTest(name=name), self.assertRaises((ValueError, OSError)):
+                self.qualify()
+            path.write_bytes(original)
+        (self.core / 'cpp/opencv_core_module_bridge.hpp').write_text('different bridge')
+        with self.assertRaisesRegex(ValueError, 'bridge disagrees'):
+            self.qualify()
+
+    def test_contradictory_include_bridge_rejected(self):
+        shutil.copytree(self.core / 'cpp', self.core / 'include')
+        (self.core / 'include/opencv_core_module_bridge.hpp').write_text('unrelated')
+        with self.assertRaisesRegex(ValueError, 'include bridge disagrees'):
+            self.qualify()
+
+    def test_missing_or_relative_workspace_metadata_rejected(self):
+        for value in ('', '.', 'unrelated'):
+            row = next(r for r in self.info if r['key'] == 'root folder')
+            original = row['value']
+            row['value'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'workspace'):
+                self.qualify()
+            row['value'] = original
+        with patch.dict(os.environ, OPENCV_FEATURES_ALIRE_PREFIX=''):
+            with self.assertRaisesRegex(ValueError, 'unrelated'):
+                self.qualify()
+
+    def test_provenance_failure_clears_stale_evidence_and_withholds_markers(self):
+        self.output.mkdir()
+        (self.output / 'qualification.json').write_text('stale success')
+        for variant in boundary.VARIANTS:
+            directory = self.output / variant
+            directory.mkdir()
+            (directory / 'execution.log').write_text(boundary.MARKERS[variant])
+        self.lock.unlink()
+        captured = io.StringIO()
+        with redirect_stdout(captured), self.assertRaises(OSError):
+            self.qualify()
+        self.assertFalse((self.output / 'qualification.json').exists())
+        for variant in boundary.VARIANTS:
+            self.assertFalse((self.output / variant / 'execution.log').exists())
+            self.assertNotIn(boundary.MARKERS[variant], captured.getvalue())
+
+    def test_workspace_pin_rejected_even_with_unpinned_lock(self):
+        with (self.source / 'alire.toml').open('a') as stream:
+            stream.write('[[pins]]\nopencv_core={path="../workspace"}\n')
+        self.git('add', 'alire.toml')
+        self.git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+                 'commit', '-qm', 'Pin rejection fixture')
+        with self.assertRaisesRegex(ValueError, 'pins are forbidden'):
+            self.qualify()
+
+    def test_late_provenance_change_withholds_report_and_success_markers(self):
+        real_run = boundary.run
+        def change_after_execution(args, *a, **kw):
+            result = real_run(args, *a, **kw)
+            if args[0] == 'sh' and str(args[-1]).endswith('fault-injection/native_boundary.exe'):
+                self.indexed['origin']['commit'] = 'a' * 40
+            return result
+        captured = io.StringIO()
+        with patch.object(boundary, 'run', side_effect=change_after_execution), \
+                redirect_stdout(captured), self.assertRaisesRegex(ValueError, 'indexed provenance'):
+            self.qualify()
+        self.assertFalse((self.output / 'qualification.json').exists())
+        for marker in boundary.MARKERS.values():
+            self.assertNotIn(marker, captured.getvalue())
 
     def test_compile_link_and_execution_failures_propagate_each_variant(self):
         for stage in ('compile', 'link', 'execute'):
@@ -467,6 +706,27 @@ class CleanlinessTests(unittest.TestCase):
 
 
 class BoundaryPolicyTests(unittest.TestCase):
+    def test_alire_json_uses_real_command_failure_and_strict_json(self):
+        with patch.object(provenance.subprocess, 'run') as command:
+            command.return_value = subprocess.CompletedProcess([], 0, '{"name":"opencv_core"}', '')
+            self.assertEqual(provenance.alire_json(ROOT, '--format=JSON', 'show', 'opencv_core=0.5.0'),
+                             {'name': 'opencv_core'})
+            self.assertEqual(command.call_args.args[0],
+                             ['alr', '-n', '--format=JSON', 'show', 'opencv_core=0.5.0'])
+            command.return_value = subprocess.CompletedProcess([], 1, '{}', 'diagnostic')
+            with self.assertRaisesRegex(ValueError, 'command failed.*diagnostic'):
+                provenance.alire_json(ROOT, 'exec')
+            for text in ('', 'warning\n{}', '{}\n{}', '{"name":"wrong","name":"opencv_core"}'):
+                command.return_value = subprocess.CompletedProcess([], 0, text, '')
+                with self.assertRaises(ValueError):
+                    provenance.alire_json(ROOT, 'exec')
+
+    def test_environment_probe_is_json_and_does_not_dump_other_variables(self):
+        result = subprocess.run([sys.executable, str(ROOT / 'scripts/resolve_core_provenance.py'),
+                                 '--environment'], capture_output=True, text=True, check=True)
+        self.assertEqual(set(json.loads(result.stdout)),
+                         {'OPENCV_CORE_ALIRE_PREFIX', 'OPENCV_FEATURES_ALIRE_PREFIX'})
+
     def test_unconditional_steps_and_history_required(self):
         text = (ROOT / '.github/workflows/windows-post-merge.yml').read_text()
         check_windows_boundary(text)

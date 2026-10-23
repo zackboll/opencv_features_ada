@@ -1,5 +1,144 @@
 # FEATURES-CI-016 — Windows native-boundary qualification
 
+## FEATURES-CI-018 — selected Core provenance, separate build and source roots
+
+Starting worktree was clean on `ci/017-windows-cleanliness-correction`, HEAD
+`f30ce8c08b7b5585d42b0b55ef342befad6e5b5f`. After a fresh fetch the requested
+branch `ci/018-windows-core-provenance` starts from main
+`c5a372d1ec802dcd91aaf92972921f122b92f57c`, tree
+`37199d381a1ced2658892142d5b92fc1dd9928c4`. The immutable release commit/tree
+in this document remains unchanged; no release source is patched.
+
+### Observed failure and metadata authority
+
+[Run 39900729214](https://github.com/zackboll/opencv_features_ada/actions/runs/39900729214),
+[job 120241451642](https://github.com/zackboll/opencv_features_ada/actions/runs/39900729214/job/120241451642),
+[artifact 12478838018](https://github.com/zackboll/opencv_features_ada/actions/runs/39900729214/artifacts/12478838018)
+were retrieved through GitHub's API and the actual logs inspected. The artifact
+contains only campaign/failure logs. The exact failing relative location is
+`cache/builds/opencv_core_0.5.0_f8aef00c/398c0561ce064e26c796348909430c1c8069ef811ca04123885f5316eaa20876/alire.toml`
+under the runner's Alire cache. It fails before raw boundary compilation;
+the immutable-release step is skipped. AUnit passed separately, but neither
+raw Windows campaign is qualified by that run.
+
+Live local probes used Alire **2.1.1**, source commit
+`fa9a1a9971d159f8cb2b8007dbb73e9e029fc109`. Built-in help and that exact
+upstream implementation were inspected, particularly `alire-roots.adb`
+(`Release_Base`), `alire-environment-loading.adb`, `alire-builds.adb`,
+`alire-releases.adb` (`Deployment_Folder`) and `alire-builds-hashes.adb`.
+Observed formats, also used by the reduced test fixtures:
+
+```toml
+[solution.context]
+solved = true
+[[solution.state]]
+crate = "opencv_core"
+fulfilment = "solved"
+pinned = false
+transitivity = "direct"
+versions = "~0.5.0"
+[solution.state.release]
+name = "opencv_core"
+version = "0.5.0"
+[solution.state.release.origin]
+commit = "f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f"
+url = "git+https://github.com/zackboll/opencv_core_ada.git"
+```
+
+`alr -n --format=JSON show opencv_core=0.5.0` returns a release object with
+`name`, `version` and `origin` (plus actions, dependencies and other fields).
+`alr -n --format=JSON version` returns an array of `{"key": ..., "value": ...}`
+rows including `alr version`, `root status`, `root folder`, `build folder` and
+`vault folder`. In contrast, `with`, `printenv` and `show --solve` do **not**
+support structured output in 2.1.1. Neither pretty solution text nor the build
+directory name alone is a provenance authority.
+
+### Resolver contract
+
+1. Parse the selected workspace's lockfile. Require exactly one solved,
+   unpinned, direct `opencv_core` under the existing `~0.5.0` constraint. Apply
+   the shared stable SemVer validator; reject wrong identity, prereleases,
+   incompatible versions, workspace/Git pins and incomplete metadata.
+2. Require the exact public Git URL above and a full lowercase 40-hex commit.
+   Independently query the index for that **exact selected version**, not latest
+   Core. Require identity/version/origin agreement. Extra/unsupported origin
+   selectors such as subdirectories fail closed.
+3. Require reviewed Alire 2.1.1 structured location metadata for the selected
+   workspace. Export its environment again using `alr exec` and a file-based
+   Python probe, emitting **only two resource prefixes as JSON**. Compare them
+   with the caller's Core prefix and tested Features checkout. Do not use `-q`
+   here: live probing showed 2.1.1 suppresses child stdout in quiet mode.
+4. Use the documented/implementation-reviewed shared layout only:
+   `builds/<deployment>/<build-hash>` and `releases/<deployment>`. The deployment
+   uses selected version (without SemVer build metadata) and commit prefix;
+   these names are consistency checks, not proof. Recompute the SHA-256 of
+   Core's sorted, NUL-terminated `alire/build_hash_inputs` entries and require
+   Features' recorded `dependency:opencv_core=<version>=<hash>` to match exactly.
+   Missing or unrelated environment/cache/hash associations fail.
+5. Read only that exact vault source manifest, retaining
+   `validate_core_manifest.py`; verify identity/version/origin agreement. The
+   build root may lack `alire.toml`; if present, contradictions are rejected.
+   Build bridge/C factory headers (and optional include copies) must match the
+   source deployment. Existing generated configuration still requires the real
+   Core bridge, DLL and exact import library from this build, external MSYS2
+   MinGW64 compiler and matching OpenCV imports. No cache recursion, copied
+   production bridge or alternate algorithm is introduced.
+6. Recheck provenance and strict Features source identity before writing the
+   report or either completion marker. Record source/build prefixes, version,
+   full origin and build hash in qualification JSON. Preflight failures clear
+   stale reports and per-variant execution evidence and propagate nonzero.
+
+The trust boundary is Alire's index/solution/deployment records and the local
+build environment, as with the original harness, not adversarial cache
+attestation or arbitrary pointer validation. This intentionally supports the
+reviewed shared-cache layout; unknown Alire versions/layouts need review,
+not a best-effort fallback. No production dependencies change.
+
+### Local qualification and remaining gates
+
+Local Linux: Alire 2.1.1, GNAT/g++ 16.1.0, GPRbuild crate 26.0.1 (binary
+26.0.0), OpenCV 4.10.0/features2d, indexed Core 0.5.0 origin
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`. The real resolver was executed
+successfully against the actual local lock/index/environment/cache, separately
+from the synthetic Windows fixtures.
+
+- Repository checks, **129/129 configuration tests** (43 Windows harness/policy),
+  all shell syntax checks and profile/layout helpers: PASS.
+- Native build, **67 registered / 67 executed / 67 passed AUnit**, zero assertion
+  failures/errors; raw production/fault and both ASan/UBSan variants: PASS.
+- Both examples, six external GPRinstall and two installed-link regressions,
+  source/installed/relocated consumers and strict path audits: PASS. The existing
+  unused `Common_Cxx_Switches` include remains reported as non-load-bearing.
+- GNATdoc 26.0.0: **127/127 documented elements**, zero gaps/warnings; independent
+  second site/log byte-identical. Official Enhancer v0.1.0 wheel installation,
+  integrity verification, deterministic/idempotent enhancement: PASS.
+  **104/104 documentation tests**, no skips (including real regeneration and
+  installed mutations); Pages 18 files/13 pages/248 references: PASS. The first
+  documentation invocation omitted optional site environment variables and
+  skipped ten tests; the complete configured rerun passed all 104.
+- Official enhancer compatibility preflight: zero failures. Chromium
+  156.0.8078.4 / Playwright 1.64.1: 64/64 root API, 199/199 project-prefix and
+  64/64 prefix API assertions passed; local Pages tar byte-identical. An initial
+  browser attempt picked up an unrelated global alpha Playwright lacking its
+  browser; isolated CI-matched 1.64.1 tooling corrected that tooling failure.
+  Hosted uploaded-artifact validation is still independent of local-tar evidence.
+
+Production Ada/C++, public API, 17 ABI entries, all Alire manifests, native
+boundary driver, Linux sanitizer implementation and Windows trigger policy
+remain unchanged. Final commit/tree and hosted URLs/results are recorded in
+the PR to avoid a self-referential source commit. Final-head repository,
+Linux, macOS, sanitizer and documentation hosted success is required before
+`READY_FOR_INDEPENDENT_REVIEW`.
+
+No local Linux fixture constitutes Windows qualification. Leave the PR unmerged,
+auto-merge disabled. The first post-merge Windows run must compile/link/check
+symbols/execute **both production and fault variants** on corrected main and,
+independently, approved release `e6d977f0bba02c526920834ef6e88905366ed1b9`, tree
+`0265f6e39de174722cfe8ff59d7663dddbcf8cbd`. Inspect both actual execution logs
+and qualification JSON reports, both native PASS markers, and the exact
+`WINDOWS_RELEASE_SOURCE_QUALIFIED` commit/tree marker. FEATURES-REL-015 remains
+paused: no tag, GitHub Release or Alire index PR is authorized.
+
 ## FEATURES-CI-017 — strict Git cleanliness correction
 
 Starting main is `d57a86e805f978840053b0a52a02beb04679233d`, tree

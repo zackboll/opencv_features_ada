@@ -18,6 +18,13 @@ def validate_core_manifest(manifest: Path) -> str:
     """Return the parsed version for stable opencv_core >=0.5.0 and <0.6.0."""
     with manifest.open("rb") as stream:
         data = tomllib.load(stream)
+    return validate_core_release(data)
+
+
+def validate_core_release(data: dict) -> str:
+    """Apply the same identity/version policy to structured Alire metadata."""
+    if not isinstance(data, dict):
+        raise ValueError("resolved Core metadata must be a table")
     if data.get("name") != "opencv_core":
         raise ValueError("resolved manifest must identify crate opencv_core")
     version = data.get("version")
