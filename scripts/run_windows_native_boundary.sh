@@ -15,6 +15,7 @@ source=$(cygpath -m "$1")
 output=$(cygpath -m "$2")
 shift 2
 mkdir -p "$output"
+rm -f "$output/qualification.json"
 log="$output/campaign.log"
 python "$(cygpath -m "$harness/scripts/windows_native_boundary.py")" "$source" "$output" "$@" \
     > "$log" 2>&1 || { cat "$log"; exit 1; }

@@ -16,6 +16,9 @@ FINAL = "PASS: actual Features shim / Core bridge / ORB boundary on "
 FAULT = "PASS: radius fault stages 15/16/17/18 x five exception categories, empty cleanup"
 MARKERS = {"production": "WINDOWS_NATIVE_BOUNDARY_PRODUCTION_PASS",
            "fault-injection": "WINDOWS_NATIVE_BOUNDARY_FAULT_PASS"}
+# Artifact diagnostics expose only a bounded sample of Git's relative names.
+STATUS_SAMPLE_LIMIT = 20
+STATUS_PATH_LIMIT = 240
 
 
 def run(args, log=None, cwd=None, env=None):
@@ -34,12 +37,24 @@ def run(args, log=None, cwd=None, env=None):
 
 def source_identity(source, expected=None):
     def git(*args):
-        return subprocess.check_output(["git", "-C", str(source), *args], text=True).strip()
+        return subprocess.check_output(["git", "-C", str(source), *args], text=True).rstrip("\r\n")
     identity = {"commit": git("rev-parse", "HEAD"), "tree": git("rev-parse", "HEAD^{tree}")}
     if expected is not None and (identity["commit"], identity["tree"]) != tuple(expected):
         raise ValueError("release source commit/tree identity mismatch")
-    if git("status", "--porcelain", "--untracked-files=all"):
-        raise ValueError("qualification source must have no tracked edits or unignored files")
+    status = git("status", "--porcelain", "--untracked-files=all")
+    if status:
+        entries = status.splitlines()
+        # Porcelain v1 paths are repository-relative, with unusual names quoted
+        # by Git. JSON escaping also prevents terminal control sequences. Keep
+        # the two-column index/worktree category (including leading spaces).
+        sample = [f"  status={json.dumps(line[:2])} "
+                  f"path={json.dumps(line[3:][:STATUS_PATH_LIMIT])}"
+                  for line in entries[:STATUS_SAMPLE_LIMIT]]
+        if len(entries) > STATUS_SAMPLE_LIMIT:
+            sample.append(f"  ... {len(entries) - STATUS_SAMPLE_LIMIT} additional entries omitted")
+        raise ValueError("qualification source must have no tracked edits or unignored files\n"
+                         f"Git status: {len(entries)} entries (bounded relative-path sample):\n"
+                         + "\n".join(sample))
     return identity
 
 
@@ -105,6 +120,13 @@ def qualify(source, output, expected=None):
     output.mkdir(parents=True, exist_ok=True)
     report_path = output / "qualification.json"
     report_path.unlink(missing_ok=True)
+    for name in ("compiler-target.log", "compiler-version.log", "qualification-failure.log"):
+        (output / name).unlink(missing_ok=True)
+    # Do not upload old success/execution evidence after a preflight failure.
+    for variant in MARKERS:
+        for name in ("features.o", "boundary.o", "native_boundary.exe", "features-compile.log",
+                     "boundary-compile.log", "link.log", "symbols.log", "execution.log"):
+            (output / variant / name).unlink(missing_ok=True)
     identity = source_identity(source, expected)
     core = Path(os.environ["OPENCV_CORE_ALIRE_PREFIX"]).resolve()
     core_version = validate_core_manifest(core / "alire.toml")
@@ -158,11 +180,12 @@ def qualify(source, output, expected=None):
                    cwd=source, env=env)
         validate_output(variant, text, version)
         report["results"][variant] = MARKERS[variant]
-        print(MARKERS[variant], flush=True)
     require_complete(report["results"])
     if source_identity(source, expected) != identity:
         raise ValueError("tested source identity changed during qualification")
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    for variant in VARIANTS:
+        print(MARKERS[variant], flush=True)
 
 
 def main():

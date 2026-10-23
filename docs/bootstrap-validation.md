@@ -1,5 +1,16 @@
 # Bootstrap validation record
 
+## FEATURES-CI-017 — Windows cleanliness correction
+
+The merged harness failed before boundary compilation in run `39699379940`;
+the immutable-source campaign was skipped. Real Git reproduces the observed
+repository-local setup-alire installation as untracked under the original
+rules. A single root ignore rule corrects that known tool output; strict Git
+identity/status rejection and bounded failure evidence remain enabled. See
+[`windows-native-boundary-qualification.md`](windows-native-boundary-qualification.md)
+for source identities, evidence limits, regressions, native local results and
+the outstanding real Windows post-merge campaigns. No release publication.
+
 ## FEATURES-CI-016 — Windows boundary infrastructure
 
 The original merged Windows workflow passed but omitted raw production/fault
