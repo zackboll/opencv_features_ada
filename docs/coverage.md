@@ -1,5 +1,15 @@
 # Features binding coverage
 
+FEATURES-CI-018 adds 17 provenance/control-flow regressions (43 Windows harness/
+policy tests; 129 complete configuration tests). Fixtures reproduce separate
+Alire 2.1.1 build/vault directories with no build-root manifest. They cover
+stable 0.5.x, exact identity/origin/commit, lock/index/source disagreements,
+missing/ambiguous/malformed metadata, workspace pins, unrelated prefixes and
+hashes, bridge/DLL/import failures, strict JSON/command failure propagation,
+stale success and late provenance mutation. Existing cleanliness tests remain.
+These are not Windows native execution. The public API, 17-entry ABI, 67 AUnit
+registrations and 127 documented public elements remain unchanged.
+
 FEATURES-CI-017 adds eleven strict-cleanliness regressions (26 Windows harness/
 policy tests total): real Git ignores/status, tracked Ada/C++ edits, unexpected
 files/directories, staged/deleted paths, bounded diagnostics, stale-report/CLI
