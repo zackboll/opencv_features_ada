@@ -23,11 +23,7 @@ test "$(git -C "$work/source" rev-parse HEAD)" = "$commit"
 test "$(git -C "$work/source" rev-parse 'HEAD^{tree}')" = "$tree"
 test -z "$(git -C "$work/source" status --porcelain --untracked-files=all)"
 cd "$work/source"
-alr -n build > "$output/release-build.log" 2>&1 || {
-    cat "$output/release-build.log"; exit 1;
-}
-cat "$output/release-build.log"
-alr -n exec -- sh "$(cygpath -m "$harness/scripts/run_windows_native_boundary.sh")" \
+sh "$(cygpath -m "$harness/scripts/run_windows_native_boundary.sh")" \
     "$(cygpath -m "$work/source")" "$(cygpath -m "$output")" "$commit" "$tree"
 git diff --exit-code HEAD --
 test -z "$(git ls-files --others --exclude-standard)"

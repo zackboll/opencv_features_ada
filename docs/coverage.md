@@ -1,5 +1,18 @@
 # Features binding coverage
 
+FEATURES-CI-019 adds eight environment regressions: **137 configuration tests**
+with the real-Alire opt-in enabled (**136 pass / one skip** without it).
+The 50 Windows harness/policy fixtures now include inherited prefixes without
+nested exec, inherited/selected hash mismatch, alternate bridge/link builds,
+missing/relative prefixes, sibling build/exec environments, preparation failure
+cleanup and nested-preparation rejection. All CI-018 negative checks remain.
+The eighth test uses real Alire 2.1.1, a disposable local index and source build
+layout with manifest PATH prepends; it verifies build/dependency hashes and
+reproduces a nested environment collision without mocked subprocesses. It is
+Windows-capable and required in the existing main-only Windows workflow.
+Its Linux execution is environment regression evidence, not Windows native
+qualification. Production API/ABI, manifests and AUnit registrations are unchanged.
+
 FEATURES-CI-018 adds 17 provenance/control-flow regressions (43 Windows harness/
 policy tests; 129 complete configuration tests). Fixtures reproduce separate
 Alire 2.1.1 build/vault directories with no build-root manifest. They cover

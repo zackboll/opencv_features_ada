@@ -2,7 +2,7 @@
 """Fail-closed Alire 2.1.1 shared-cache provenance for the Windows harness.
 
 The lock selects a release; indexed JSON authenticates its declared origin.
-The fresh Alire environment and recorded build hashes associate that release
+The inherited Alire environment and recorded build hashes associate that release
 with the build used by Features. The vault manifest is NOT a build manifest.
 This verifies Alire's provenance records, not arbitrary cache tamper resistance.
 """
@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 import re
 import subprocess
-import sys
 import tomllib
 
 from validate_core_manifest import validate_core_manifest, validate_core_release
@@ -32,7 +31,7 @@ def table(value):
 
 
 def alire_json(source, *args):
-    # Do not use -q: Alire 2.1.1 exec suppresses the child's stdout in quiet mode.
+    # Metadata queries only: never re-export an already established environment.
     result = subprocess.run(["alr", "-n", *args], cwd=source,
                             text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode:
@@ -90,18 +89,14 @@ def resolve_core_provenance(source, core):
             or not Path(info["root folder"]).is_absolute() or
             Path(info.get("root folder", "")).resolve() != source.resolve()):
         raise ValueError("Alire provenance belongs to a different workspace")
-    # printenv has no structured output in 2.1.1. Use exec to read just the
-    # resource prefixes as JSON, not shell-output parsing or an environment dump.
+    # The caller already runs inside the authoritative Alire execution context.
+    # Re-exporting with exec hashes the exported PATH on MSYS2 and conflicts
+    # with the inherited resource prefix. Validate it independently instead.
     keys = ("OPENCV_CORE_ALIRE_PREFIX", "OPENCV_FEATURES_ALIRE_PREFIX")
-    fresh = table(alire_json(source, "exec", "--", sys.executable,
-                            Path(__file__).resolve().as_posix(), "--environment"))
-    inherited = os.environ.get(keys[1])
-    if (not all(isinstance(fresh.get(k), str) and fresh[k]
-                and Path(fresh[k]).is_absolute() for k in keys)
-            or Path(fresh[keys[0]]).resolve() != core.resolve()
-            or Path(fresh[keys[1]]).resolve() != source.resolve()
-            or not inherited or not Path(inherited).is_absolute()
-            or Path(inherited).resolve() != source.resolve()):
+    inherited = {key: os.environ.get(key) for key in keys}
+    if (not all(inherited[k] and Path(inherited[k]).is_absolute() for k in keys)
+            or Path(inherited[keys[0]]).resolve() != core.resolve()
+            or Path(inherited[keys[1]]).resolve() != source.resolve()):
         raise ValueError("Core build prefix/environment is unrelated to selected workspace")
     deployment = f"opencv_core_{version.split('+')[0]}_{origin['commit'][:8]}"
     for key in ("build folder", "vault folder"):
@@ -136,11 +131,4 @@ def resolve_core_provenance(source, core):
             raise ValueError("Core include bridge disagrees with verified source deployment")
     return {"version": version, "origin": origin, "build_prefix": str(core),
             "source_prefix": str(checkout), "build_hash": digest,
-            "mechanism": "Alire 2.1.1 lock/index JSON/environment/build-hash/vault"}
-
-
-if __name__ == "__main__":
-    if sys.argv[1:] != ["--environment"]:
-        sys.exit("usage: resolve_core_provenance.py --environment")
-    print(json.dumps({key: os.environ.get(key) for key in
-                      ("OPENCV_CORE_ALIRE_PREFIX", "OPENCV_FEATURES_ALIRE_PREFIX")}))
+            "mechanism": "Alire 2.1.1 lock/index JSON/inherited-environment/build-hash/vault"}

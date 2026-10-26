@@ -7,7 +7,7 @@ def check_windows_boundary(text):
     # Routing remains checked separately by workflow_topology.py.
     for name, command in (
         ("Qualify Windows production and fault native boundaries",
-         "alr -n exec -- sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary"),
+         "sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary"),
         ("Qualify immutable 0.1.0 release native boundaries",
          "sh scripts/qualify_windows_release.sh obj/windows-release-boundary"),
     ):
