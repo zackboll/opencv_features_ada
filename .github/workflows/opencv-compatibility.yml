@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        opencv: ["4.1.0", "4.10.0", "5.0.0"]
+        opencv: ["4.1.0", "4.4.0", "4.6.0", "4.8.0", "4.10.0", "5.0.0"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +24,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build g++ pkg-config libopencv-dev
+      - name: Verify selected upstream commit
+        shell: bash
+        run: |
+          set -eu
+          case '${{ matrix.opencv }}' in
+            4.1.0) expected=371bba8f54560b374fbcd47e7e02f015ac4969ad ;;
+            4.4.0) expected=c3bb57afeaf030f10939204d48d7c2a3842f4293 ;;
+            4.6.0) expected=b0dc474160e389b9c9045da5db49d03ae17c6a6b ;;
+            4.8.0) expected=f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef ;;
+            4.10.0) expected=71d3237a093b60a27601c20e9ee6c3e52154e8b1 ;;
+            5.0.0) expected=40738fb16ceddb5fb3fea747585f7ce6abb0605b ;;
+            *) exit 1 ;;
+          esac
+          test "$(git -C opencv-source rev-parse HEAD)" = "$expected"
+          git -C features rev-parse HEAD HEAD^{tree}
+          git -C opencv-source rev-parse HEAD
+          g++ --version
       - name: Build selected native modules
         shell: bash
         run: |
@@ -56,5 +73,6 @@ jobs:
         working-directory: features
         run: |
           sh scripts/test.sh
+          sh scripts/run_profile_tests.sh
           grep -F 'Native_Version := "${{ matrix.opencv }}";' config/opencv_features_install.gpr
           alr -n exec -- sh scripts/run_sanitizers.sh

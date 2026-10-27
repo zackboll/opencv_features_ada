@@ -40,7 +40,11 @@ static_assert(offsetof(opencv_features_keypoint, x) == 0 &&
               offsetof(opencv_features_keypoint, octave) == 20 &&
               offsetof(opencv_features_keypoint, class_id) == 24, "Unexpected keypoint offsets");
 
-struct opencv_features_orb_handle { cv::Ptr<cv::ORB> detector; };
+struct opencv_features_orb_handle {
+    cv::Ptr<cv::ORB> detector;
+    float scale_factor = 1.2f;
+    int32_t levels = 8;
+};
 struct opencv_features_result_handle {
     std::vector<opencv_features_keypoint> points;
     cv::Mat descriptors; // private temporary, never an application-owned wrapper
@@ -111,11 +115,11 @@ const cv::Mat &descriptors(const opencv_core_mat_handle *handle) {
             mat->cols == 32 && mat->rows > 0), "expected 2-D UInt8 C1 Nx32 ORB descriptors");
     return *mat;
 }
-bool finite_keypoint(const cv::KeyPoint &p, const cv::Mat &image) noexcept {
+bool finite_keypoint(const cv::KeyPoint &p, const cv::Mat &image, int32_t levels) noexcept {
     return std::isfinite(p.pt.x) && std::isfinite(p.pt.y) &&
            std::isfinite(p.size) && std::isfinite(p.angle) && std::isfinite(p.response) &&
            p.pt.x >= 0 && p.pt.y >= 0 && p.pt.x < image.cols && p.pt.y < image.rows &&
-           p.size > 0 && p.octave >= 0 && p.octave < opencv_features_detail::levels;
+           p.size > 0 && p.octave >= 0 && p.octave < levels;
 }
 void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *image_handle,
              const opencv_core_mat_handle *mask_handle,
@@ -123,8 +127,9 @@ void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *i
     require(out_result != nullptr && out_count != nullptr, "null extraction output");
     require(handle != nullptr && !handle->detector.empty(), "null or unready ORB detector");
     const cv::Mat &source = input(image_handle);
-    require(opencv_features_detail::image_layout_fits(source.rows, source.cols),
-            "image is outside the fixed-profile ORB arithmetic envelope");
+    require(opencv_features_detail::image_layout_fits(source.rows, source.cols,
+                handle->scale_factor, handle->levels),
+            "image is outside the configured ORB arithmetic envelope");
     cv::Mat mask;
     if (mask_handle != nullptr) {
         const cv::Mat &selection = input(mask_handle);
@@ -151,7 +156,7 @@ void extract(opencv_features_orb_handle *handle, const opencv_core_mat_handle *i
     result->points.reserve(keypoints.size());
     checkpoint(4);
     for (const cv::KeyPoint &point : keypoints) {
-        require(finite_keypoint(point, image), "invalid native ORB keypoint");
+        require(finite_keypoint(point, image, handle->levels), "invalid native keypoint");
         result->points.push_back({point.pt.x, point.pt.y, point.size, point.angle,
                                   point.response, point.octave, point.class_id});
     }
@@ -179,14 +184,23 @@ const char *opencv_features_native_backend(void) {
 opencv_features_status opencv_features_orb_create(
     int32_t maximum_features, int32_t tuple, int32_t score, int32_t fast_threshold,
     opencv_features_orb_handle **out_handle) {
+    return opencv_features_orb_create_profiled(maximum_features, tuple, score,
+                                             fast_threshold, 1.2f, 8, out_handle);
+}
+opencv_features_status opencv_features_orb_create_profiled(
+    int32_t maximum_features, int32_t tuple, int32_t score, int32_t fast_threshold,
+    float scale_factor, int32_t levels, opencv_features_orb_handle **out_handle) {
     if (out_handle != nullptr) *out_handle = nullptr;
     return guarded([&] {
         require(out_handle != nullptr, "null detector output");
-        require(opencv_features_detail::parameters_fit(maximum_features, tuple, score, fast_threshold),
+        require(opencv_features_detail::parameters_fit(maximum_features, tuple, score, fast_threshold,
+                                                      scale_factor, levels),
                 "ORB configuration is outside the supported profile");
         checkpoint(1);
         auto result = std::make_unique<opencv_features_orb_handle>();
-        result->detector = cv::ORB::create(maximum_features, 1.2f, 8, 31, 0, tuple,
+        result->scale_factor = scale_factor;
+        result->levels = levels;
+        result->detector = cv::ORB::create(maximum_features, scale_factor, levels, 31, 0, tuple,
                             score == 0 ? cv::ORB::HARRIS_SCORE : cv::ORB::FAST_SCORE, 31,
                             fast_threshold);
         require(!result->detector.empty(), "native ORB factory returned no detector");

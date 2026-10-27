@@ -1,5 +1,22 @@
 # ORB feature extraction
 
+## Configurable scale-space (development API)
+
+The original four-field configuration and default factory remain unchanged.
+Use `ORB.Create ((others => <>), (Scale_Factor => 1.1, Levels => 12))` for an
+immutable configured detector. `Pyramid_Parameters` reads those settings and,
+like `Parameters`, rejects closed/unready detectors. Finite scales 1.1..2.0
+and levels 2..16 are supported, subject to profile-dependent feature-target
+and image-size preflight. Defaults stay scale 1.2/eight levels. Edge 31, first
+level 0 and patch 31 stay fixed; no setters are provided.
+
+For nondefault profiles target <= INT32_MAX/(2*Levels); all levels must round
+to positive sizes. See `docs/orb-contract.md` and `docs/orb-source-review.md`.
+The complete `examples/src/orb_pyramid_synthetic.adb` compares default and
+configured extraction, matches descriptors and converts owned correspondences.
+This synthetic comparison makes no geometric/localization accuracy claim.
+The fixed-profile walkthrough below remains valid for the unchanged default.
+
 [OpenCV.Features.ORB](api:OpenCV.Features.ORB) detects ORB (Oriented FAST and
 Rotated BRIEF) keypoints in an 8-bit grayscale `OpenCV.Core.Mat` and computes a
 32-byte binary descriptor for each one. The result is an
@@ -8,7 +25,7 @@ keypoint values with a Core-owned descriptor matrix.
 
 ## Construct a detector
 
-[Create](api:OpenCV.Features.ORB.Create) returns a ready
+[Create](api:OpenCV.Features.ORB.Create/1) returns a ready
 [Detector](api:OpenCV.Features.ORB.Detector). With no argument it uses the
 defaults of [Configuration](api:OpenCV.Features.ORB.Configuration):
 
@@ -21,8 +38,10 @@ defaults of [Configuration](api:OpenCV.Features.ORB.Configuration):
 
 Out-of-range values raise `OpenCV.OpenCV_Error` from `Create`; a zero
 `Maximum_Features` is already rejected by its `Positive` subtype. The
-structural profile is fixed in this release: scale factor 1.2, eight pyramid
-levels, edge threshold 31, first level 0 and patch size 31.
+default structural profile is scale factor 1.2, eight pyramid levels,
+edge threshold 31, first level 0 and patch size 31. The
+[configured factory](api:OpenCV.Features.ORB.Create/2) accepts a separate
+[Pyramid_Configuration](api:OpenCV.Features.ORB.Pyramid_Configuration).
 [Parameters](api:OpenCV.Features.ORB.Parameters) returns the configuration a
 ready detector was created with.
 

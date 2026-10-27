@@ -5,9 +5,10 @@ private with System;
 
 --  ORB (Oriented FAST and Rotated BRIEF) keypoint detection and binary
 --  descriptor extraction for 8-bit grayscale Core Mats. The public profile
---  exposes the requested feature target, WTA_K, the Harris/FAST score and
---  the FAST threshold. The structural profile is fixed: scale factor 1.2,
---  eight pyramid levels, edge threshold 31, first level 0, patch size 31.
+   --  exposes the requested feature target, WTA_K, the Harris/FAST score and
+   --  the FAST threshold. Scale factor and pyramid levels are configurable;
+   --  defaults remain 1.2 and eight. Edge threshold 31, first level 0 and
+   --  patch size 31 remain fixed.
 --  OpenCV 4 runs through the native features2d module and OpenCV 5.0
 --  through features; the Ada API is the same for both. Results are
 --  OpenCV.Features.Feature_Set values that own their keypoints and
@@ -31,7 +32,8 @@ package OpenCV.Features.ORB is
    --  Public ORB parameters. Create validates the ranges that the Ada
    --  subtypes do not express and rejects others with OpenCV_Error.
    --  @field Maximum_Features Requested feature target (OpenCV nfeatures),
-   --  1 .. 1_073_741_823 (2_147_483_647 / 2), default 500. It is a target
+   --  1 .. 1_073_741_823 (2_147_483_647 / 2) for the default pyramid,
+   --  otherwise at most 2_147_483_647 / (2 * Levels); default 500. It is a target
    --  distributed over the pyramid levels, not a strict cap: a result can
    --  hold fewer keypoints, or more when native responses tie.
    --  @field Tuple WTA_K selection, default Two_Samples.
@@ -46,10 +48,17 @@ package OpenCV.Features.ORB is
       FAST_Threshold   : Natural := 20;
    end record;
 
-   --  Owner of one native ORB detector, configured with a Configuration and
-   --  a deliberately small initial profile. Native structural parameters are
-   --  fixed at scaleFactor=1.2f, nlevels=8, edgeThreshold=31, firstLevel=0,
-   --  patchSize=31. Expanding that surface is a later reviewed slice.
+   --  Immutable scale-space parameters, separate from Configuration so
+   --  existing four-field aggregates remain source compatible.
+   --  @field Scale_Factor Finite level-to-level scale, 1.1 .. 2.0; default 1.2.
+   --  @field Levels Pyramid levels, 2 .. 16; default 8.
+   type Pyramid_Configuration is record
+      Scale_Factor : OpenCV.Float32_Value := 1.2;
+      Levels       : Positive := 8;
+   end record;
+
+   --  Owner of one native ORB detector and its immutable configuration.
+   --  Edge threshold 31, first level 0 and patch size 31 remain fixed.
    --  A default-declared Detector is not ready; Create returns a ready one.
    --  Close and finalization release the native detector; both are
    --  idempotent and never raise. Detectors are limited and cannot be
@@ -66,9 +75,22 @@ package OpenCV.Features.ORB is
    function Create (Parameters : Configuration := (others => <>))
       return Detector;
 
+   --  Create with explicit immutable scale-space parameters. For profiles
+   --  other than (1.2, 8), Maximum_Features is conservatively bounded by
+   --  2_147_483_647 / (2 * Levels). Every image level must have positive size.
+   --  See docs/orb-contract.md for the configured arithmetic envelope.
+   --  @param Parameters Feature target, tuple, score and FAST threshold.
+   --  @param Pyramid Scale factor and number of levels.
+   --  @return A ready detector owning its native ORB instance.
+   --  @exception OpenCV_Error Unsupported configuration or native failure.
+   function Create
+     (Parameters : Configuration;
+      Pyramid : Pyramid_Configuration) return Detector;
+
    --  Release the native detector early. Closing a default-declared or
    --  already closed detector has no effect. Afterwards Is_Ready is False,
-   --  and Parameters and Detect_And_Compute raise OpenCV_Error. Existing
+   --  and Parameters, Pyramid_Parameters and Detect_And_Compute raise
+   --  OpenCV_Error. Existing
    --  feature sets are unaffected. Do not close a detector while another
    --  task is extracting with it.
    --  @param Self Detector to close.
@@ -86,9 +108,15 @@ package OpenCV.Features.ORB is
    --  @exception OpenCV_Error The detector is not ready.
    function Parameters (Self : Detector) return Configuration;
 
+   --  Read the complete immutable scale-space configuration.
+   --  @param Self A ready detector.
+   --  @return The detector's scale factor and number of levels.
+   --  @exception OpenCV_Error The detector is not ready.
+   function Pyramid_Parameters (Self : Detector) return Pyramid_Configuration;
+
    --  Detect ORB keypoints anywhere in the image and compute their binary
    --  descriptors. Image: nonempty UInt8 C1, two dimensions, at least 2x2.
-   --  The fixed-profile native arithmetic envelope is checked in the shim;
+   --  The configured native arithmetic envelope is checked in the shim;
    --  see docs/orb-contract.md. The image is snapshotted before native
    --  detection: a Region is an isolated logical image, returned coordinates
    --  are local to it, and a noncontiguous Region gives the same result as
@@ -139,6 +167,7 @@ private
    type Detector is new Ada.Finalization.Limited_Controlled with record
       Handle : aliased System.Address := System.Null_Address;
       Config : Configuration := (others => <>);
+      Pyramid : Pyramid_Configuration := (others => <>);
    end record;
 
    --  Finalization closes the detector exactly as Close does.

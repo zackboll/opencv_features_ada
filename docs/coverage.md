@@ -1,5 +1,21 @@
 # Features binding coverage
 
+## FEATURES-API-020 (current development)
+
+**75 AUnit registrations**, eight new configured-pyramid cases: legacy/default
+equivalence and aggregate compatibility; levels 2/4/8/12/16 and multiple scales;
+round trips/octaves/descriptor pairing; WTA 2/3/4 with matching/correspondences;
+masks/blank/zero-mask/ROI; result lifetime; invalid parameters; closed access;
+invalid upper-level dimensions. **18 native operations**: one additive factory,
+all previous signatures preserved. Compiler-backed helpers cover target/layout
+frontiers, float distribution, nonfinite scales, int32 extrema and rounding ties.
+Real Core-backed native drivers exercise both factories, configured extraction
+against a same-build native oracle, outputs and fault cleanup under ASan/UBSan.
+Helpers alone are not native qualification. Successful GNATdoc generation counts
+**41 declarations, 137/137 documented elements, zero warnings**; all prior anchors
+are preserved. See [actual qualification](task-020-validation.md) for version gaps.
+The sections below retain historical inventories, not current totals.
+
 FEATURES-CI-019 adds eight environment regressions: **137 configuration tests**
 with the real-Alire opt-in enabled (**136 pass / one skip** without it).
 The 50 Windows harness/policy fixtures now include inherited prefixes without

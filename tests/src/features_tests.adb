@@ -1587,6 +1587,229 @@ package body Features_Tests is
    end Correspondence_Region;
 
    package Caller is new AUnit.Test_Caller (Fixture);
+   procedure Pyramid_Default (T : in out Fixture) is
+      pragma Unreferenced (T);
+      use type ORB.Configuration;
+      use type ORB.Pyramid_Configuration;
+      --  Positional four-field aggregate remains legal and unchanged.
+      Config : constant ORB.Configuration := (500, ORB.Two_Samples, ORB.Harris_Score, 20);
+      Legacy : constant ORB.Detector := ORB.Create (Config);
+      Explicit_Default : constant ORB.Detector := ORB.Create (Config, (others => <>));
+      Source : constant OpenCV.Core.Mat := Image;
+      A : constant Feature_Set := Legacy.Detect_And_Compute (Source);
+      B : constant Feature_Set := Explicit_Default.Detect_And_Compute (Source);
+   begin
+      Assert (Legacy.Parameters = Explicit_Default.Parameters, "legacy configuration changed");
+      Assert (Legacy.Pyramid_Parameters = Explicit_Default.Pyramid_Parameters,
+              "legacy pyramid defaults changed");
+      Assert (Keypoints (A) = Keypoints (B), "explicit defaults differ from legacy");
+      Assert_Same (Descriptor_Copy (A), Descriptor_Copy (B));
+   end Pyramid_Default;
+
+   procedure Pyramid_Levels (T : in out Fixture) is
+      pragma Unreferenced (T);
+      use type ORB.Pyramid_Configuration;
+      type Level_List is array (Positive range <>) of Positive;
+      type Scale_List is array (Positive range <>) of OpenCV.Float32_Value;
+      Scales : constant Scale_List := [1.1, 1.2];
+      Source : constant OpenCV.Core.Mat := Image (512, 512);
+      Before : constant OpenCV.Core.Mat := Source.Clone;
+   begin
+      for L of Level_List'(2, 4, 8, 12, 16) loop
+         for S of Scales loop
+            declare
+               Pyramid : constant ORB.Pyramid_Configuration := (S, L);
+               Detector : constant ORB.Detector := ORB.Create ((others => <>), Pyramid);
+               Result : constant Feature_Set := Detector.Detect_And_Compute (Source);
+               Descriptors : constant OpenCV.Core.Mat := Descriptor_Copy (Result);
+               Higher : Boolean := False;
+            begin
+               Assert (Detector.Pyramid_Parameters = Pyramid, "pyramid round trip");
+               Assert (Count (Result) > 0 and then Descriptors.Rows = Count (Result)
+                       and then Descriptors.Columns = 32, "configured descriptor pairing");
+               for P of Keypoints (Result) loop
+                  Assert (P.Octave >= 0 and then P.Octave < Interfaces.Integer_32 (L),
+                          "configured octave bound");
+                  Higher := Higher or else P.Octave > 0;
+               end loop;
+               Assert (Higher, "textured image has no upper-level points");
+            end;
+         end loop;
+      end loop;
+      declare
+         Two : constant ORB.Detector := ORB.Create ((others => <>), (1.1, 2));
+         Many : constant ORB.Detector := ORB.Create ((others => <>), (1.1, 16));
+         A : constant Feature_Set := Two.Detect_And_Compute (Source);
+         B : constant Feature_Set := Many.Detect_And_Compute (Source);
+         Upper : Natural := 0;
+      begin
+         for P of Keypoints (A) loop
+            Assert (P.Octave < 2, "two-level distribution");
+         end loop;
+         for P of Keypoints (B) loop
+            if P.Octave >= 2 then
+               Upper := Upper + 1;
+            end if;
+         end loop;
+         Assert (Upper > 0, "configured profiles did not change octave distribution");
+      end;
+      Assert_Same (Source, Before);
+   end Pyramid_Levels;
+
+   procedure Pyramid_Tuples (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Source : constant OpenCV.Core.Mat := Image;
+   begin
+      for Tuple in ORB.Tuple_Size loop
+         declare
+            Detector : constant ORB.Detector := ORB.Create
+              ((Tuple => Tuple, others => <>), (1.5, 4));
+            Query : constant Feature_Set := Detector.Detect_And_Compute (Source);
+            Train : constant Feature_Set := Detector.Detect_And_Compute (Source);
+            Matches : constant Matching.Descriptor_Match_Array :=
+              Matching.Brute_Force_Match (Query, Train);
+            Points : constant Correspondences.Point_Correspondence_Array :=
+              Correspondences.From_Matches (Query, Train, Matches);
+         begin
+            Assert (Required_Norm (Query) =
+                    (if Tuple = ORB.Two_Samples then Hamming else Hamming_2), "configured norm");
+            Assert (Points'Length = Count (Query) and then Matches'Length > 0,
+                    "configured matching/correspondences");
+            for M of Matches loop
+               Assert (M.Distance = 0, "configured self-match distance");
+            end loop;
+         end;
+      end loop;
+   end Pyramid_Tuples;
+
+   procedure Pyramid_Masks_ROI (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : constant ORB.Detector := ORB.Create ((others => <>), (2.0, 4));
+      Parent : constant OpenCV.Core.Mat := Image (320, 320);
+      Region : constant OpenCV.Core.Mat := Parent.Region ((32, 32, 256, 256));
+      Packed : constant OpenCV.Core.Mat := Region.Clone;
+      Mask_Parent : OpenCV.Core.Mat := Image (320, 320, False);
+      Blank : constant OpenCV.Core.Mat := Image (Textured => False);
+   begin
+      Mask_Parent.Set_To (OpenCV.Make_Scalar (255.0));
+      declare
+         Mask : constant OpenCV.Core.Mat := Mask_Parent.Region ((32, 32, 256, 256));
+         A : constant Feature_Set := Detector.Detect_And_Compute (Region, Mask);
+         B : constant Feature_Set := Detector.Detect_And_Compute (Packed, Mask.Clone);
+         Unmasked : constant Feature_Set := Detector.Detect_And_Compute (Region);
+         Zero : constant Feature_Set := Detector.Detect_And_Compute (Region, Blank);
+         Empty : constant Feature_Set := Detector.Detect_And_Compute (Blank);
+      begin
+         Assert (Keypoints (A) = Keypoints (B) and then Keypoints (A) = Keypoints (Unmasked),
+                 "configured independent ROI snapshots/full mask");
+         Assert_Same (Descriptor_Copy (A), Descriptor_Copy (B));
+         Assert_Same (Region, Packed);
+         Assert (Is_Empty (Zero) and then Is_Empty (Empty), "configured empty results");
+      end;
+   end Pyramid_Masks_ROI;
+
+   procedure Pyramid_Lifetime (T : in out Fixture) is
+      pragma Unreferenced (T);
+      function Extract return Feature_Set is
+         Detector : ORB.Detector := ORB.Create ((others => <>), (1.1, 12));
+         Source : constant OpenCV.Core.Mat := Image;
+      begin
+         return Result : Feature_Set := Detector.Detect_And_Compute (Source) do
+            Detector.Close;
+         end return;
+      end Extract;
+      Result : constant Feature_Set := Extract;
+      Descriptors : constant OpenCV.Core.Mat := Descriptor_Copy (Result);
+   begin
+      Assert (Count (Result) > 0 and then Descriptors.Rows = Count (Result),
+              "configured result lost after finalization");
+   end Pyramid_Lifetime;
+
+   procedure Pyramid_Invalid (T : in out Fixture) is
+      pragma Unreferenced (T);
+      procedure Reject (P : ORB.Pyramid_Configuration; N : Positive := 500) is
+      begin
+         declare
+            Detector : constant ORB.Detector := ORB.Create
+              ((Maximum_Features => N, others => <>), P);
+            pragma Unreferenced (Detector);
+         begin
+            Assert (False, "invalid pyramid accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end Reject;
+   begin
+      Reject ((0.0, 8));
+      Reject ((-1.0, 8));
+      Reject ((1.0, 8));
+      Reject ((1.09, 8));
+      Reject ((2.01, 8));
+      Reject ((1.2, 1));
+      Reject ((1.2, 17));
+      Reject ((1.2, Positive'Last));
+      Reject ((2.0, 16), 2_147_483_647 / 32 + 1);
+   end Pyramid_Invalid;
+
+   procedure Pyramid_Closed (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : ORB.Detector;
+      procedure Reject is
+      begin
+         declare
+            P : constant ORB.Pyramid_Configuration := Detector.Pyramid_Parameters;
+            pragma Unreferenced (P);
+         begin
+            Assert (False, "unready pyramid access accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end Reject;
+   begin
+      Reject;
+      declare
+         Ready : ORB.Detector := ORB.Create ((others => <>), (1.1, 16));
+      begin
+         Ready.Close;
+         declare
+            P : constant ORB.Pyramid_Configuration := Ready.Pyramid_Parameters;
+            pragma Unreferenced (P);
+         begin
+            Assert (False, "closed pyramid access accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end;
+      declare
+         Ready : ORB.Detector := ORB.Create ((others => <>), (1.1, 16));
+      begin
+         Ready.Close;
+         declare
+            P : constant ORB.Configuration := Ready.Parameters;
+            pragma Unreferenced (P);
+         begin
+            Assert (False, "closed configured parameter access accepted");
+         end;
+      exception
+         when OpenCV.OpenCV_Error => null;
+      end;
+   end Pyramid_Closed;
+
+   procedure Pyramid_Tiny (T : in out Fixture) is
+      pragma Unreferenced (T);
+      Detector : constant ORB.Detector := ORB.Create ((others => <>), (2.0, 16));
+      Source : constant OpenCV.Core.Mat := Image;
+   begin
+      declare
+         Result : constant Feature_Set := Detector.Detect_And_Compute (Source);
+         pragma Unreferenced (Result);
+      begin
+         Assert (False, "zero upper-level dimensions accepted");
+      end;
+   exception
+      when OpenCV.OpenCV_Error => null;
+   end Pyramid_Tiny;
+
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
       Result : constant AUnit.Test_Suites.Access_Test_Suite :=
         new AUnit.Test_Suites.Test_Suite;
@@ -1698,6 +1921,14 @@ package body Features_Tests is
       Result.Add_Test (Caller.Create ("Correspondences preserve input counts keypoints norms and descriptors", Correspondence_Preservation'Access));
       Result.Add_Test (Caller.Create ("Correspondences ignore norm mismatch and preserve full distance metadata", Correspondence_Norms'Access));
       Result.Add_Test (Caller.Create ("Correspondences copy noncontiguous Region-local coordinates unchanged", Correspondence_Region'Access));
+      Result.Add_Test (Caller.Create ("Pyramid legacy default equivalence", Pyramid_Default'Access));
+      Result.Add_Test (Caller.Create ("Pyramid levels 2/4/8/12/16 and scales", Pyramid_Levels'Access));
+      Result.Add_Test (Caller.Create ("Pyramid WTA 2/3/4 matching and correspondences", Pyramid_Tuples'Access));
+      Result.Add_Test (Caller.Create ("Pyramid masks blank and noncontiguous ROI", Pyramid_Masks_ROI'Access));
+      Result.Add_Test (Caller.Create ("Pyramid owned result finalization", Pyramid_Lifetime'Access));
+      Result.Add_Test (Caller.Create ("Pyramid invalid configurations", Pyramid_Invalid'Access));
+      Result.Add_Test (Caller.Create ("Pyramid closed and unready access", Pyramid_Closed'Access));
+      Result.Add_Test (Caller.Create ("Pyramid rejects zero upper-level sizes", Pyramid_Tiny'Access));
       return Result;
    end Suite;
 end Features_Tests;

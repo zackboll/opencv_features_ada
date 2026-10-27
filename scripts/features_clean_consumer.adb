@@ -33,6 +33,14 @@ procedure Features_Clean_Consumer is
      (256, 256, (Depth => OpenCV.Core.UInt8, Channels => 1));
    Detector : constant ORB.Detector := ORB.Create;
 begin
+   --  Exercise the additive API through source, installed and relocated
+   --  public consumers, while retaining the legacy workflow below.
+   declare
+      Configured : constant ORB.Detector := ORB.Create
+        ((others => <>), (Scale_Factor => 1.1, Levels => 12));
+   begin
+      Require (Configured.Pyramid_Parameters.Levels = 12, "installed pyramid API");
+   end;
    Train_Image.Set_To (OpenCV.Make_Scalar (0.0));
    for R in 0 .. 255 loop
       for C in 0 .. 255 loop

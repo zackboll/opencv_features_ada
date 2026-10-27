@@ -11,7 +11,7 @@ detector. It is a limited, controlled type, so it cannot be copied.
 - A default-declared detector is not ready.
   [Is_Ready](api:OpenCV.Features.ORB.Is_Ready) is `False`, and extraction or
   [Parameters](api:OpenCV.Features.ORB.Parameters) raises `OpenCV_Error`.
-- [Create](api:OpenCV.Features.ORB.Create) returns a ready detector.
+- [Create](api:OpenCV.Features.ORB.Create/1) returns a ready detector.
 - [Close](api:OpenCV.Features.ORB.Close) releases the native detector early.
   Closing again, or closing a default-declared detector, has no effect.
   Finalization closes automatically; neither raises an exception.

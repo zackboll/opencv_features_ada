@@ -1,5 +1,6 @@
 with Ada.Containers;
 with Interfaces;
+with Interfaces.C;
 with OpenCV.Core.Module_Interop;
 with OpenCV.Features.Internal.C_API;
 
@@ -49,6 +50,36 @@ package body OpenCV.Features.ORB is
       end return;
    end Create;
 
+   function Create
+     (Parameters : Configuration; Pyramid : Pyramid_Configuration)
+      return Detector
+   is
+      use type OpenCV.Float32_Value;
+   begin
+      --  Ordered comparisons reject NaN as well as infinities. Check before
+      --  narrowing Ada integers; native preflight applies the profile target cap.
+      if not (Pyramid.Scale_Factor >= 1.1 and then Pyramid.Scale_Factor <= 2.0)
+        or else Pyramid.Levels not in 2 .. 16
+        or else Parameters.Maximum_Features > 2_147_483_647 / 2
+        or else Parameters.FAST_Threshold > 255
+      then
+         raise OpenCV.OpenCV_Error with "ORB configuration is outside the supported profile";
+      end if;
+      return Result : Detector do
+         C.Check
+           (C.ORB_Create_Profiled
+              (Interfaces.Integer_32 (Parameters.Maximum_Features),
+               Tuple_Value (Parameters.Tuple),
+               Interfaces.Integer_32 (Score_Kind'Pos (Parameters.Score)),
+               Interfaces.Integer_32 (Parameters.FAST_Threshold),
+               Interfaces.C.C_float (Pyramid.Scale_Factor),
+               Interfaces.Integer_32 (Pyramid.Levels), Result.Handle'Access),
+            "ORB.Create");
+         Result.Config := Parameters;
+         Result.Pyramid := Pyramid;
+      end return;
+   end Create;
+
    procedure Close (Self : in out Detector) is
    begin
       C.ORB_Destroy (Self.Handle);
@@ -70,6 +101,14 @@ package body OpenCV.Features.ORB is
       end if;
       return Self.Config;
    end Parameters;
+
+   function Pyramid_Parameters (Self : Detector) return Pyramid_Configuration is
+   begin
+      if not Is_Ready (Self) then
+         raise OpenCV.OpenCV_Error with "ORB detector is not ready";
+      end if;
+      return Self.Pyramid;
+   end Pyramid_Parameters;
 
    procedure Validate_Image (Image : OpenCV.Core.Mat) is
       use type OpenCV.Core.Depth_Type;

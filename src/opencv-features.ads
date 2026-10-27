@@ -30,7 +30,7 @@ package OpenCV.Features is
    --  configured Harris or FAST score). It is preserved unchanged and is not
    --  a probability or match confidence.
    --  @field Octave Zero-based pyramid level that produced the keypoint; for
-   --  the fixed ORB profile it is in 0 .. 7.
+   --  ORB it is in 0 .. Pyramid_Parameters.Levels - 1 (default 0 .. 7).
    --  @field Class_Id Native class identifier, preserved unchanged. The
    --  Features operations neither assign nor interpret it.
    type Keypoint is record

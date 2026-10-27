@@ -104,6 +104,17 @@ rectification, intrinsics, 3-D points, coordinate/pixel normalization, geospatia
 or navigation policy is added. Broader detectors, match masks, arbitrary K,
 persistent/FLANN matchers, GPU and optical flow remain deferred.
 
+## 020 — configurable ORB scale-space (post-approved-0.1.0 development)
+
+Additive `Pyramid_Configuration`, two-argument `Create`, and `Pyramid_Parameters`;
+original configuration/defaults unchanged. Finite scale 1.1..2.0, levels 2..16,
+conservative profile-specific target/image bounds; no setters. One additive
+native factory: 18 ABI operations. Eight new AUnit registrations: 75 total.
+Manual matrix: 4.1.0, 4.4.0, 4.6.0, 4.8.0, 4.10.0, 5.0.0, not every minor.
+See [Task 020 qualification](task-020-validation.md) for executed evidence and
+outstanding gates. Earlier release sections are historical; this does not
+change or publish the approved immutable release source.
+
 ## Later — expand only after evidence
 
 Measure whether broader ORB pyramid tuning, bulk keypoint transfer, alternative

@@ -116,6 +116,10 @@
       "anchor": "f62e99d5b086dd32101acce55b148aa8af610cfa4770b76dec943ebaa97bfa2f",
       "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
     },
+    "OpenCV.Features.ORB.Create|function|function Create (Parameters : Configuration; Pyramid : Pyramid_Configuration) return Detector": {
+      "anchor": "992d237f2c0bd277716e0f44db1552e2e850dcf83d2b3b38416092fd02ebfe0d",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
     "OpenCV.Features.ORB.Detect_And_Compute|function|function Detect_And_Compute (Self : Detector; Image : OpenCV.Core.Mat) return Feature_Set": {
       "anchor": "22f828a1a3f4d9ecc057ea73e2b4e84f87c4ebf78c8c5493f586c59450da342d",
       "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
@@ -134,6 +138,14 @@
     },
     "OpenCV.Features.ORB.Parameters|function|function Parameters (Self : Detector) return Configuration": {
       "anchor": "213f1936fac8b97692614d3ed13f14d06a2d2739527eb404ac5e8b84f1fe5497",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Pyramid_Configuration|type|type Pyramid_Configuration is record Scale_Factor : OpenCV.Float32_Value := 1.2; Levels : Positive := 8; end record": {
+      "anchor": "88b51821d70cccfa3240f8fd849d7898937868bcf2df07d3ea7f184deaf83909",
+      "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
+    },
+    "OpenCV.Features.ORB.Pyramid_Parameters|function|function Pyramid_Parameters (Self : Detector) return Pyramid_Configuration": {
+      "anchor": "ca798d2acb56ef1de451b063789da48c9fd7ad0a56cbd989ff83788d9962682f",
       "page": "71007168ac326a7bdd4e866a08abe473df533f97af629fa8d55c6ab3677485c7.html"
     },
     "OpenCV.Features.ORB.Score_Kind|type|type Score_Kind is (Harris_Score, FAST_Score)": {

@@ -10,16 +10,44 @@ Alire crate: `opencv_features`; public packages: `OpenCV.Features` and
 release. Preparation, merge to `main`, a tagged GitHub release, and acceptance
 into the Alire community index are separate milestones. This candidate has not
 completed the latter three. See [current qualification](docs/release-0.1.0-qualification.md).
-ORB uses a fixed eight-level profile. Binary BF one-best, KNN2 and radius
+Development after the approved immutable 0.1.0 source adds configurable ORB
+scale-space (finite scale 1.1..2.0, 2..16 levels); defaults remain 1.2/eight.
+This task does not change or publish the approved release source.
+Binary BF one-best, KNN2 and radius
 matching, pure-Ada ratio filtering, and owned 2-D correspondence conversion
-are included. Configurable ORB pyramid levels, RANSAC, homography, PnP and
-navigation estimation are not implemented. The native AUnit inventory is 67
+are included. RANSAC, homography, PnP and
+navigation estimation are not implemented. The native AUnit inventory is 75
 cases. Local Linux qualification against indexed OpenCV Core 0.5.0 and native
 OpenCV 4.10.0 is recorded in
 [the validation record](docs/bootstrap-validation.md). That record is not a
 completed cross-platform release claim. No CI badges imply success.
 
 ## Start here
+
+### Configured ORB scale-space
+
+```ada
+Default : constant ORB.Detector := ORB.Create;
+Tuned : constant ORB.Detector := ORB.Create
+  ((others => <>), (Scale_Factor => 1.1, Levels => 12));
+```
+
+`Configuration` retains its four fields. The separate `Pyramid_Configuration`,
+two-argument `Create` and `Pyramid_Parameters` are additive; both parameter
+accessors reject unready/closed detectors. Nondefault profiles have a conservative
+target cap INT32_MAX/(2*Levels), and images must have positive upper-level sizes.
+See [the contract](docs/orb-contract.md) and [Task 020 evidence](docs/task-020-validation.md).
+The complete synthetic `orb_pyramid_synthetic` example compares default and
+configured extraction, descriptor matching and public correspondence conversion:
+
+```sh
+alr -n -C examples build
+alr -n -C examples exec -- sh ../scripts/run_native.sh bin/orb_pyramid_synthetic
+```
+
+Current native ABI: **18** operations; the original 17 signatures are unchanged,
+with only `opencv_features_orb_create_profiled` added. The isolated manual matrix
+pins 4.1.0, 4.4.0, 4.6.0, 4.8.0, 4.10.0 and 5.0.0, not every intervening minor.
 
 With Alire, an Ada 2022 toolchain, a C++17 compiler, pkg-config, and native
 OpenCV development packages available:
@@ -96,10 +124,10 @@ It uses only Core and Features: no image files, GUI, camera, or Imgproc
 binding is needed to exercise extraction.
 
 The detector supports a requested feature target, HARRIS/FAST scoring, WTA_K
-2/3/4, and a FAST threshold. Its structural profile is fixed at scale factor
-1.2, **eight pyramid levels**, edge threshold 31, first level 0, and patch
-size 31. Pyramid level count is not configurable in 0.1.0. These settings are
-deliberately not exposed as unchecked tuning knobs. See
+2/3/4, and a FAST threshold. Its default structural profile is scale factor
+1.2, **eight pyramid levels**, edge threshold 31, first level 0 and patch
+size 31. The development API adds separately validated scale/level settings;
+the approved 0.1.0 source remains fixed-profile. See
 [the ORB contract](docs/orb-contract.md).
 
 A `Feature_Set` is limited and private. Keypoints are owned Ada values in a
@@ -293,7 +321,8 @@ accepted `Matching.Descriptor_Match_Array` values into ordinary Ada-owned
 `Point_Correspondence_Array` values. Each record contains `Query_Index`,
 `Train_Index`, `Query_Point`, `Train_Point`, and the original binary descriptor
 `Distance`. It uses only public `Count`/`Point` accessors, with **no native call
-or new C/C++ ABI**; the native inventory remains **17 declarations/imports**.
+or new C/C++ ABI**; the current 18-operation inventory includes the later
+additive configured-ORB factory, not a correspondence operation.
 
 - Every query/train index is one-based and explicitly validated against its
   respective feature count. All indices are checked before result construction;
@@ -351,7 +380,7 @@ sh scripts/run_profile_tests.sh
 ```
 
 These checks do not prove native ORB correctness. The configured AUnit suite
-contains 67 cases covering extraction, masks, descriptors, ownership, matching, ratio, radius, correspondences,
+contains 75 cases covering extraction, masks, descriptors, ownership, matching, ratio, radius, correspondences,
 noncontiguous Regions, configuration, and invalid inputs. Use `alr test`
 for the native suite; the script propagates failures. Linux also runs the
 real-Core-handle raw-boundary driver. `alr -n exec -- sh scripts/run_sanitizers.sh`
@@ -360,7 +389,7 @@ See `docs/orb-source-review.md` for pinned upstream source-derived bounds.
 
 Cross-platform CI runs Linux and macOS on pull requests and on main.
 Windows/MSYS2 runs only on pushes to main, never on pull requests or manual
-dispatch. A separate manual workflow builds native OpenCV 4.1.0, 4.10.0, and
+dispatch. A separate manual workflow builds native OpenCV 4.1.0, 4.4.0, 4.6.0, 4.8.0, 4.10.0, and
 5.0.0. Those jobs are qualification targets; a green badge is not claimed
 until that workflow has completed against this candidate. Historical Windows post-merge run
 [39006138286](https://github.com/zackboll/opencv_features_ada/actions/runs/39006138286)

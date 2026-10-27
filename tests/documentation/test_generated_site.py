@@ -52,7 +52,7 @@ class GeneratedSiteTests(unittest.TestCase):
                                     capture=False, strict=strict, report=None)
 
     def test_unmodified_site_passes_every_check(self):
-        self.assertEqual(self.site()["sections"], 38)
+        self.assertEqual(self.site()["sections"], 41)
         self.coverage()
         check.check_warnings(ROOT, self.log, ROOT / check.WARNINGS, capture=False,
                              strict=False, report=None)
