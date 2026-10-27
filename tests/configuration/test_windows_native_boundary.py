@@ -6,6 +6,7 @@ import io
 import json
 import os
 import shutil
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 import windows_native_boundary as boundary
 import resolve_core_provenance as provenance
+import prepare_windows_boundary as preparation
 from check_windows_boundary import check_windows_boundary
 
 
@@ -29,7 +31,15 @@ class BoundaryFixtures(unittest.TestCase):
         self.cache = self.root / "alire/cache"
         self.deployment = "opencv_core_0.5.0_f8aef00c"
         # Actual Alire 2.1.1 hash algorithm: sorted inputs, each NUL-terminated.
-        inputs = 'profile:opencv_core=RELEASE\nversion:gnat_native=16.1.0\n'
+        # Reduced real Windows inputs: PATH is manifest-modified on MSYS2.
+        inputs = ('environment:PATH=gnat_native_16.1.0_9f74f58a/bin;'
+                  'opencv_features_0.1.0_filesystem/lib;opencv_core_0.5.0_f8aef00c/lib;'
+                  'C:\\alire\\cache\\msys64\\usr\\bin;C:\\Windows\\System32\n'
+                  'external:LIBRARY_TYPE=default\n'
+                  'external:OPENCV_CORE_LIBRARY_TYPE=default\n'
+                  'profile:opencv_core=RELEASE\n'
+                  'switches:opencv_core=-O3,-fdata-sections,-ffunction-sections,-gnatW8,-gnatn\n'
+                  'version:gnat_native=16.1.0\n')
         digest = hashlib.sha256(b''.join(s.encode() + b'\0'
                                        for s in inputs.splitlines())).hexdigest()
         self.core = self.cache / "builds" / self.deployment / digest
@@ -71,8 +81,8 @@ versions = "~0.5.0"
             'alr version': '2.1.1', 'root status': 'VALID',
             'root folder': str(self.source), 'build folder': str(self.cache / 'builds'),
             'vault folder': str(self.cache / 'releases')}.items()]
-        self.fresh = {'OPENCV_CORE_ALIRE_PREFIX': str(self.core),
-                      'OPENCV_FEATURES_ALIRE_PREFIX': str(self.source)}
+        self.inherited = {'OPENCV_CORE_ALIRE_PREFIX': str(self.core),
+                          'OPENCV_FEATURES_ALIRE_PREFIX': str(self.source)}
         self.metadata = patch.object(provenance, 'alire_json', side_effect=self.alire_json)
         self.metadata.start()
         self.addCleanup(self.metadata.stop)
@@ -133,7 +143,7 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
         self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
                  "commit", "-qm", "Fixture, not release evidence")
         self.identity = boundary.source_identity(self.source)
-        self.environment = patch.dict(os.environ, **self.fresh)
+        self.environment = patch.dict(os.environ, **self.inherited)
         self.environment.start()
         self.addCleanup(self.environment.stop)
 
@@ -146,8 +156,6 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
             return self.indexed
         if args == ('--format=JSON', 'version'):
             return self.info
-        if args[:2] == ('exec', '--') and args[-1] == '--environment':
-            return self.fresh
         self.fail(f'unexpected Alire query: {args}')
 
     def qualify(self):
@@ -189,6 +197,47 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
         self.assertEqual(result['source_prefix'], str(self.checkout))
         self.assertEqual(result['build_prefix'], str(self.core))
 
+    def test_existing_environment_verified_without_nested_exec(self):
+        queries = []
+        def metadata(source, *args):
+            queries.append(args)
+            if 'exec' in args:
+                raise ValueError('Trying to set an already defined environment variable: '
+                                 'OPENCV_CORE_ALIRE_PREFIX')
+            return self.alire_json(source, *args)
+        with patch.object(provenance, 'alire_json', side_effect=metadata):
+            result = provenance.resolve_core_provenance(self.source, self.core)
+        self.assertEqual(result['build_hash'], self.core.name)
+        self.assertEqual(queries, [('--format=JSON', 'show', 'opencv_core=0.5.0'),
+                                   ('--format=JSON', 'version')])
+
+    def test_different_inherited_and_selected_build_hash_rejected(self):
+        other = self.core.parent / ('a' * 64)
+        shutil.copytree(self.core, other)
+        with patch.dict(os.environ, OPENCV_CORE_ALIRE_PREFIX=str(other)):
+            with self.assertRaisesRegex(ValueError, 'hash is unrelated'):
+                provenance.resolve_core_provenance(self.source, other)
+            with self.assertRaisesRegex(ValueError, 'environment is unrelated'):
+                provenance.resolve_core_provenance(self.source, self.core)
+
+    def test_link_configuration_cannot_substitute_another_core_build(self):
+        other = self.core.parent / ('a' * 64)
+        shutil.copytree(self.core, other)
+        original = self.config.read_text()
+        for old, new in ((f'-I{self.core}/cpp', f'-I{other}/cpp'),
+                         (f'{self.core}/lib/libopencv_core_shim.dll.a',
+                          f'{other}/lib/libopencv_core_shim.dll.a')):
+            self.config.write_text(original.replace(old, new))
+            with self.subTest(new=new), self.assertRaises(ValueError):
+                self.qualify()
+
+    def test_missing_or_relative_inherited_prefixes_rejected(self):
+        for key in self.inherited:
+            for value in ('', '.', 'unrelated'):
+                with self.subTest(key=key, value=value), patch.dict(os.environ, {key: value}):
+                    with self.assertRaisesRegex(ValueError, 'environment is unrelated'):
+                        provenance.resolve_core_provenance(self.source, self.core)
+
     def test_stable_patch_release_is_not_hardcoded_to_050(self):
         # Alire deployment strips SemVer build metadata, but the lock retains it.
         version = '0.5.12+build.1'
@@ -204,8 +253,8 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
             path.write_text(path.read_text().replace('0.5.0', version).replace(
                 'versions = "~' + version + '"', 'versions = "~0.5.0"'))
         self.indexed['version'] = version
-        self.fresh['OPENCV_CORE_ALIRE_PREFIX'] = str(self.core)
-        result = provenance.resolve_core_provenance(self.source, self.core)
+        with patch.dict(os.environ, OPENCV_CORE_ALIRE_PREFIX=str(self.core)):
+            result = provenance.resolve_core_provenance(self.source, self.core)
         self.assertEqual(result['version'], version)
 
     def test_incompatible_versions_rejected_before_index_query(self):
@@ -255,12 +304,10 @@ print('000 T opencv_features_test_fail' if hooks else '000 T opencv_features_orb
                 self.qualify()
 
     def test_unrelated_environment_build_and_source_rejected(self):
-        for key in self.fresh:
-            original = self.fresh[key]
-            self.fresh[key] = str(self.root / 'unrelated')
-            with self.subTest(key=key), self.assertRaisesRegex(ValueError, 'unrelated'):
-                self.qualify()
-            self.fresh[key] = original
+        for key in self.inherited:
+            with self.subTest(key=key), patch.dict(os.environ, {key: str(self.root / 'unrelated')}):
+                with self.assertRaises((ValueError, OSError)):
+                    self.qualify()
         for key in ('root folder', 'build folder', 'vault folder'):
             row = next(r for r in self.info if r['key'] == key)
             original = row['value']
@@ -486,11 +533,17 @@ case "$*" in
     *) exit 1 ;;
 esac
 ''',
+            'python': '#!/bin/sh\nexec ' + shlex.quote(sys.executable) + ' -c ' + shlex.quote(
+                'import sys; from pathlib import Path; sys.path.insert(0, ' +
+                repr(str(ROOT / 'scripts')) + '); import prepare_windows_boundary as p; '
+                'p.prepare(Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4:])') + ' "$@"\n',
         }
         for name, text in scripts.items():
             path = tools / name; path.write_text(text); path.chmod(0o755)
         env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ['PATH'],
                    TRACE=str(trace), RUNNER_TEMP=str(self.root))
+        for key in self.inherited:
+            env.pop(key, None)
         for change in ({'FIXTURE_TREE': 'wrong'}, {'FIXTURE_STAGE': 'build'},
                        {'FIXTURE_STAGE': 'boundary'}):
             with self.subTest(change=change):
@@ -506,7 +559,10 @@ esac
                 if 'FIXTURE_TREE' in change:
                     self.assertNotIn('alr ', trace.read_text())
                 if change.get('FIXTURE_STAGE') == 'build':
+                    self.assertIn('alr -n build', trace.read_text())
                     self.assertNotIn('alr -n exec', trace.read_text())
+                if change.get('FIXTURE_STAGE') == 'boundary':
+                    self.assertIn('alr -n exec --', trace.read_text())
 
     def test_shell_rejects_missing_completion_markers_and_python_failure(self):
         tools = self.root / 'tools'
@@ -532,6 +588,65 @@ exit "${FIXTURE_EXIT:-0}"
                                         env={**env, **change}, capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, not change, result.stdout + result.stderr)
                 self.assertFalse((self.output / 'qualification.json').exists())
+
+
+class PreparationTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='preparation fixture ')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.source = self.root / 'independent source'
+        self.source.mkdir()
+        self.output = self.root / 'output'
+
+    def test_sibling_build_and_direct_exec_share_native_parent(self):
+        calls = []
+        before = dict(os.environ)
+        def command(args, **kwargs):
+            calls.append((args, kwargs['cwd'], dict(os.environ)))
+            self.assertNotIn('env', kwargs)
+            kwargs['stdout'].write('fixture diagnostic\n')
+            return subprocess.CompletedProcess(args, 0)
+        expected = ['e6d977f0bba02c526920834ef6e88905366ed1b9',
+                    '0265f6e39de174722cfe8ff59d7663dddbcf8cbd']
+        with patch.object(preparation.subprocess, 'run', side_effect=command):
+            preparation.prepare(self.source, self.output, expected)
+        self.assertEqual(calls[0][0], ['alr', '-n', 'build'])
+        self.assertEqual(calls[1][0][:5], ['alr', '-n', 'exec', '--', sys.executable])
+        self.assertTrue(calls[1][0][5].endswith('windows_native_boundary.py'))
+        self.assertEqual(calls[1][0][6:], [str(self.source), str(self.output), *expected])
+        for _, cwd, environment in calls:
+            self.assertEqual(cwd, self.source)
+            self.assertEqual(environment, before)
+
+    def test_prepare_failures_clear_stale_success_and_stop(self):
+        for failed in (0, 1):
+            self.output.mkdir(exist_ok=True)
+            (self.output / 'qualification.json').write_text('stale success')
+            for variant in boundary.VARIANTS:
+                directory = self.output / variant
+                directory.mkdir(exist_ok=True)
+                (directory / 'execution.log').write_text(boundary.MARKERS[variant])
+            results = [subprocess.CompletedProcess([], 0) for _ in range(failed)]
+            results.append(subprocess.CompletedProcess([], 23))
+            captured = io.StringIO()
+            with patch.object(preparation.subprocess, 'run', side_effect=results) as command, \
+                    redirect_stdout(captured), self.assertRaisesRegex(ValueError, 'failed.*23'):
+                preparation.prepare(self.source, self.output)
+            self.assertEqual(command.call_count, failed + 1)
+            self.assertFalse((self.output / 'qualification.json').exists())
+            for variant, marker in boundary.MARKERS.items():
+                self.assertFalse((self.output / variant / 'execution.log').exists())
+                self.assertNotIn(marker, captured.getvalue())
+
+    def test_preparation_rejects_nested_environment_without_clearing_it(self):
+        for key in ('OPENCV_CORE_ALIRE_PREFIX', 'OPENCV_FEATURES_ALIRE_PREFIX'):
+            with patch.dict(os.environ, {key: 'inherited'}), \
+                    patch.object(preparation.subprocess, 'run') as command:
+                with self.assertRaisesRegex(ValueError, 'not nested'):
+                    preparation.prepare(self.source, self.output)
+                command.assert_not_called()
+                self.assertEqual(os.environ[key], 'inherited')
 
 
 class CleanlinessTests(unittest.TestCase):
@@ -721,11 +836,10 @@ class BoundaryPolicyTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     provenance.alire_json(ROOT, 'exec')
 
-    def test_environment_probe_is_json_and_does_not_dump_other_variables(self):
-        result = subprocess.run([sys.executable, str(ROOT / 'scripts/resolve_core_provenance.py'),
-                                 '--environment'], capture_output=True, text=True, check=True)
-        self.assertEqual(set(json.loads(result.stdout)),
-                         {'OPENCV_CORE_ALIRE_PREFIX', 'OPENCV_FEATURES_ALIRE_PREFIX'})
+    def test_resolver_has_no_environment_export_subprocess(self):
+        text = (ROOT / 'scripts/resolve_core_provenance.py').read_text()
+        self.assertNotIn('"exec"', text)
+        self.assertNotIn('printenv', text)
 
     def test_unconditional_steps_and_history_required(self):
         text = (ROOT / '.github/workflows/windows-post-merge.yml').read_text()
@@ -738,8 +852,8 @@ class BoundaryPolicyTests(unittest.TestCase):
                        '        shell: echo\n'):
             with self.subTest(bypass=bypass), self.assertRaises(ValueError):
                 check_windows_boundary(text.replace(
-                    '        run: alr -n exec -- sh scripts/run_windows_native_boundary.sh',
-                    bypass + '        run: alr -n exec -- sh scripts/run_windows_native_boundary.sh'))
+                    '        run: sh scripts/run_windows_native_boundary.sh',
+                    bypass + '        run: sh scripts/run_windows_native_boundary.sh'))
         for bypass in (' || true', ' # disabled', ' && echo ignored'):
             with self.assertRaises(ValueError):
                 check_windows_boundary(text.replace('obj/windows-native-boundary\n',
@@ -754,9 +868,10 @@ class BoundaryPolicyTests(unittest.TestCase):
                       'commit=e6d977f0bba02c526920834ef6e88905366ed1b9',
                       'tree=0265f6e39de174722cfe8ff59d7663dddbcf8cbd',
                       'rev-parse HEAD', "rev-parse 'HEAD^{tree}'", 'git diff --exit-code HEAD --',
-                      'alr -n build', '$harness/scripts/run_windows_native_boundary.sh'):
+                      '$harness/scripts/run_windows_native_boundary.sh'):
             self.assertIn(token, script)
-        self.assertLess(script.index("rev-parse 'HEAD^{tree}'"), script.index('alr -n build'))
+        self.assertLess(script.index("rev-parse 'HEAD^{tree}'"),
+                        script.index('sh "$(cygpath -m "$harness/scripts/run_windows_native_boundary.sh")"'))
         self.assertNotIn('cp ', script)
 
     def test_linux_campaign_bytes_remain_approved(self):

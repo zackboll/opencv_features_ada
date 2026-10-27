@@ -1,5 +1,134 @@
 # FEATURES-CI-016 — Windows native-boundary qualification
 
+## FEATURES-CI-019 — one execution environment
+
+### Investigation recorded before implementation
+
+Initial worktree: clean, branch `ci/018-windows-core-provenance`, HEAD
+`8db6b23de18976e89853e23f69e5735388be43de`. Freshly fetched main and the new
+`ci/019-windows-alire-environment` branch start at
+`915ea1229085c7ae1eec5887f430d8eab568e1db` (tree
+`bd7eae9b989b690f47f106a89e328b9a5c30b9e8`). Approved release remains
+`e6d977f0bba02c526920834ef6e88905366ed1b9`, tree
+`0265f6e39de174722cfe8ff59d7663dddbcf8cbd`.
+
+The complete [Windows job 121373932959](https://github.com/zackboll/opencv_features_ada/actions/runs/40261253660/job/121373932959)
+and [artifact 12624238928](https://github.com/zackboll/opencv_features_ada/actions/runs/40261253660/artifacts/12624238928)
+were downloaded and inspected. AUnit completed 67/67; boundary compilation
+never began and immutable release qualification was skipped. The artifact has
+only campaign/failure logs, not hash-input files, DLLs, link configuration or
+qualification JSON. It cannot establish their historical byte identities.
+
+The outer `alr exec` supplied Core build
+`398c0561ce064e26c796348909430c1c8069ef811ca04123885f5316eaa20876`.
+The resolver's nested `alr exec` tried to assign
+`0dce2c62a74a892bcb1251df1da3b1fc6d723e71761b2f4b838398ba0f72e0ee`
+to the already set `OPENCV_CORE_ALIRE_PREFIX`. Both paths select the same
+`opencv_core_0.5.0_f8aef00c` deployment: a build hash is not a source revision.
+The build log also records bridge/configuration build
+`e3ffe32c14157e6d9acc22dc628d869ef54e2551711b7d7f090b372b15d9a53c`.
+Simply removing the nested call must not make that different build acceptable.
+
+Alire 2.1.1 source `fa9a1a9971d159f8cb2b8007dbb73e9e029fc109`
+explains the mechanism. `Builds.Hashes.Compute` loads an environment with
+`For_Hashing => True`: resource paths use relative deployment names, but
+`Environment.Compile` starts with the process's existing environment.
+`Add_Environment` hashes the effective values of manifest-modified variables.
+Indexed Core 0.5.0 (public Git origin, immutable
+`f8aef00c5366b4275ccd3d934f9c73ea5b83cd4f`) and Features both prepend
+`${CRATE_ROOT}/lib` to PATH on MSYS2. The exported outer environment adds
+absolute build/toolchain paths. Hashing again inside that environment therefore
+has additional PATH inputs, producing a different digest without changing the
+selected release. Windows startup also unconditionally prepends MSYS2's usr/bin;
+shell/native transitions can change PATH representation. `Exec.Execute` exports
+again and `Environment.Compile(Check_Conflicts => True)` rejects the different
+resource prefix before starting the Python probe. This is not evidence of an
+inconsistent dependency solution, nor a supported way to query inherited values.
+
+A real Alire 2.1.1 local-index experiment, with both crates declaring precisely
+the PATH prepend above, reproduced this conflict on Linux without mocked
+subprocesses. The outer prefix matched the recorded dependency hash; nested
+exec computed another hash and did not launch its child. Linux's ordinary Core
+metadata omits the MSYS2 PATH action, explaining why CI-018's real Linux probe
+missed the regression. Exact historical digests cannot be recomputed from the
+Windows artifact because it does not retain the historical PATH/hash inputs.
+
+### Correction and acceptance contract
+
+The resolver reads both inherited absolute resource prefixes. Only metadata
+queries (`show` for the exact selected version and `version`, both structured
+JSON) invoke Alire; neither exports an execution environment. All CI-018
+lock/index/origin/immutable commit, stable version, unpinned dependency, workspace,
+cache layout, sorted NUL-terminated Core SHA-256 recomputation, Features dependency
+hash, vault manifest and bridge-header checks remain. Generated configuration
+still must reference this exact Core bridge/import library, with its actual DLL
+present. A different valid-looking cache directory is not an acceptable substitute.
+
+Removing only the nested query is insufficient: the failed build's bridge and
+later outer prefix already differed. The shell launcher now calls
+`prepare_windows_boundary.py` **outside** Alire. That native Python process
+runs build and exec as siblings with an identical unmodified parent environment,
+then exec invokes the native Python harness directly, not through an MSYS shell.
+This avoids extra PATH transformations between selection and verification and
+regenerates configuration for the same selected build. The launcher rejects
+already inherited Core/Features prefixes instead of clearing them. It removes
+old report/variant evidence before preparation; every subprocess failure remains
+fatal. No provenance error is suppressed and no alternate build is selected.
+
+The immutable campaign still clones independently, verifies the exact original
+commit/tree before building, and uses the newer harness externally without any
+overlay or source/manifest edit. Both native variants, symbol checks, report and
+final commit/tree marker remain mandatory. Trigger routing is unchanged:
+Windows remains main-only, not PR CI. A real-tool environment regression is added
+to that same post-merge workflow, explicitly separate from native qualification.
+
+### Local validation
+
+- Repository/profile/layout checks, all shell syntax and whitespace checks: PASS.
+- **137/137 configuration tests**, no skips with `FEATURES_REAL_ALIRE_TEST=1`:
+  50 harness/policy fixtures plus one real-Alire environment regression. This
+  includes all CI-018 negatives, inherited/selected mismatch and link-prefix
+  substitution rejection, preparation failures and stale-report cleanup.
+- Real resolver with actual indexed Core 0.5.0, full origin commit above, actual
+  lock/vault/build/bridge: PASS without nested exec. Local build digest
+  `59c9d1a9a87e5b0e5373d4b44fa3558506b5db4669aa1b218555afed90327689`.
+- Linux native: **67 registered / 67 executed / 67 passed AUnit**, zero failures
+  or errors; ordinary production/fault and both ASan/UBSan variants: PASS.
+- Both examples, six external-shim installation and two installed-link metadata
+  regressions, source/installed/relocated consumers and active path audits: PASS.
+  The existing unused `Common_Cxx_Switches` include remains non-load-bearing;
+  no auditor acceptance rule changed.
+- GNATdoc 26.0.0: **127/127** documented/rendered, zero gaps/warnings, second
+  independent generation/site/log identical. Official Enhancer v0.1.0 verified
+  installation and deterministic/idempotent enhancement: PASS. **104/104**
+  documentation tests, no skips, including real generation/security mutations.
+  Pages: 18 files / 13 pages / 248 references: PASS.
+- Official enhancer compatibility preflight: zero failures.
+- Independent detached checkout of the exact approved release commit/tree:
+  Linux build, both ordinary native variants and both ASan/UBSan variants PASS;
+  strict Git cleanliness unchanged afterward. This supplemental Linux run is
+  not either mandatory Windows campaign and emits no Windows release marker.
+- Chromium 156.0.8078.4 / Playwright 1.64.1: **64/64** root API, **199/199**
+  project-prefix and **64/64** prefix API assertions: PASS. Local Pages archive
+  byte-identical; hosted uploaded-artifact verification remains a CI gate.
+
+Local tools: Alire 2.1.1 (source SHA above), GNAT 16.1.0, GPRbuild crate 26.0.1
+(binary 26.0.0), Alire-environment g++ 16.1.0, host g++ 14.2.0, OpenCV 4.10.0 /
+features2d. GNAT version probing through the existing generation script emits
+Alire's broken-pipe diagnostic after grep exits early; the generation exits zero,
+both sites/logs compare identically and strict checks pass. No tool/script was
+changed to hide that diagnostic.
+
+Final tested/pushed/PR SHA equality and hosted run URLs belong in the PR record
+to avoid self-reference. Exact-final-head repository, Linux, macOS, sanitizer and
+documentation CI must pass before review readiness. No local result here is real
+Windows qualification. Independent review/merge and the **first Windows main
+run** remain outstanding: require actual compile/link/execution/symbol logs,
+qualification JSON and both native markers for corrected main and independently
+for the original immutable release, plus exactly
+`WINDOWS_RELEASE_SOURCE_QUALIFIED e6d977f0bba02c526920834ef6e88905366ed1b9 0265f6e39de174722cfe8ff59d7663dddbcf8cbd`.
+FEATURES-REL-015 remains blocked. No tag, release or Alire index submission.
+
 ## FEATURES-CI-018 — selected Core provenance, separate build and source roots
 
 Starting worktree was clean on `ci/017-windows-cleanliness-correction`, HEAD
@@ -64,10 +193,9 @@ directory name alone is a provenance authority.
    Core. Require identity/version/origin agreement. Extra/unsupported origin
    selectors such as subdirectories fail closed.
 3. Require reviewed Alire 2.1.1 structured location metadata for the selected
-   workspace. Export its environment again using `alr exec` and a file-based
-   Python probe, emitting **only two resource prefixes as JSON**. Compare them
-   with the caller's Core prefix and tested Features checkout. Do not use `-q`
-   here: live probing showed 2.1.1 suppresses child stdout in quiet mode.
+   workspace. **Corrected by CI-019:** validate the two inherited absolute resource
+   prefixes against the selected Core and tested Features checkout without
+   re-exporting an already established environment.
 4. Use the documented/implementation-reviewed shared layout only:
    `builds/<deployment>/<build-hash>` and `releases/<deployment>`. The deployment
    uses selected version (without SemVer build metadata) and commit prefix;
@@ -233,10 +361,11 @@ in that Windows log. Overall workflow success did not close this coverage gap.
 
 ## Compilation and execution contract
 
-After `alr -n build`, from an Alire environment on Windows/MSYS2:
+From an outer Windows/MSYS2 shell (not inside `alr exec`); preparation builds
+and then establishes the single execution environment:
 
 ```sh
-alr -n exec -- sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
+sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
 ```
 
 The shell entry requires Windows/MSYS2 and native Windows Python 3.11+ (the

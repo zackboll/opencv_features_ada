@@ -47,8 +47,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "MSYS2 package dependency consistency check failed: $LASTEXITCODE" }
       - name: Build and run with isolated native runtime
         run: sh scripts/test.sh
+      - name: Regress real Alire environment hashing (not native qualification)
+        env:
+          FEATURES_REAL_ALIRE_TEST: "1"
+        run: alr -n exec -- python -m unittest discover -s tests/configuration -p test_alire_environment_real.py -v
       - name: Qualify Windows production and fault native boundaries
-        run: alr -n exec -- sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
+        run: sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
       - name: Qualify immutable 0.1.0 release native boundaries
         run: sh scripts/qualify_windows_release.sh obj/windows-release-boundary
       - name: Preserve Windows native-boundary diagnostics

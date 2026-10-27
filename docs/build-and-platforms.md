@@ -91,6 +91,13 @@ source/harness/Core/compiler identities separately. See
 [Windows native-boundary qualification](windows-native-boundary-qualification.md)
 for repeatable commands, marker gates, diagnostics and outstanding review gates.
 
+Invoke the boundary shell launcher from outside an Alire execution environment.
+Its native-Python preparation builds and enters Alire as sibling processes using
+the same parent PATH, then invokes the harness directly. Do not wrap this launcher
+in `alr exec`: nested environment export changes MSYS2 PATH build-hash inputs.
+The harness validates inherited resource prefixes independently against lock,
+index, hash records, generated link configuration and vault bridge headers.
+
 ## CI routing
 
 PR CI (`cross-platform.yml`):

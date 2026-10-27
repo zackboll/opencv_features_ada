@@ -20,14 +20,23 @@ may precede final source-integrity verification.
 
 Core resource prefixes are build locations, not source-manifest authorities.
 The Windows qualification harness cross-checks the solved unpinned Alire lock
-against exact-version indexed JSON, then binds the release to the freshly
-exported workspace environment, Alire's shared build/vault locations and the
+against exact-version indexed JSON, then binds the release to the inherited
+workspace execution environment, Alire's shared build/vault locations and the
 recorded dependency/build hashes. Only the exact selected vault deployment is
 consulted for a source manifest; no recursive cache search is permitted. The
 actual bridge headers must agree with that source deployment. Both provenance
 and Features source identity are checked again before publishing success.
 This is qualification-only Alire 2.1.1 support, not a production dependency or
 a cryptographic attestation of arbitrary local cache contents.
+
+Alire environment export is not a metadata query. On MSYS2, manifest PATH
+prepends participate in Alire 2.1.1 build hashing, so a nested `alr exec` can
+compute another resource prefix and collide with the inherited one. The
+qualification launcher builds and enters exec as sibling native subprocesses
+with the same unchanged parent environment, then invokes Python directly.
+No shell is inserted between exec and provenance verification. Inherited
+prefixes must still agree with the generated bridge/link configuration and
+recorded dependency/build hashes; mismatches are fatal, never cache substitutions.
 
 ## Module ownership
 
