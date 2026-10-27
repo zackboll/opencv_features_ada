@@ -129,3 +129,87 @@ or exhaustive failure of every allocation inside OpenCV. Hooks and control symbo
 are absent from the production build. No safe ordinary fixed-profile input was found
 that deterministically causes cv::Exception after preflight; that mapping is tested
 synthetically. Both limits remain explicit.
+
+## Task 020 — configurable scale-space review (2026-10-26)
+
+The preceding fixed-profile review is retained as historical evidence, unchanged.
+This extension independently retrieved the following official tagged sources;
+`git ls-remote https://github.com/opencv/opencv.git refs/tags/<tag> refs/tags/<tag>^{}`
+established each annotated tag's peeled commit. The new
+`orb_scale_space_review_task_020` provenance array records SHA-256 and Git blob
+hashes of **11 files per tag**, including ORB declarations/implementation,
+FAST/score/filter/Feature2D, exact resize, threshold, smoothing, border copy and
+Mat allocation. These are source observations, not six native build results.
+
+| Tag | Peeled commit | Dimension calculation / Harris addressing | Incoming mask |
+| --- | --- | --- | --- |
+| 4.1.0 | `371bba8f54560b374fbcd47e7e02f015ac4969ad` | float division; signed global offset | unchanged |
+| 4.4.0 | `c3bb57afeaf030f10939204d48d7c2a3842f4293` | float division; signed global offset | unchanged |
+| 4.6.0 | `b0dc474160e389b9c9045da5db49d03ae17c6a6b` | float reciprocal multiplication; size_t Harris global offset and explicit local stride check | unchanged |
+| 4.8.0 | `f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef` | reciprocal multiplication; size_t Harris offset/check | unchanged |
+| 4.10.0 | `71d3237a093b60a27601c20e9ee6c3e52154e8b1` | reciprocal multiplication; size_t Harris offset/check | unchanged |
+| 5.0.0 | `40738fb16ceddb5fb3fea747585f7ce6abb0605b` | reciprocal multiplication; size_t Harris offset/check | normalized inside ORB override |
+
+4.x paths use `modules/features2d`; 5.0 uses `modules/features`. All six use
+the same float geometric distribution, target doubling, first-target-times-levels
+reserve, fixed 31-patch descriptor, radius-15 orientation and 32-byte schema.
+All use exact-linear successive image/mask resize and threshold resized masks
+at 254. FAST candidate filtering and retainBest response ties remain relevant:
+requested feature targets do not bound actual output count.
+
+### Acceptance derivation
+
+Let M=INT32_MAX, L=2..16, s=binary32 in [1.1f,2.0f], firstLevel=0.
+`pow(double(s),level)` returned as float is positive and finite in [1,32768].
+Scale is strictly greater than one; no layer enlarges the source. Octave fits
+int32 (0..15), and patch size times scale <=1,015,808 remains finite.
+Checking each level with **both** `float(d)/power > 0.5f` and
+`float(d)*(1.0f/power) > 0.5f` excludes cvRound-to-zero ties before allocation
+or resize, for image and matching mask geometry. Tiny valid positive levels
+can simply produce no features after the fixed edge exclusion.
+
+The configured envelope is W=align_up(columns+64,16), H=L*(rows+64), WH<=M.
+Calculation uses int64 dimensions and division before multiplication; malformed
+int32 extrema cannot overflow. H>=132, W>=80 imply W<16,269,000 and rows<13,421,773,
+both below 2^24. Thus integer-to-float source dimensions remain exact. Each
+rounded layer is no larger than source. Packing cannot exceed vertically stacked
+padded layers; trial horizontal sums <=2W, layer offsets <WH, orientation
+15W+15, descriptor 22W+22, Harris 6W+6, FAST 3*(W+16), resize 2*width and
+2*height and level pixel counts all fit signed int. Border/patch constants are
+unchanged. With UInt8 C1, fixed Harris gradient/moment bounds in the historical
+table still apply. Exact-linear coefficient and Mat allocation byte products
+are size_t; the reachable pixel and signed indexing products are bounded here.
+Smoothing uses the unchanged 7x7 sigma-2 path. This is not exhaustive vendor HAL,
+SIMD, custom allocator, OpenCL, supplied-keypoint or alternate-patch review.
+
+For nonlegacy profiles choose N<=floor(M/(2L)), **not** the legacy cap.
+The geometric first share is q=(1-f)/(1-f^L), f=float(1/double(s)). Here
+f is between 0.5 and approximately 0.909091; the denominator is >= approximately
+0.17355 (L>=2), with no severe cancellation. q<=2/3 (maximum at s=2,L=2);
+later shares shrink. Binary32 arithmetic and at most 15 multiplications have
+errors far below the spare 1/3 share; rounding to nearest adds <=0.5. Every
+rounded share is strictly less than 2N, including N=1. Hence firstShare*L<M
+and summing at most L-1 shares stays below M. More tightly each share<=N for
+N>=2 (and <=1 for N=1), so target doubling fits because 2N<=M/L. The last
+`max(N-sumFeatures,0)` neither underflows nor exceeds N; its doubling fits.
+This deliberately generous margin is a conservative acceptance bound, not a
+native maximum. Compiler-backed tests evaluate the actual float recurrence at
+accepted cap/rejected cap+1 across all levels and representative scales.
+The legacy s=1.2f,L=8 branch retains the historical independent N<=M/2 review.
+
+Actual FAST candidates (including ties) are bounded by sum(layer pixels)
+<=L*rows*columns<WH<=M, protecting native count casts, Harris counters/offset
+accumulation and descriptor rows before publication. Allocation availability
+is not guaranteed: bad_alloc/native failures remain translated. Returned
+keypoints are additionally checked against configured L and the original
+finite/coordinate/schema requirements. Independent ROI snapshots and RAII
+publication remain unchanged. The extreme s=2,L=16 profile may admit no square
+image under this conservative envelope; no universal geometry admission is promised.
+
+### Qualification boundary
+
+See [Task 020 validation](task-020-validation.md) for compiler identities, actual
+AUnit/raw/helper/sanitizer results and six-version outcomes. Same-build native
+reference comparisons cover order, values and descriptors, never cross-version
+count equality. Instrumenting the real Features shim does not instrument the
+entire OpenCV/Core libraries or prove every upstream allocation safe.

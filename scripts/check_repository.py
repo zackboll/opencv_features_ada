@@ -122,7 +122,8 @@ def main() -> None:
     declared = set(re.findall(r"\b(opencv_features_\w+)\s*\(", header))
     imported = set(re.findall(r'External_Name\s*=>\s*"(opencv_features_\w+)"', ada))
     check(declared == imported, f"C/Ada import mismatch: {declared ^ imported}")
-    check(len(declared) == 17, "Task 006 must add no native C/C++ ABI surface")
+    check(len(declared) == 18 and "opencv_features_orb_create_profiled" in declared,
+          "Task 020 adds exactly one profiled ORB factory")
     check(all(re.search(r"\b" + n + r"\s*\(", cpp) for n in declared), "missing C++ export")
     check_bridge_ownership(ROOT)
     check_correspondences(ROOT)
@@ -132,7 +133,7 @@ def main() -> None:
     check(not list((ROOT / "src").rglob("opencv.ads")), "do not redeclare Core's root package")
     tests = (ROOT / "tests/src/features_tests.adb").read_text()
     registrations = re.findall(r"Result\.Add_Test\s*\(Caller\.Create", tests)
-    check(len(registrations) == 67, "update the documented AUnit inventory when changing tests")
+    check(len(registrations) == 75, "update the documented AUnit inventory when changing tests")
     for path in list((ROOT / "src").rglob("*.ads")) + list((ROOT / "src").rglob("*.adb")):
         check("pragma Import" not in path.read_text() or "/internal/" in path.as_posix(),
               f"C import leaked into public Ada: {path}")

@@ -56,6 +56,10 @@ OPENCV_FEATURES_API const char *opencv_features_native_backend(void);
 OPENCV_FEATURES_API opencv_features_status opencv_features_orb_create(
     int32_t maximum_features, int32_t tuple, int32_t score,
     int32_t fast_threshold, opencv_features_orb_handle **out_handle);
+/* Additive factory; edge=31, first=0, patch=31 remain fixed. */
+OPENCV_FEATURES_API opencv_features_status opencv_features_orb_create_profiled(
+    int32_t maximum_features, int32_t tuple, int32_t score, int32_t fast_threshold,
+    float scale_factor, int32_t levels, opencv_features_orb_handle **out_handle);
 OPENCV_FEATURES_API void opencv_features_orb_destroy(opencv_features_orb_handle *handle);
 
 /* Outputs are initialized to null/zero before validation. Inputs are borrowed

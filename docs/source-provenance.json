@@ -526,5 +526,457 @@
         }
       ]
     }
+  ],
+  "orb_scale_space_review_task_020": [
+    {
+      "tag": "4.1.0",
+      "commit": "371bba8f54560b374fbcd47e7e02f015ac4969ad",
+      "module": "features2d",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/core/src/copy.cpp",
+          "sha256": "044f693ae29bb5b7092df6062e6ba92713406e7fe0f6c53b2b74c69f093d7054",
+          "git_blob": "b7faa5c3395c097d41c04551d4d4037b290c2e14"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/core/src/matrix.cpp",
+          "sha256": "ea831063263ab26fe9fcc7a9b76f9e5e34aeae28ffb7b45d67ce80b21ca00352",
+          "git_blob": "6824bb5a413dec7ed344c77900ea06fc4c47c750"
+        },
+        {
+          "path": "modules/features2d/include/opencv2/features2d.hpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/include/opencv2/features2d.hpp",
+          "sha256": "c694cd0c9c15090fa965817900e99a3d9b240d6ec19a0d560a1aea3ce5a6f863",
+          "git_blob": "c995fbf01a871a2a564b5d8150a0c53f59ccad93"
+        },
+        {
+          "path": "modules/features2d/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/fast.cpp",
+          "sha256": "c6a0de3f0f44a409d0ad25ccc255adb2e5146a9ac149b31aaf3d248d8e21dfff",
+          "git_blob": "828a0c5443825ba4f32650c6e200dda112604e5f"
+        },
+        {
+          "path": "modules/features2d/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/fast_score.cpp",
+          "sha256": "a415213cbc7380abdad92f41dfe8f31e12908abe79b590b5611cb58d88aa121f",
+          "git_blob": "9076e0b53a969b9e359037940b899dfc1302c941"
+        },
+        {
+          "path": "modules/features2d/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features2d/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/keypoint.cpp",
+          "sha256": "9620a536527090f5a7b1c61508bca66022103f7c2978a9f57f67f154754e1158",
+          "git_blob": "219634e5b4fc71939055f0857a685655dbcb3600"
+        },
+        {
+          "path": "modules/features2d/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/features2d/src/orb.cpp",
+          "sha256": "dee6e3b4ea60d8176914456722a9a24ae1314113f22f49330ed30f304e1626f6",
+          "git_blob": "a664dcac5de5a8248e106901db53aa7160f874a0"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/imgproc/src/resize.cpp",
+          "sha256": "d39210369fdbfe031eff73a2e85e8b738c84bb66c0c8db8b83c3a94b6c34048b",
+          "git_blob": "2882f26341f434e5a7f5bfcf621169f95673a79a"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "c7f837af282dea9a94c7c2832d83e0dd95d0d7cd34ceb9fe09eb94c93b1d9b0d",
+          "git_blob": "4e514eb8b8934d75bd1ce3e17cfd856816172286"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/371bba8f54560b374fbcd47e7e02f015ac4969ad/modules/imgproc/src/thresh.cpp",
+          "sha256": "69064903314076567119a64e31f5f3db80d3bac4c673dc608b8e0c5511604e64",
+          "git_blob": "157a83b603c92eaa0cec252b1343bcb9f7369566"
+        }
+      ]
+    },
+    {
+      "tag": "4.4.0",
+      "commit": "c3bb57afeaf030f10939204d48d7c2a3842f4293",
+      "module": "features2d",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/core/src/copy.cpp",
+          "sha256": "b4ebfe2169b87cb1779b45154a35424cf3de1a100eb07d4386947561a458ec5e",
+          "git_blob": "48440ef265e08370af09d0b5fdaa9419e5c3609a"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/core/src/matrix.cpp",
+          "sha256": "ea831063263ab26fe9fcc7a9b76f9e5e34aeae28ffb7b45d67ce80b21ca00352",
+          "git_blob": "6824bb5a413dec7ed344c77900ea06fc4c47c750"
+        },
+        {
+          "path": "modules/features2d/include/opencv2/features2d.hpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/include/opencv2/features2d.hpp",
+          "sha256": "bda2a9831f64052a07c6448021e3e7213904d8bdf13f65387fd9fcec2a03e8d2",
+          "git_blob": "08faf42370e6f5a173cfd6c7be2decd53aa4e049"
+        },
+        {
+          "path": "modules/features2d/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/src/fast.cpp",
+          "sha256": "27c6c8e68788cca9360a87242965a43657ff1be62f28a53789720d9f40152b44",
+          "git_blob": "e373926a144ac021eede5908717b01a3f8c957b1"
+        },
+        {
+          "path": "modules/features2d/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/src/fast_score.cpp",
+          "sha256": "bb68ef8493a76022810dadfbb189d570a3dd9f5af1c9f6d52a6881b447423f39",
+          "git_blob": "0bc011af491f4ec545ea1a7cbba21eae408966b9"
+        },
+        {
+          "path": "modules/features2d/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features2d/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/src/keypoint.cpp",
+          "sha256": "9620a536527090f5a7b1c61508bca66022103f7c2978a9f57f67f154754e1158",
+          "git_blob": "219634e5b4fc71939055f0857a685655dbcb3600"
+        },
+        {
+          "path": "modules/features2d/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/features2d/src/orb.cpp",
+          "sha256": "dee6e3b4ea60d8176914456722a9a24ae1314113f22f49330ed30f304e1626f6",
+          "git_blob": "a664dcac5de5a8248e106901db53aa7160f874a0"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/imgproc/src/resize.cpp",
+          "sha256": "53e35c5eb8875949236173b3af779d3083566bad1efb8ceb17a3a8d35c3aac3c",
+          "git_blob": "2f060b6ae0181c194d2bcd0c22c9aab914d6167e"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "b1c20592e5226d3b1d78330459f5d74bfbc53a0ae58c05559cb6c4e5ed1c744a",
+          "git_blob": "65d1fc8ed687545eb9f9ed7f55c293d0fe815acb"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/c3bb57afeaf030f10939204d48d7c2a3842f4293/modules/imgproc/src/thresh.cpp",
+          "sha256": "857af4070228777e5046a009586ffdce7a46cc582021bdd391a9a43e069e0ca7",
+          "git_blob": "7cd8ff0b22b63d3232b5d39a8b076885a82d919b"
+        }
+      ]
+    },
+    {
+      "tag": "4.6.0",
+      "commit": "b0dc474160e389b9c9045da5db49d03ae17c6a6b",
+      "module": "features2d",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/core/src/copy.cpp",
+          "sha256": "4686cd395f8e9454c3d7e3d840933b613dba62516dc37090eb4735f0f412e58f",
+          "git_blob": "89948fb878dc54d96e72f07ed20f1a59751bf6f2"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/core/src/matrix.cpp",
+          "sha256": "971caceef30198fe96b6486885cf9dfec26cbe238be29bd7eb12a5ca8d7074a2",
+          "git_blob": "8111dc223036713364cd6efc46d69f1143dff712"
+        },
+        {
+          "path": "modules/features2d/include/opencv2/features2d.hpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/include/opencv2/features2d.hpp",
+          "sha256": "ecee7e55b85457ca2855c7c2a66be8352e661c6aa57a5c86ed025f10cb2473b0",
+          "git_blob": "952d24ca0cfa81f97839d44050285e6b59156f18"
+        },
+        {
+          "path": "modules/features2d/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/src/fast.cpp",
+          "sha256": "27c6c8e68788cca9360a87242965a43657ff1be62f28a53789720d9f40152b44",
+          "git_blob": "e373926a144ac021eede5908717b01a3f8c957b1"
+        },
+        {
+          "path": "modules/features2d/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/src/fast_score.cpp",
+          "sha256": "bb68ef8493a76022810dadfbb189d570a3dd9f5af1c9f6d52a6881b447423f39",
+          "git_blob": "0bc011af491f4ec545ea1a7cbba21eae408966b9"
+        },
+        {
+          "path": "modules/features2d/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features2d/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/src/keypoint.cpp",
+          "sha256": "5e4a7e2225ffcd1214a111f61f072b8471cdf527495653ad9acd6c84b3fd033a",
+          "git_blob": "21d9eb30f792c19f3a2dee73e4298e8daee054a5"
+        },
+        {
+          "path": "modules/features2d/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/features2d/src/orb.cpp",
+          "sha256": "a48add597e6b7d74e11489953e18a93807c71ff1d0db8654ab4df32f051ed3fd",
+          "git_blob": "ae1e611127b1badfc9457c1253d6690e59480c83"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/imgproc/src/resize.cpp",
+          "sha256": "35011face43155641c5107093ee7e740f9d7b444a2a2aa96e88242b4d989bfac",
+          "git_blob": "90a05085e39cb675f33da3faa2f007199168670f"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "bb73a91042f85eaf840df5d8bad6f89629ce99aa46691c63ed19f6c318aec23b",
+          "git_blob": "b001a37f8932ac51d27d27de220ccb20fd95429b"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/b0dc474160e389b9c9045da5db49d03ae17c6a6b/modules/imgproc/src/thresh.cpp",
+          "sha256": "b06e5725e496ca8ff6063dc64097185f7c8162fcb3936a7a3fd75eda50fe4277",
+          "git_blob": "bed0d37f26f82f9be3c78f36fb97c93a1128df4c"
+        }
+      ]
+    },
+    {
+      "tag": "4.8.0",
+      "commit": "f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef",
+      "module": "features2d",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/core/src/copy.cpp",
+          "sha256": "4686cd395f8e9454c3d7e3d840933b613dba62516dc37090eb4735f0f412e58f",
+          "git_blob": "89948fb878dc54d96e72f07ed20f1a59751bf6f2"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/core/src/matrix.cpp",
+          "sha256": "971caceef30198fe96b6486885cf9dfec26cbe238be29bd7eb12a5ca8d7074a2",
+          "git_blob": "8111dc223036713364cd6efc46d69f1143dff712"
+        },
+        {
+          "path": "modules/features2d/include/opencv2/features2d.hpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/include/opencv2/features2d.hpp",
+          "sha256": "3a81da5ae29a96a872a38a0078685226eb59978f4c8204234fd1c013b0fb1d53",
+          "git_blob": "98ae85f35351f84ee1b2f2c277aaac8399f071f6"
+        },
+        {
+          "path": "modules/features2d/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/src/fast.cpp",
+          "sha256": "c2c6615e48e1e857f3cbcca801da56133b6f9e4c7371b4ab9df2013ac6a24fbc",
+          "git_blob": "163f02717e09c51827a084847f0038a5c676e088"
+        },
+        {
+          "path": "modules/features2d/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/src/fast_score.cpp",
+          "sha256": "bb68ef8493a76022810dadfbb189d570a3dd9f5af1c9f6d52a6881b447423f39",
+          "git_blob": "0bc011af491f4ec545ea1a7cbba21eae408966b9"
+        },
+        {
+          "path": "modules/features2d/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features2d/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/src/keypoint.cpp",
+          "sha256": "6074a550e4501e4c984ad98cd4c984ad26dbb7ca49275749eec9438e785deaed",
+          "git_blob": "4d2007f6d7287f5ebeaae51e7819e45da295e4ad"
+        },
+        {
+          "path": "modules/features2d/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/features2d/src/orb.cpp",
+          "sha256": "3874450ed3f9a779f2cf1a20daf544332898d5bcabed30a38071741a6ae5d203",
+          "git_blob": "b0d32002a1722c4717f1cf7b9678c30dbf4e4ee3"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/imgproc/src/resize.cpp",
+          "sha256": "1d52a10a862e1880299aeeee2ff458faa2235de6f8e6701102ff12f5c23f333b",
+          "git_blob": "456cfc4af916b235f8148cadf73fd827e262b49d"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "f609d9f760f712209cedf3dc4a6d2418618684deaeb170b59edc699f7924a67b",
+          "git_blob": "8a521d6df389e406e4d5c794ca0bd0d93975717c"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/f9a59f2592993d3dcc080e495f4f5e02dd8ec7ef/modules/imgproc/src/thresh.cpp",
+          "sha256": "b06e5725e496ca8ff6063dc64097185f7c8162fcb3936a7a3fd75eda50fe4277",
+          "git_blob": "bed0d37f26f82f9be3c78f36fb97c93a1128df4c"
+        }
+      ]
+    },
+    {
+      "tag": "4.10.0",
+      "commit": "71d3237a093b60a27601c20e9ee6c3e52154e8b1",
+      "module": "features2d",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/core/src/copy.cpp",
+          "sha256": "649227551ca086712b32da2bdc678b13014721db0e692f9539b5e6f2b735c77d",
+          "git_blob": "5c8af185b533f5a313217d8f40dd1ac14f9056dc"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/core/src/matrix.cpp",
+          "sha256": "9cc6b08af49aba9b5eeb443d68f755a60cf674a24afe77711b61ff5e193d9d26",
+          "git_blob": "0701542dfd7ffddb5d02d4eaab3bad54441524ec"
+        },
+        {
+          "path": "modules/features2d/include/opencv2/features2d.hpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/include/opencv2/features2d.hpp",
+          "sha256": "c55060eb4f2f3ba5518ffe816ea5d7318796f59d2bd87c7b69fb6c2528827b61",
+          "git_blob": "b4c4dde7121fb58218384b3d779e70a6eb82c280"
+        },
+        {
+          "path": "modules/features2d/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/fast.cpp",
+          "sha256": "52fdef066234a790e269b01f3cd3af75350b2529d253535b82233556d682d129",
+          "git_blob": "cb088eb5351a938c685a4e914b83018e68abad4a"
+        },
+        {
+          "path": "modules/features2d/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/fast_score.cpp",
+          "sha256": "4b0aa2e330d1756bc4918fa95c8fa8ac0a18ebfb6838a45b6e0f8fbe862b57ae",
+          "git_blob": "0c43ad55528d4b6a810eb1aeb9c9c7bd5873840d"
+        },
+        {
+          "path": "modules/features2d/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features2d/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/keypoint.cpp",
+          "sha256": "6074a550e4501e4c984ad98cd4c984ad26dbb7ca49275749eec9438e785deaed",
+          "git_blob": "4d2007f6d7287f5ebeaae51e7819e45da295e4ad"
+        },
+        {
+          "path": "modules/features2d/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/features2d/src/orb.cpp",
+          "sha256": "3874450ed3f9a779f2cf1a20daf544332898d5bcabed30a38071741a6ae5d203",
+          "git_blob": "b0d32002a1722c4717f1cf7b9678c30dbf4e4ee3"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/imgproc/src/resize.cpp",
+          "sha256": "60e44ab978fda269c19055659d0f1d7cdd32c1bfce8853ceb8dd6166833ee177",
+          "git_blob": "7e45f1e0f4990ca1d73f9120ff10cc96377cf62a"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "734d42f8f339ede165d504cd8a0f3b77ee387a09c5b6cf8b83a26700bfac08ff",
+          "git_blob": "d0f50a73bb7e14475718fa6c2850ec01acf7705e"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/71d3237a093b60a27601c20e9ee6c3e52154e8b1/modules/imgproc/src/thresh.cpp",
+          "sha256": "334504baf244c78bf707c2384ffa8406edb65ff321955a08b473bb021b6455c1",
+          "git_blob": "a8c89059a7807c9e507d64bab2389408b7b66061"
+        }
+      ]
+    },
+    {
+      "tag": "5.0.0",
+      "commit": "40738fb16ceddb5fb3fea747585f7ce6abb0605b",
+      "module": "features",
+      "tag_identity_method": "Independent git ls-remote of official upstream annotated tag and peeled commit, 2026-10-26",
+      "scope": "Task 020 configurable CPU Mat ORB, scale 1.1..2.0, levels 2..16, first 0, edge/patch 31; source review is not a native qualification result",
+      "files": [
+        {
+          "path": "modules/core/src/copy.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/core/src/copy.cpp",
+          "sha256": "21f7a615ea294aac0d00733ddbfeb066fd992d9c2e5e36933cc39ff3abf84157",
+          "git_blob": "61f7d57457825a523701072fa77de4593d0b99af"
+        },
+        {
+          "path": "modules/core/src/matrix.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/core/src/matrix.cpp",
+          "sha256": "fd8a80d6e55e1310e7b4a46a12aa4fa137888e80da2dd5b5e47ffa3c49d388b0",
+          "git_blob": "be8b6c87829282cfad7ce5da18dbdcca3a4d79b5"
+        },
+        {
+          "path": "modules/features/include/opencv2/features.hpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/include/opencv2/features.hpp",
+          "sha256": "c1d5ef95ffb0b7123f615627420ceaeb6a56152a14bf49e74f05696da54b01c2",
+          "git_blob": "55519cca94d24e4b39b339aa8579c1d34e767e8f"
+        },
+        {
+          "path": "modules/features/src/fast.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/fast.cpp",
+          "sha256": "c5b1bf470c70ee2ed1a8bf042e4134f7d7b6a9d07a61e947b1d7d37d2ddd4055",
+          "git_blob": "b1267bba77389641f1879c32a15fc1200fb68db1"
+        },
+        {
+          "path": "modules/features/src/fast_score.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/fast_score.cpp",
+          "sha256": "4b0aa2e330d1756bc4918fa95c8fa8ac0a18ebfb6838a45b6e0f8fbe862b57ae",
+          "git_blob": "0c43ad55528d4b6a810eb1aeb9c9c7bd5873840d"
+        },
+        {
+          "path": "modules/features/src/feature2d.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/feature2d.cpp",
+          "sha256": "8625603d8e521264efb48a09e51e340d2958729df5779d7c2c5a060951043aa9",
+          "git_blob": "49fafbaf233526f5d40563da1fd020d00c528996"
+        },
+        {
+          "path": "modules/features/src/keypoint.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/keypoint.cpp",
+          "sha256": "866cf1867cc7ff70748d99568519193bfcafcdebd9a414aa8fb83bd6c5591e47",
+          "git_blob": "aad9fe36e3f4cf042ee85d663908e7e803f1b477"
+        },
+        {
+          "path": "modules/features/src/orb.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/features/src/orb.cpp",
+          "sha256": "ac48243150ab9f011f3f122632df10f094597fe728aefcb711659c3f4833c7f9",
+          "git_blob": "b9dd44fd80af16cae1b28c0f3ab3bc7fdedd5534"
+        },
+        {
+          "path": "modules/imgproc/src/resize.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/imgproc/src/resize.cpp",
+          "sha256": "e4610736015ab8e7395bde854a60337d1281b972566bb4806db04f1868f6e36c",
+          "git_blob": "08a5abdd068b304f68ca35321a63b186deb7aad3"
+        },
+        {
+          "path": "modules/imgproc/src/smooth.dispatch.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/imgproc/src/smooth.dispatch.cpp",
+          "sha256": "10af19878d22b25330efac59e35a10c5e29ebfb8bbd3d62d929ae278ed16b799",
+          "git_blob": "52581b4e42775c63bd2c3258f0dddf3a617c5f2a"
+        },
+        {
+          "path": "modules/imgproc/src/thresh.cpp",
+          "url": "https://github.com/opencv/opencv/blob/40738fb16ceddb5fb3fea747585f7ce6abb0605b/modules/imgproc/src/thresh.cpp",
+          "sha256": "318c6986e695ff0e39f7799a57107e55804b32d32a185375fbbd1279ad7309f4",
+          "git_blob": "7588d90808c21f878e9f786cb2993fc2b994d851"
+        }
+      ]
+    }
   ]
 }

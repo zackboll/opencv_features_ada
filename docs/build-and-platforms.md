@@ -118,7 +118,7 @@ events, missing main routing, Windows runners/jobs/matrices, and dependency cach
 
 The PR workflow exercises runner-installed Linux/macOS OpenCV; the separate
 post-merge workflow exercises MSYS2 Windows OpenCV.
-The manual workflow source-builds 4.1.0, 4.10.0 and 5.0.0 on Linux with CPU
+The manual workflow source-builds 4.1.0, 4.4.0, 4.6.0, 4.8.0, 4.10.0 and 5.0.0 on Linux with CPU
 paths and explicit pkg-config/runtime prefixes. The distro development package
 is also installed to satisfy Alire's external-package discovery; its native
 library must not shadow the requested source build. The workflow verifies

@@ -25,9 +25,10 @@ One documented behavioral difference is visible through the API: nonbinary
 detection-mask values. OpenCV 4.x keeps them at pyramid level 0 but only 255
 survives into later levels, while OpenCV 5.0 first maps every nonzero value to
 255, so use 0/255 masks for portable results. A manual workflow
-(`opencv-compatibility.yml`) builds those three OpenCV versions from source on
-Linux; it is a qualification target, not a result implied for every commit.
-Other OpenCV releases are not reviewed.
+(`opencv-compatibility.yml`) now pins six source builds on Linux: 4.1.0, 4.4.0,
+4.6.0, 4.8.0, 4.10.0 and 5.0.0. Task 020 independently reviews configurable
+ORB source paths on all six. The matrix is a qualification target, not a result
+implied for every commit; other minor versions are not thereby qualified.
 
 ## Compilers and runtimes
 
@@ -75,7 +76,7 @@ depend on the source tree or the original prefix. See
 | --- | --- | --- |
 | `cross-platform.yml` | pull requests, `main`, manual | repository checks; Linux and macOS build, AUnit and consumer qualification; Linux examples and ASan/UBSan boundary driver; macOS libc++ linkage check |
 | `windows-post-merge.yml` | pushes to `main` only | MSYS2 build, AUnit, DLL inspection and consumer qualification |
-| `opencv-compatibility.yml` | manual | source-built OpenCV 4.1.0, 4.10.0 and 5.0.0 on Linux |
+| `opencv-compatibility.yml` | manual | source-built OpenCV 4.1.0, 4.4.0, 4.6.0, 4.8.0, 4.10.0 and 5.0.0 on Linux |
 | `documentation.yml` | pull requests, `main`, manual | GNATdoc API reference, documentation checks, enhanced site and these guides; no publication |
 
 Next: the Limitations and roadmap guide.

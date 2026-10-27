@@ -179,7 +179,7 @@ class OutputComparisonTests(unittest.TestCase):
             manifest.write_text(manifest.read_text().replace(
                 '"enhancer_version": "0.1.0"', '"enhancer_version": "0.1.0.dev0"'))
             report = comparison.compare(old, new)
-            self.assertEqual(report["census"]["release"]["resolved_references"], 248)
+            self.assertEqual(report["census"]["release"]["resolved_references"], 258)
             for path, addition in ((new / "index.html", "<!-- semantic drift -->"),
                                    (new / "api/presentation.json", "\n")):
                 original = path.read_text()

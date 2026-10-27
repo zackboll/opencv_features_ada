@@ -3,13 +3,14 @@
 `opencv_features` deliberately starts small. This guide lists what is fixed,
 what is not implemented, and what belongs to other components.
 
-## Fixed ORB profile
+## ORB scale-space limits
 
-Only four ORB settings are public: the requested feature target, WTA_K, the
-Harris/FAST score and the FAST threshold. The structural profile is fixed:
-scale factor 1.2, **eight pyramid levels**, edge threshold 31, first level 0
-and patch size 31. These are not configurable in this release; changing them
-needs a reviewed slice that re-derives the native arithmetic bounds.
+The original four-field configuration contains feature target, WTA_K,
+Harris/FAST score and FAST threshold. Development after approved 0.1.0 adds
+separate immutable scale-space settings: finite scale 1.1..2.0 and 2..16 levels,
+default 1.2/eight. Edge threshold 31, first level 0 and patch size 31 remain
+fixed. There are no setters. Nondefault targets are conservatively bounded
+by INT32_MAX/(2*Levels); image admission checks all upper-level dimensions.
 `Maximum_Features` is a requested target, not a strict cap. Very large images
 can be rejected by the binding's conservative native size envelope even when
 OpenCV itself might accept them (see `docs/orb-contract.md`).

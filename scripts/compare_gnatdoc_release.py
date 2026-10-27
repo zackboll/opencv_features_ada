@@ -27,7 +27,7 @@ def compare(old: Path, new: Path) -> dict:
         html = list(site.rglob("*.html"))
         refs = sum(len(support.collect(path).references) for path in html)
         checked = pages.check(site.resolve(), pages.expected_files(), pages.routes())
-        if len(html) != 13 or refs != 248 or checked["errors"]:
+        if len(html) != 13 or refs != 258 or checked["errors"]:
             raise support.SupportError(f"{label}: page/reference census or link errors: {checked}")
         report["census"][label] = {"html_pages": len(html), "files": len(before),
                                    "resolved_references": refs, "link_errors": checked["errors"]}
@@ -42,7 +42,7 @@ def main():
     args = parser.parse_args()
     report = compare(args.old, args.new)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    print("PASS: 17 byte-identical files; manifest release version only; 248 references in each site")
+    print("PASS: 17 byte-identical files; manifest release version only; 258 references in each site")
 
 
 if __name__ == "__main__":

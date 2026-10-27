@@ -9,14 +9,23 @@ than INT32_MAX/2. This last restriction covers native doubling of per-level
 retained feature targets; it is not an assertion that the actual output
 never exceeds the requested target when responses tie.
 
-Structural settings are fixed: scaleFactor=1.2f, nlevels=8,
-edgeThreshold=31, firstLevel=0, patchSize=31. Broader structural configuration
-is intentionally deferred, not silently accepted. Fixed defaults reduce the
-first review/test surface; they are not claimed optimal for navigation.
+The original four-field `Configuration` and one-argument/default `Create`
+retain scaleFactor=1.2f, nlevels=8. A separate `Pyramid_Configuration` and
+two-argument `Create` support finite binary32 scale **1.1 .. 2.0**, inclusive,
+and **2 .. 16** levels. Edge threshold 31, first level 0 and patch size 31 stay
+fixed. No mutable setters. `Parameters` and `Pyramid_Parameters` return immutable
+settings; both reject closed/default-declared detectors.
+
+The legacy `(1.2f,8)` profile retains INT32_MAX/2 through either factory.
+Other profiles require `Maximum_Features <= INT32_MAX / (2 * Levels)`.
+This conservative binding limit covers doubling and the signed native
+`nfeaturesPerLevel[0]*nlevels` reserve, not OpenCV's full acceptance set.
 
 Source and optional mask must be nonempty 2-D UInt8 C1. Geometry must match.
-The source is at least 2x2 so eight default pyramid levels do not round a
-source dimension to zero at the last level. Empty images are errors;
+The source is at least 2x2. Every configured level must have dimensions strictly
+above 0.5 before rounding under both reviewed division and reciprocal-multiply
+calculations. For scale 2/four levels a dimension of 4 rejects (half-integer
+tie), while 5 passes this check. Legacy 2x2 admission is unchanged. Empty images are errors;
 featureless valid images are empty successful results.
 
 Inputs and masks are cloned separately. Use **0/255 binary masks** for the
@@ -38,18 +47,21 @@ are local. Source/mask mutation during extraction is not supported.
 ## Native arithmetic envelope
 
 `cpp/orb_profile.hpp` admits a conservative subset, not OpenCV's exact
-acceptance set. With the fixed profile, the native border is 32. Every
+acceptance set. With all supported profiles, the native border is 32. Every
 pyramid level is no larger than the input. Define
 
 ```
 W = align_up(columns + 64, 16)
-H = 8 * (rows + 64)
+H = Levels * (rows + 64)
 ```
 
 Both bounds and their product must fit a signed 32-bit integer. The helper
 uses signed 64-bit arithmetic and a division-based product check. Stacking
 all padded levels vertically is an upper bound on the packed pyramid's
 height; no assumption that an allocation actually reaches H is made. The
+positive-level-size check is additional. Extreme combinations (scale 2/16 levels)
+can have no accepted square image under this conservative envelope; detector
+readiness does not promise admission for every image geometry. The
 product bound also contains the fixed-radius row-offset products. Large
 images that OpenCV might accept can be rejected by this bootstrap envelope.
 
@@ -61,7 +73,7 @@ this helper do **not** establish sanitizer coverage of native ORB.
 
 Native output is checked before publication: representable count, finite
 keypoint coordinates/size/angle/response, coordinates inside the input,
-positive keypoint size, valid fixed-profile octave, and N-by-32 UInt8 C1
+positive keypoint size, `0 <= Octave < Levels`, and N-by-32 UInt8 C1
 descriptors for N nonzero keypoints. Empty output must have no descriptors.
 Native class IDs and response values are preserved, not normalized.
 

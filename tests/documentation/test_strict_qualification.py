@@ -148,29 +148,29 @@ class StrictRealSiteTests(unittest.TestCase):
         code, out, err = self.strict()
         self.assertEqual(code, 0, err)
         report = results(out)
-        self.assertEqual(report["inventory"], {"declarations": 38, "internal_units": 2,
+        self.assertEqual(report["inventory"], {"declarations": 41, "internal_units": 2,
                                                "packages": 4})
-        self.assertEqual(report["site"]["sections"], 38)
+        self.assertEqual(report["site"]["sections"], 41)
         self.assertEqual(report["site"]["packages"], 4)
         self.assertEqual((report["warnings"]["raw"], report["warnings"]["baseline"],
                           report["warnings"]["new"], report["warnings"]["stale"]), (0, 0, [], []))
-        self.assertEqual(report["coverage"]["total"], {"documented": 127, "elements": 127,
-                                                       "percent": 100.0, "rendered": 127})
+        self.assertEqual(report["coverage"]["total"], {"documented": 137, "elements": 137,
+                                                       "percent": 100.0, "rendered": 137})
         self.assertEqual((report["coverage"]["baseline"], report["coverage"]["new_gaps"],
                           report["coverage"]["stale_baseline"]), (0, [], []))
 
-    def test_exactly_four_packages_and_38_preserved_declarations(self):
+    def test_exactly_four_packages_and_41_preserved_declarations(self):
         specs = source.specifications(ROOT)
         index, pages = native.read_site(self.api)
         self.assertEqual(sorted(name for name, _ in index.units), PACKAGES)
         self.assertEqual(sorted(check.public(specs)), PACKAGES)
         matched = check.match_sections(specs, pages)
-        self.assertEqual(len(matched), 38)
+        self.assertEqual(len(matched), 41)
         recorded = json.loads((ROOT / check.DECLARATIONS).read_text())
         self.assertEqual(sum(len(p["declarations"]) for p in
-                             recorded["public_packages"].values()), 38)
+                             recorded["public_packages"].values()), 41)
         elements = check.coverage_elements(specs, pages, matched)
-        self.assertEqual(len(elements), 127)
+        self.assertEqual(len(elements), 137)
         self.assertEqual([e["identity"] for e in elements if not e["documented"]], [])
         self.assertEqual(check.warning_identities(self.log.read_text(), specs), [])
 

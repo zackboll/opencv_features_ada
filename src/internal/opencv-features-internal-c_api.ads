@@ -74,6 +74,12 @@ package OpenCV.Features.Internal.C_API is
       Handle : access System.Address) return Status
      with Import, Convention => C,
           External_Name => "opencv_features_orb_create";
+   function ORB_Create_Profiled
+     (Maximum_Features, Tuple, Score, FAST_Threshold : Interfaces.Integer_32;
+      Scale_Factor : Interfaces.C.C_float; Levels : Interfaces.Integer_32;
+      Handle : access System.Address) return Status
+     with Import, Convention => C,
+          External_Name => "opencv_features_orb_create_profiled";
    procedure ORB_Destroy (Handle : System.Address)
      with Import, Convention => C,
           External_Name => "opencv_features_orb_destroy";

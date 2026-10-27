@@ -713,6 +713,28 @@
           "signature": "type Configuration is record Maximum_Features : Positive := 500; Tuple : Tuple_Size := Two_Samples; Score : Score_Kind := Harris_Score; FAST_Threshold : Natural := 20; end record"
         },
         {
+          "category": "record",
+          "identity": "OpenCV.Features.ORB.Pyramid_Configuration|type|type Pyramid_Configuration is record Scale_Factor : OpenCV.Float32_Value := 1.2; Levels : Positive := 8; end record",
+          "kind": "type",
+          "members": [
+            {
+              "default": "1.2",
+              "kind": "field",
+              "name": "Scale_Factor",
+              "subtype": "OpenCV.Float32_Value"
+            },
+            {
+              "default": "8",
+              "kind": "field",
+              "name": "Levels",
+              "subtype": "Positive"
+            }
+          ],
+          "name": "Pyramid_Configuration",
+          "ownership_sensitive": [],
+          "signature": "type Pyramid_Configuration is record Scale_Factor : OpenCV.Float32_Value := 1.2; Levels : Positive := 8; end record"
+        },
+        {
           "category": "private",
           "identity": "OpenCV.Features.ORB.Detector|type|type Detector is tagged limited private",
           "kind": "type",
@@ -743,6 +765,34 @@
             "result: limited private type OpenCV.Features.ORB.Detector"
           ],
           "signature": "function Create (Parameters : Configuration := (others => <>)) return Detector"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Create|function|function Create (Parameters : Configuration; Pyramid : Pyramid_Configuration) return Detector",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Parameters",
+              "subtype": "Configuration"
+            },
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Pyramid",
+              "subtype": "Pyramid_Configuration"
+            },
+            {
+              "kind": "return",
+              "subtype": "Detector"
+            }
+          ],
+          "name": "Create",
+          "ownership_sensitive": [
+            "result: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Create (Parameters : Configuration; Pyramid : Pyramid_Configuration) return Detector"
         },
         {
           "category": "subprogram",
@@ -805,6 +855,28 @@
             "in Self: limited private type OpenCV.Features.ORB.Detector"
           ],
           "signature": "function Parameters (Self : Detector) return Configuration"
+        },
+        {
+          "category": "subprogram",
+          "identity": "OpenCV.Features.ORB.Pyramid_Parameters|function|function Pyramid_Parameters (Self : Detector) return Pyramid_Configuration",
+          "kind": "function",
+          "members": [
+            {
+              "kind": "parameter",
+              "mode": "in",
+              "name": "Self",
+              "subtype": "Detector"
+            },
+            {
+              "kind": "return",
+              "subtype": "Pyramid_Configuration"
+            }
+          ],
+          "name": "Pyramid_Parameters",
+          "ownership_sensitive": [
+            "in Self: limited private type OpenCV.Features.ORB.Detector"
+          ],
+          "signature": "function Pyramid_Parameters (Self : Detector) return Pyramid_Configuration"
         },
         {
           "category": "subprogram",

@@ -4,9 +4,17 @@
 #include "opencv_core_module_bridge.hpp"
 #include "radius_limits.hpp"
 #include <opencv2/core/ocl.hpp>
+#include <opencv2/core/version.hpp>
+#if CV_VERSION_MAJOR == 4
+#include <opencv2/features2d.hpp>
+#else
+#include <opencv2/features.hpp>
+#endif
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <cmath>
+#include <limits>
 
 #ifdef OPENCV_FEATURES_TEST_HOOKS
 extern "C" void opencv_features_test_fail(int stage, int kind);
@@ -541,7 +549,102 @@ void radius() {
     opencv_features_match_result_destroy(nullptr);
     std::cout << "PASS: radius raw negatives, thresholds/empties/one row, overflow helpers, ROI/lifetime\n";
 }
+void profiled() {
+    using Detector = std::unique_ptr<opencv_features_orb_handle, decltype(&opencv_features_orb_destroy)>;
+    using Result = std::unique_ptr<opencv_features_result_handle, decltype(&opencv_features_result_destroy)>;
+    opencv_features_orb_handle *raw_detector = nullptr;
+    check(opencv_features_orb_create(500,2,0,20,&raw_detector) == 0, "legacy profile factory");
+    Detector legacy(raw_detector, opencv_features_orb_destroy);
+    for (float scale : {0.0f, -1.0f, 1.0f, std::nextafter(1.1f, 0.0f),
+                       std::nextafter(2.0f, 3.0f), std::numeric_limits<float>::quiet_NaN(),
+                       std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()}) {
+        raw_detector = legacy.get();
+        check(opencv_features_orb_create_profiled(500,2,0,20,scale,8,&raw_detector) == 1 &&
+              raw_detector == nullptr, "raw invalid scale output initialization");
+    }
+    for (int levels : {0,-1,1,17,INT32_MAX}) {
+        raw_detector = legacy.get();
+        check(opencv_features_orb_create_profiled(500,2,0,20,1.2f,levels,&raw_detector) == 1 &&
+              raw_detector == nullptr, "raw invalid level output initialization");
+    }
+    check(opencv_features_orb_create_profiled(500,2,0,20,1.1f,16,nullptr) == 1,
+          "profiled null output");
+    for (int levels = 2; levels <= 16; ++levels) {
+        const int cap = INT32_MAX / (2 * levels);
+        check(opencv_features_orb_create_profiled(cap,2,0,20,1.1f,levels,&raw_detector) == 0,
+              "profile target exact admitted boundary");
+        Detector boundary(raw_detector,opencv_features_orb_destroy);
+        raw_detector = legacy.get();
+        check(opencv_features_orb_create_profiled(cap+1,2,0,20,1.1f,levels,&raw_detector) == 1 &&
+              raw_detector == nullptr, "profile target exact rejected boundary");
+    }
+    raw_detector = legacy.get();
+    check(opencv_features_orb_create_profiled(INT32_MAX,2,0,20,2.0f,16,&raw_detector) == 1 &&
+          raw_detector == nullptr, "profile target signed maximum");
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+    const int statuses[] = {1,2,3,4,4};
+    for (int kind = 1; kind <= 5; ++kind) {
+        raw_detector = legacy.get();
+        opencv_features_test_fail(1,kind);
+        check(opencv_features_orb_create_profiled(500,2,0,20,1.1f,16,&raw_detector) == statuses[kind-1] &&
+              raw_detector == nullptr, "profiled factory exception barrier");
+    }
+#endif
+    auto image = matrix(512,512), output = matrix(2,2), tiny = matrix(4,256);
+    fill(image.get(),true); fill(tiny.get(),false);
+    for (int levels : {2,4,8,12,16}) {
+        check(opencv_features_orb_create_profiled(500,2,0,20,1.1f,levels,&raw_detector) == 0,
+              "profiled factory");
+        Detector detector(raw_detector,opencv_features_orb_destroy);
+        opencv_features_result_handle *raw = nullptr;
+        int32_t count = -1;
+        check(opencv_features_orb_extract(detector.get(),image.get(),&raw,&count) == 0 && count > 0,
+              "profiled native extraction");
+        Result result(raw,opencv_features_result_destroy);
+        check(opencv_features_result_descriptors(raw,output.get()) == 0, "profiled descriptors");
+        schema(output.get(),count);
+        // Same-build native oracle only: no cross-version count equality.
+        std::vector<cv::KeyPoint> reference;
+        cv::Mat expected_descriptors;
+        {
+            const cv::Mat *source = nullptr, *actual = nullptr;
+            check(opencv_core_module_input_mat(image.get(),&source) == 0 &&
+                  opencv_core_module_input_mat(output.get(),&actual) == 0, "reference scoped inputs");
+            cv::ORB::create(500,1.1f,levels,31,0,2,cv::ORB::HARRIS_SCORE,31,20)->detectAndCompute(
+                source->clone(),cv::noArray(),reference,expected_descriptors);
+            check(reference.size() == std::size_t(count) &&
+                  cv::norm(*actual,expected_descriptors,cv::NORM_INF) == 0, "profiled native reference descriptors");
+        }
+        for (int i = 0; i < count; ++i) {
+            opencv_features_keypoint p{};
+            check(opencv_features_result_point(raw,i,&p) == 0 && p.octave >= 0 && p.octave < levels,
+                  "profiled octave bounds");
+            const auto &expected = reference[std::size_t(i)];
+            check(p.x == expected.pt.x && p.y == expected.pt.y && p.size == expected.size &&
+                  p.angle == expected.angle && p.response == expected.response && p.octave == expected.octave &&
+                  p.class_id == expected.class_id, "profiled native reference keypoint order/values");
+        }
+#ifdef OPENCV_FEATURES_TEST_HOOKS
+        for (int stage : {2,3,4}) {
+            for (int kind = 1; kind <= 5; ++kind) {
+                raw = result.get(); count = -1;
+                opencv_features_test_fail(stage,kind);
+                check(opencv_features_orb_extract(detector.get(),image.get(),&raw,&count) == statuses[kind-1] &&
+                      raw == nullptr && count == 0, "profiled extraction exception cleanup");
+            }
+        }
+#endif
+    }
+    check(opencv_features_orb_create_profiled(500,2,0,20,2.0f,4,&raw_detector) == 0, "upper-level factory");
+    Detector detector(raw_detector,opencv_features_orb_destroy);
+    opencv_features_result_handle *raw = nullptr;
+    int32_t count = -1;
+    check(opencv_features_orb_extract(detector.get(),tiny.get(),&raw,&count) == 1 &&
+          raw == nullptr && count == 0, "zero upper-level preflight");
+    std::cout << "PASS: profiled raw scales/levels/nonfinite/null/outputs, native levels and cleanup\n";
+}
 void run() {
+    profiled();
     auto image = matrix(256, 256), mask = matrix(256, 256), blank = matrix(256, 256);
     auto wrong = matrix(256, 256, OPENCV_CORE_DEPTH_FLOAT32), small = matrix(128, 128);
     auto output = matrix(2, 2);
