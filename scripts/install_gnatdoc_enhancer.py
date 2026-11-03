@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Install the independently approved official enhancer v0.1.0 release wheel.
+"""Install the independently approved official enhancer release wheel (v0.1.5).
 
-HTTPS downloads, annotated tag/source identity, archive digest, provenance and
-every wheel member are checked before installation. Subsequent invocations of
+HTTPS downloads, annotated tag/source identity, archive digests, SHA256SUMS,
+release provenance, the wheel RECORD and every wheel member are checked before
+installation. Subsequent invocations of
 enhance_docs.py recheck installed bytes against Features-owned identities.
 --with-guides installs the existing hash-pinned optional Markdown wheels.
 """
@@ -37,7 +38,8 @@ def main(argv=None) -> int:
     except (support.SupportError, OSError, subprocess.CalledProcessError) as error:
         print(f"FAIL: {error}", file=sys.stderr)
         return 1
-    print(f"PASS: installed {tool} from official v0.1.0; approved wheel and installed bytes verified")
+    print(f"PASS: installed {tool} from official {support.approval()['tag']}; "
+          "approved wheel and installed bytes verified")
     return 0
 
 

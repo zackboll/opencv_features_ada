@@ -7,8 +7,11 @@ comparison here is independent of the enhancer's own ``verify`` operation.
 """
 from __future__ import annotations
 
-import hashlib
+import base64
+import csv
 import email.parser
+import hashlib
+import io
 import html.parser
 import json
 import re
@@ -22,7 +25,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PINNED_REVISION = "4ee95e8c95b8c7f54397a07e3e1c507783c115aa"
+PINNED_REVISION = "0120bee2f2455e4c832d1d5ddae0a4cb03cb9477"
 PROVENANCE = "gnatdoc-enhancer-provenance.json"
 
 
@@ -108,8 +111,30 @@ def download_release(name: str, destination: Path, digest: str, size: int) -> No
     destination.write_bytes(data)
 
 
+def dist_info() -> str:
+    return f"ada_gnatdoc_enhancer-{approval()['version']}.dist-info"
+
+
+def verify_record(wheel: zipfile.ZipFile) -> None:
+    """The wheel's own RECORD must list every other member with its exact digest and size."""
+    rows = list(csv.reader(io.StringIO(wheel.read(dist_info() + "/RECORD").decode("utf-8"))))
+    listed = {}
+    for row in rows:
+        if len(row) != 3 or row[0] in listed:
+            raise SupportError("malformed wheel RECORD")
+        listed[row[0]] = row[1:]
+    if set(listed) != set(wheel.namelist()) or listed.pop(dist_info() + "/RECORD") != ["", ""]:
+        raise SupportError("wheel RECORD inventory differs from members")
+    for name, (digest, size) in listed.items():
+        data = wheel.read(name)
+        encoded = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+        if digest != "sha256=" + encoded or size != str(len(data)):
+            raise SupportError(f"wheel RECORD entry differs: {name}")
+
+
 def verify_wheel(path: Path) -> dict:
-    expected = approval()["wheel"]
+    approved = approval()
+    expected = approved["wheel"]
     if sha256(path) != expected["sha256"]:
         raise SupportError("wheel SHA-256 differs from Features-owned approval")
     if path.stat().st_size != expected["bytes"]:
@@ -123,9 +148,9 @@ def verify_wheel(path: Path) -> dict:
                 raise SupportError("non-regular wheel member")
             if hashlib.sha256(wheel.read(member)).hexdigest() != expected["members"][member.filename]:
                 raise SupportError("wheel member identity differs")
-        metadata = email.parser.BytesParser().parsebytes(
-            wheel.read("ada_gnatdoc_enhancer-0.1.0.dist-info/METADATA"))
-        if metadata["Name"] != "ada-gnatdoc-enhancer" or metadata["Version"] != "0.1.0":
+        verify_record(wheel)
+        metadata = email.parser.BytesParser().parsebytes(wheel.read(dist_info() + "/METADATA"))
+        if metadata["Name"] != "ada-gnatdoc-enhancer" or metadata["Version"] != approved["version"]:
             raise SupportError("incorrect wheel metadata")
         if metadata.get_all("Requires-Dist", []) != [
                 'markdown-it-py==3.0.0; extra == "guides"', 'mdurl==0.1.2; extra == "guides"']:
@@ -134,18 +159,46 @@ def verify_wheel(path: Path) -> dict:
 
 
 def verify_release_provenance(record: dict) -> None:
+    """Check the v0.1.5 release-provenance schema against the Features-owned approval.
+
+    The record does not carry the annotated tag; verify_tag() establishes that
+    independently. Every wheel member's digest and size must match the approval.
+    """
     approved = approval()
-    tag = {"name": approved["tag"], "object_sha": approved["tag_object"],
-           "peeled_commit": approved["revision"], "peeled_tree": approved["tree"]}
-    if (any(record.get(k) != approved[v] for k, v in (
-            ("repository", "repository"), ("source_commit", "revision"),
-            ("git_tree", "tree"), ("release_version", "version"))) or
-            any(record.get("annotated_tag", {}).get(k) != v for k, v in tag.items()) or
-            record.get("archive_identities", {}).get("wheel") != {
-                k: approved["wheel"][k] for k in ("name", "bytes", "sha256", "members")} or
-            record.get("assets", {}).get(approved["wheel"]["name"]) != {
-                k: approved["wheel"][k] for k in ("bytes", "sha256")}):
+    wheel = approved["wheel"]
+    archives = record.get("archives", {})
+    audit = record.get("distribution_content_audit", {})
+    members = archives.get("wheel", {}).get("members", {})
+    package = {k: v for k, v in wheel["members"].items() if k.startswith("ada_gnatdoc_enhancer/")}
+    if (record.get("schema_version") != 1 or
+            record.get("expected_source_commit") != approved["revision"] or
+            record.get("expected_source_tree") != approved["tree"] or
+            record.get("release_version") != approved["version"] or
+            {k: archives.get("wheel", {}).get(k) for k in ("name", "bytes", "sha256")} !=
+            {k: wheel[k] for k in ("name", "bytes", "sha256")} or
+            {k: v.get("sha256") for k, v in members.items()} != wheel["members"] or
+            any(not isinstance(v.get("bytes"), int) for v in members.values()) or
+            archives.get("sdist", {}).get("sha256") != approved["sdist_sha256"] or
+            audit.get("version") != approved["version"] or
+            audit.get("runtime_dependencies") != [] or
+            audit.get("wheel_record_hashes_and_sizes_verified") is not True or
+            audit.get("module_asset_sha256") != package):
         raise SupportError("release provenance does not match approved tag/source/archive identity")
+
+
+def verify_sha256sums(text: str) -> None:
+    """The published SHA256SUMS must list exactly the approved archive digests."""
+    approved = approval()
+    listed = {}
+    for line in text.splitlines():
+        digest, _, name = line.partition("  ")
+        if not re.fullmatch(r"[0-9a-f]{64}", digest) or not name or name in listed:
+            raise SupportError("malformed SHA256SUMS")
+        listed[name] = digest
+    if listed != {approved["wheel"]["name"]: approved["wheel"]["sha256"],
+                  f"ada_gnatdoc_enhancer-{approved['version']}.tar.gz": approved["sdist_sha256"],
+                  "release-provenance.json": approved["provenance_sha256"]}:
+        raise SupportError("SHA256SUMS differs from the approved release digests")
 
 
 def verify_tag(directory: Path) -> None:
@@ -172,8 +225,12 @@ def install(environment: Path, requirements: Path | None = None) -> Path:
         download_release(wheel.name, wheel, approved["wheel"]["sha256"], approved["wheel"]["bytes"])
         verify_wheel(wheel)
         manifest = temporary / "release-provenance.json"
-        download_release(manifest.name, manifest, approved["provenance_sha256"], 707651)
+        download_release(manifest.name, manifest, approved["provenance_sha256"],
+                         approved["provenance_bytes"])
         verify_release_provenance(json.loads(manifest.read_text()))
+        sums = temporary / "SHA256SUMS"
+        download_release(sums.name, sums, approved["sha256sums_sha256"], approved["sha256sums_bytes"])
+        verify_sha256sums(sums.read_text())
         verify_tag(temporary / "git")
         venv.EnvBuilder(with_pip=True).create(environment)
         python = environment / "bin/python"
@@ -280,7 +337,7 @@ def installation_identity(environment: Path) -> dict:
     for name, directory in (("markdown-it-py", "markdown_it"), ("mdurl", "mdurl")):
         if name not in renderer and (package.parent / directory).exists():
             raise SupportError("unrecorded guide renderer package")
-    metadata = package.parent / "ada_gnatdoc_enhancer-0.1.0.dist-info"
+    metadata = package.parent / dist_info()
     direct = metadata / "direct_url.json"
     if direct.exists():
         origin = json.loads(direct.read_text())

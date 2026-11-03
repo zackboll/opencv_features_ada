@@ -198,7 +198,7 @@ class NavigationSecurityTests(unittest.TestCase):
         CheckerTests.setUp(self)
         self.script = (ROOT / "tests/documentation/fixtures/gnatdoc-navigation.js").read_text()
         self.assertEqual(pages.sha256(self.script.encode()),
-                         "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd")
+                         "e32e0a9fcbccffbe94268ff933905e5616a52d4d89969c52e7d539acdb102522")
         write(self.site, {self.NAVIGATION: self.script})
 
     def check(self, **options):
@@ -208,8 +208,8 @@ class NavigationSecurityTests(unittest.TestCase):
         self.assertEqual(self.script.count(self.EXPRESSION), 1)
         matches = list(re.finditer(r"://|[\"'`]/", self.script))
         self.assertEqual(len(matches), 1)
-        self.assertEqual(self.script[:matches[0].start()].count("\n") + 1, 103)
-        self.assertIn(self.EXPRESSION, self.script.splitlines()[102])
+        self.assertEqual(self.script[:matches[0].start()].count("\n") + 1, 133)
+        self.assertIn(self.EXPRESSION, self.script.splitlines()[132])
 
     def test_exact_reviewed_navigation_passes(self):
         self.assertEqual(self.check()["errors"], [])

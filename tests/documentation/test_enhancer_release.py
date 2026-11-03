@@ -24,27 +24,95 @@ class ReleaseTests(unittest.TestCase):
                     support.verify_wheel(wheel)
                 create.assert_not_called()
 
-    def test_wrong_tag_source_tree_and_version_are_rejected(self):
+    @staticmethod
+    def provenance():
+        """A minimal record in the v0.1.5 release-provenance schema."""
         approved = support.approval()
-        provenance = {
-            "repository": approved["repository"], "source_commit": approved["revision"],
-            "git_tree": approved["tree"], "release_version": approved["version"],
-            "annotated_tag": {"name": approved["tag"], "object_sha": approved["tag_object"],
-                              "peeled_commit": approved["revision"], "peeled_tree": approved["tree"]},
-            "archive_identities": {"wheel": {k: approved["wheel"][k]
-                                              for k in ("name", "bytes", "sha256", "members")}},
-            "assets": {approved["wheel"]["name"]: {
-                "sha256": approved["wheel"]["sha256"], "bytes": approved["wheel"]["bytes"]}},
+        wheel = approved["wheel"]
+        return {
+            "schema_version": 1, "release_version": approved["version"],
+            "expected_source_commit": approved["revision"], "expected_source_tree": approved["tree"],
+            "archives": {
+                "wheel": {"name": wheel["name"], "bytes": wheel["bytes"], "sha256": wheel["sha256"],
+                          "members": {k: {"bytes": 1, "sha256": v} for k, v in wheel["members"].items()}},
+                "sdist": {"sha256": approved["sdist_sha256"]}},
+            "distribution_content_audit": {
+                "version": approved["version"], "runtime_dependencies": [],
+                "wheel_record_hashes_and_sizes_verified": True,
+                "module_asset_sha256": {k: v for k, v in wheel["members"].items()
+                                        if k.startswith("ada_gnatdoc_enhancer/")}},
         }
+
+    def test_wrong_tag_source_tree_and_version_are_rejected(self):
+        provenance = self.provenance()
         support.verify_release_provenance(provenance)
-        for key in ("source_commit", "git_tree", "release_version"):
-            altered = dict(provenance, **{key: "wrong"})
+        for key, value in (("expected_source_commit", "0" * 40), ("expected_source_tree", "0" * 40),
+                           ("release_version", "0.1.0"), ("schema_version", 2)):
             with self.subTest(key=key), self.assertRaises(support.SupportError):
-                support.verify_release_provenance(altered)
-        for key in ("name", "object_sha", "peeled_commit", "peeled_tree"):
-            altered = dict(provenance, annotated_tag=dict(provenance["annotated_tag"], **{key: "wrong"}))
-            with self.subTest(key=key), self.assertRaises(support.SupportError):
-                support.verify_release_provenance(altered)
+                support.verify_release_provenance(dict(provenance, **{key: value}))
+        def altered(change):
+            record = json.loads(json.dumps(provenance))
+            change(record)
+            return record
+        member = "ada_gnatdoc_enhancer/cli.py"
+        for label, change in (
+                ("wheel digest", lambda r: r["archives"]["wheel"].update(sha256="0" * 64)),
+                ("wheel name", lambda r: r["archives"]["wheel"].update(
+                    name="ada_gnatdoc_enhancer-0.1.0-py3-none-any.whl")),
+                ("member digest", lambda r: r["archives"]["wheel"]["members"][member].update(
+                    sha256="0" * 64)),
+                ("extra member", lambda r: r["archives"]["wheel"]["members"].update(
+                    {"ada_gnatdoc_enhancer/extra.py": {"bytes": 1, "sha256": "0" * 64}})),
+                ("sdist digest", lambda r: r["archives"]["sdist"].update(sha256="0" * 64)),
+                ("audit version", lambda r: r["distribution_content_audit"].update(version="0.1.0")),
+                ("runtime dependency", lambda r: r["distribution_content_audit"].update(
+                    runtime_dependencies=["requests"])),
+                ("unverified RECORD", lambda r: r["distribution_content_audit"].update(
+                    wheel_record_hashes_and_sizes_verified=False)),
+                ("module digest", lambda r: r["distribution_content_audit"][
+                    "module_asset_sha256"].update({member: "0" * 64}))):
+            with self.subTest(label=label), self.assertRaises(support.SupportError):
+                support.verify_release_provenance(altered(change))
+
+    def test_sha256sums_must_list_exactly_the_approved_archives(self):
+        approved = support.approval()
+        lines = [f"{approved['wheel']['sha256']}  {approved['wheel']['name']}",
+                 f"{approved['sdist_sha256']}  ada_gnatdoc_enhancer-{approved['version']}.tar.gz",
+                 f"{approved['provenance_sha256']}  release-provenance.json"]
+        support.verify_sha256sums("\n".join(lines) + "\n")
+        for label, text in (("tampered digest", "\n".join(["0" * 64 + lines[0][64:]] + lines[1:])),
+                            ("missing archive", "\n".join(lines[:2])),
+                            ("extra archive", "\n".join(lines + ["0" * 64 + "  extra.whl"])),
+                            ("duplicate", "\n".join(lines + lines[:1])),
+                            ("malformed", "\n".join(lines).replace("  ", " ", 1))):
+            with self.subTest(label=label), self.assertRaises(support.SupportError):
+                support.verify_sha256sums(text)
+
+    def test_wheel_record_tampering_is_rejected(self):
+        name = support.dist_info() + "/RECORD"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "test.whl"
+            data = b"print()\n"
+            digest = support.base64.urlsafe_b64encode(
+                hashlib.sha256(data).digest()).rstrip(b"=").decode()
+            good = f"ada_gnatdoc_enhancer/x.py,sha256={digest},{len(data)}\n{name},,\n"
+            for label, record, ok in (
+                    ("valid", good, True),
+                    ("wrong digest", good.replace(digest, "A" * len(digest)), False),
+                    ("wrong size", good.replace(f",{len(data)}", ",99"), False),
+                    ("unlisted member", f"{name},,\n", False),
+                    ("listed absent member", good + "ada_gnatdoc_enhancer/y.py,sha256=x,1\n", False),
+                    ("hashed RECORD", good.replace(f"{name},,", f"{name},sha256=x,1"), False)):
+                with self.subTest(label=label):
+                    with zipfile.ZipFile(path, "w") as wheel:
+                        wheel.writestr("ada_gnatdoc_enhancer/x.py", data)
+                        wheel.writestr(name, record)
+                    with zipfile.ZipFile(path) as wheel:
+                        if ok:
+                            support.verify_record(wheel)
+                        else:
+                            with self.assertRaises(support.SupportError):
+                                support.verify_record(wheel)
 
     def test_unapproved_redirects_are_rejected(self):
         for url in ("http://github.com/a", "https://evil.example/a",
@@ -105,8 +173,9 @@ class InstalledReleaseTests(unittest.TestCase):
 
     def test_official_installation_is_accepted(self):
         tool, record = support.verified_tool(self.environment)
-        self.assertEqual(support.run(str(tool), "--version").stdout.strip(), "0.1.0")
-        self.assertEqual(record["version"], "0.1.0")
+        self.assertEqual(support.run(str(tool), "--version").stdout.strip(), "0.1.5")
+        self.assertEqual(record["version"], "0.1.5")
+        self.assertEqual(record["revision"], "0120bee2f2455e4c832d1d5ddae0a4cb03cb9477")
         self.assertEqual(record["wheel_sha256"], support.approval()["wheel"]["sha256"])
 
     def test_installed_mutations_and_rewritten_same_run_hashes_are_rejected(self):
@@ -138,7 +207,7 @@ class InstalledReleaseTests(unittest.TestCase):
                 finally:
                     path.write_bytes(original)
                     record_path.write_bytes(original_record)
-        for key, value in (("revision", "0" * 40), ("version", "0.1.0.dev0"),
+        for key, value in (("revision", "0" * 40), ("version", "0.1.0"),
                            ("tag_object", "0" * 40), ("wheel_sha256", "0" * 64)):
             with self.subTest(provenance=key):
                 try:
@@ -149,12 +218,13 @@ class InstalledReleaseTests(unittest.TestCase):
                     record_path.write_bytes(original_record)
         support.verified_tool(self.environment)
 
-    def test_development_module_and_metadata_are_rejected(self):
+    def test_other_version_module_and_metadata_are_rejected(self):
         package = support.installed_package(self.environment)
         for path, old, new in (
-                (package / "__init__.py", b'"0.1.0"', b'"0.1.0.dev0"'),
-                (package.parent / "ada_gnatdoc_enhancer-0.1.0.dist-info/METADATA",
-                 b"Version: 0.1.0\n", b"Version: 0.1.0.dev0\n")):
+                (package / "__init__.py", b'"0.1.5"', b'"0.1.0"'),
+                (package / "__init__.py", b'"0.1.5"', b'"0.1.6.dev0"'),
+                (package.parent / support.dist_info() / "METADATA",
+                 b"Version: 0.1.5\n", b"Version: 0.1.0\n")):
             original = path.read_bytes()
             try:
                 self.assertIn(old, original)
@@ -167,28 +237,46 @@ class InstalledReleaseTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("FEATURES_ENHANCED_SITE"), "set FEATURES_ENHANCED_SITE")
 class OutputComparisonTests(unittest.TestCase):
-    def test_only_release_version_transition_is_accepted(self):
+    def test_only_the_reviewed_release_transition_is_accepted(self):
         import shutil
         import compare_gnatdoc_release as comparison
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             old, new = root / "old", root / "new"
-            shutil.copytree(Path(os.environ["FEATURES_ENHANCED_SITE"]), old)
-            shutil.copytree(old, new)
+            shutil.copytree(Path(os.environ["FEATURES_ENHANCED_SITE"]), new)
+            shutil.copytree(new, old)
+            # Reconstruct the v0.1.0 bytes from the reviewed fixture-free inputs.
+            index = old / "api/index.html"
+            index.write_text(index.read_text().replace(comparison.NEW_LABEL, comparison.OLD_LABEL))
+            navigation = old / comparison.NAVIGATION
+            navigation.write_bytes(b"0.1.0 navigation")
             manifest = old / "api/presentation.json"
-            manifest.write_text(manifest.read_text().replace(
-                '"enhancer_version": "0.1.0"', '"enhancer_version": "0.1.0.dev0"'))
-            report = comparison.compare(old, new)
-            self.assertEqual(report["census"]["release"]["resolved_references"], 248)
-            for path, addition in ((new / "index.html", "<!-- semantic drift -->"),
-                                   (new / "api/presentation.json", "\n")):
-                original = path.read_text()
-                try:
-                    path.write_text(original + addition)
-                    with self.assertRaises(support.SupportError):
-                        comparison.compare(old, new)
-                finally:
-                    path.write_text(original)
-            (new / "unexpected.html").write_text("unexpected")
-            with self.assertRaises(support.SupportError):
-                comparison.compare(old, new)
+            text = manifest.read_text()
+            for value, replacement in (
+                    (f'"enhancer_version": "{comparison.NEW_VERSION}"',
+                     f'"enhancer_version": "{comparison.OLD_VERSION}"'),
+                    (support.sha256(new / "api/index.html"), support.sha256(index)),
+                    (comparison.NEW_NAVIGATION, support.sha256(navigation))):
+                self.assertEqual(text.count(value), 1, value)
+                text = text.replace(value, replacement)
+            manifest.write_text(text)
+            with mock.patch.object(comparison, "OLD_NAVIGATION", support.sha256(navigation)):
+                report = comparison.compare(old, new)
+                self.assertEqual(report["census"]["release"]["resolved_references"], 248)
+                self.assertEqual(sorted(k for k, v in report["files"].items()
+                                        if v["classification"] != "byte-identical"),
+                                 comparison.CHANGED)
+                for path, addition in ((new / "index.html", "<!-- semantic drift -->"),
+                                       (new / "api/index.html", "<!-- semantic drift -->"),
+                                       (new / "api/presentation.json", "\n"),
+                                       (new / comparison.NAVIGATION, "\n// drift\n")):
+                    original = path.read_text()
+                    try:
+                        path.write_text(original + addition)
+                        with self.assertRaises(support.SupportError):
+                            comparison.compare(old, new)
+                    finally:
+                        path.write_text(original)
+                (new / "unexpected.html").write_text("unexpected")
+                with self.assertRaises(support.SupportError):
+                    comparison.compare(old, new)
