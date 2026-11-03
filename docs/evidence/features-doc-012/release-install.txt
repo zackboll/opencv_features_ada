@@ -1,0 +1,1 @@
+PASS: installed <scratch>/venv015/bin/gnatdoc-enhancer from official v0.1.5; approved wheel and installed bytes verified

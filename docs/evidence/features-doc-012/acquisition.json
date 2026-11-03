@@ -1,0 +1,133 @@
+{
+  "annotated_tag": {
+    "method": "git fetch of refs/tags/v0.1.5 into a new empty repository; rev-parse and cat-file",
+    "name": "v0.1.5",
+    "object": "c6ca2b445b089e7f50abc1779d76dd4ff3f0f1eb",
+    "peeled_commit": "0120bee2f2455e4c832d1d5ddae0a4cb03cb9477",
+    "peeled_tree": "01900ddb099c801eeb92fba718f4c528f87d865f",
+    "type": "tag"
+  },
+  "downloads": {
+    "SHA256SUMS": {
+      "bytes": 300,
+      "sha256": "93e061866d52e13b6266c6fa0efb3b9c2e3a1bd1b4c818981a11a802ded74756"
+    },
+    "ada_gnatdoc_enhancer-0.1.5-py3-none-any.whl": {
+      "bytes": 117934,
+      "sha256": "d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247"
+    },
+    "ada_gnatdoc_enhancer-0.1.5.tar.gz": {
+      "bytes": 3521158,
+      "sha256": "2bc2cc4160a182a2a9b1a4907f47198daabf88883888fa09d736913bd2931079"
+    },
+    "release-provenance.json": {
+      "bytes": 1157963,
+      "sha256": "6c30b7a4ec987ab4f74a44d04586dcd57308dd592ac13f33c9444ef3acf0a8f3"
+    }
+  },
+  "expected_sha256": {
+    "SHA256SUMS": "93e061866d52e13b6266c6fa0efb3b9c2e3a1bd1b4c818981a11a802ded74756",
+    "ada_gnatdoc_enhancer-0.1.5-py3-none-any.whl": "d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247",
+    "ada_gnatdoc_enhancer-0.1.5.tar.gz": "2bc2cc4160a182a2a9b1a4907f47198daabf88883888fa09d736913bd2931079",
+    "release-provenance.json": "6c30b7a4ec987ab4f74a44d04586dcd57308dd592ac13f33c9444ef3acf0a8f3"
+  },
+  "installed_cli": {
+    "gnatdoc-enhancer --version": "0.1.5",
+    "importlib.metadata": "0.1.5",
+    "module __version__": "0.1.5"
+  },
+  "release": "https://github.com/zackboll/ada-gnatdoc-enhancer/releases/tag/v0.1.5",
+  "release_provenance": {
+    "authorization": "Expected source commit/tree supplied independently of archives",
+    "distribution_content_audit": {
+      "archives": {
+        "rebuilt_wheel": {
+          "bytes": 117934,
+          "name": "ada_gnatdoc_enhancer-0.1.5-py3-none-any.whl",
+          "sha256": "6cb004d1881b1fbee8f815d4bffccbd1ebd2b65f2b4de75b0167fd9e74980c03"
+        },
+        "sdist": {
+          "bytes": 3521158,
+          "name": "ada_gnatdoc_enhancer-0.1.5.tar.gz",
+          "sha256": "2bc2cc4160a182a2a9b1a4907f47198daabf88883888fa09d736913bd2931079"
+        },
+        "wheel": {
+          "bytes": 117934,
+          "name": "ada_gnatdoc_enhancer-0.1.5-py3-none-any.whl",
+          "sha256": "d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247"
+        }
+      },
+      "compression_byte_identity_required": false,
+      "optional_guides_dependencies": [
+        "markdown-it-py==3.0.0; extra == \"guides\"",
+        "mdurl==0.1.2; extra == \"guides\""
+      ],
+      "required_sdist_inputs": 1351,
+      "runtime_dependencies": [],
+      "sdist_files": 1401,
+      "source_wheel_sdist_rebuilt_module_assets_equal": true,
+      "version": "0.1.5",
+      "wheel_files": 48,
+      "wheel_record_hashes_and_sizes_verified": true
+    },
+    "expected_source_commit": "0120bee2f2455e4c832d1d5ddae0a4cb03cb9477",
+    "expected_source_tree": "01900ddb099c801eeb92fba718f4c528f87d865f",
+    "merged_main_ci": "https://github.com/zackboll/ada-gnatdoc-enhancer/actions/runs/41349104967",
+    "publication_authorized": false,
+    "qualification_status": "FINAL_ARTIFACTS_QUALIFIED",
+    "qualification_task": "GNATDOC-036",
+    "release_version": "0.1.5",
+    "schema_version": 1
+  },
+  "sha256sums_lists_exactly": [
+    "d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247  ada_gnatdoc_enhancer-0.1.5-py3-none-any.whl",
+    "2bc2cc4160a182a2a9b1a4907f47198daabf88883888fa09d736913bd2931079  ada_gnatdoc_enhancer-0.1.5.tar.gz",
+    "6c30b7a4ec987ab4f74a44d04586dcd57308dd592ac13f33c9444ef3acf0a8f3  release-provenance.json"
+  ],
+  "v0.1.0_to_v0.1.5_wheel_inventory": {
+    "added": [
+      "ada_gnatdoc_enhancer/assets/gnatdoc-examples.css",
+      "ada_gnatdoc_enhancer/assets/gnatdoc-search.css",
+      "ada_gnatdoc_enhancer/assets/gnatdoc-search.js",
+      "ada_gnatdoc_enhancer/examples.py",
+      "ada_gnatdoc_enhancer/external_symbols.py",
+      "ada_gnatdoc_enhancer/search.py",
+      "ada_gnatdoc_enhancer/verified_examples.py"
+    ],
+    "changed_packaged_assets": {
+      "gnatdoc-navigation.js": {
+        "git_blob_v0.1.5": "94bb38eaf6d52f198bed861f0edae6009673af86",
+        "v0.1.0": "b3fb428b507844d6be76fb40156058d39a5b5f57004bde04e33b0411f68504cd",
+        "v0.1.5": "e32e0a9fcbccffbe94268ff933905e5616a52d4d89969c52e7d539acdb102522"
+      }
+    },
+    "release_provenance_bytes": {
+      "v0.1.0": 707651,
+      "v0.1.5": 1157963
+    },
+    "removed": [],
+    "unchanged_packaged_assets": [
+      "gnatdoc-guides.css",
+      "gnatdoc-theme.css",
+      "gnatdoc-instance-navigation.js",
+      "gnatdoc-symbol-navigation.js"
+    ],
+    "v0.1.0_members": 41,
+    "v0.1.5_members": 48
+  },
+  "wheel": {
+    "members": 48,
+    "members_equal_release_provenance_digests_and_sizes": true,
+    "metadata": {
+      "Name": "ada-gnatdoc-enhancer",
+      "Requires-Dist": [
+        "markdown-it-py==3.0.0; extra == \"guides\"",
+        "mdurl==0.1.2; extra == \"guides\""
+      ],
+      "Version": "0.1.5"
+    },
+    "package_members_equal_tagged_git_blobs": true,
+    "package_modules_and_assets": 42,
+    "record_rows_verified": 47
+  }
+}

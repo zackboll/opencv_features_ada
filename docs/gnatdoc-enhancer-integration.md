@@ -1,6 +1,91 @@
-# Shared GNATdoc enhancer integration (DOC-004 through DOC-011)
+# Shared GNATdoc enhancer integration (DOC-004 through DOC-012)
 
-## Active dependency: official v0.1.0 (DOC-011)
+## Active dependency: official v0.1.5 (DOC-012)
+
+Features now installs the published **v0.1.5** release wheel. GNATdoc 26.0.0
+still generates the native site from `docs_api.gpr`, and the Features-owned
+native checks still run first. The library, Alire manifest and indexed Core
+dependency are unchanged. The DOC-011 section below records the superseded
+v0.1.0 integration.
+
+| Identity | Approved value |
+| --- | --- |
+| Release | [ada-gnatdoc-enhancer v0.1.5](https://github.com/zackboll/ada-gnatdoc-enhancer/releases/tag/v0.1.5) |
+| Annotated tag object | `c6ca2b445b089e7f50abc1779d76dd4ff3f0f1eb` |
+| Source commit / tree | `0120bee2f2455e4c832d1d5ddae0a4cb03cb9477` / `01900ddb099c801eeb92fba718f4c528f87d865f` |
+| Package / module / CLI version | `0.1.5` |
+| Wheel SHA-256 (117934 bytes, 48 members) | `d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247` |
+| Source archive SHA-256 (verified, not installed) | `2bc2cc4160a182a2a9b1a4907f47198daabf88883888fa09d736913bd2931079` |
+| Release provenance SHA-256 (1157963 bytes) | `6c30b7a4ec987ab4f74a44d04586dcd57308dd592ac13f33c9444ef3acf0a8f3` |
+| `SHA256SUMS` SHA-256 | `93e061866d52e13b6266c6fa0efb3b9c2e3a1bd1b4c818981a11a802ded74756` |
+
+### What changed in the integration
+
+- `docs/gnatdoc-enhancer-release.json` is the new Features-owned approval: all
+  48 wheel member digests (41 in v0.1.0; seven added, none removed), archive
+  sizes and digests. The member digests were checked against the official
+  download, the release provenance (digest and size) and, for all 42 package
+  modules and assets, the tagged Git blobs.
+- The v0.1.5 release provenance uses a new schema: `expected_source_commit`,
+  `expected_source_tree`, `archives` and `distribution_content_audit`, and no
+  annotated-tag block. `verify_release_provenance` now checks that schema. The
+  annotated tag is still checked independently with a fresh Git fetch.
+- The installer also downloads and checks `SHA256SUMS`, and checks every wheel
+  `RECORD` entry (digest and size) against the wheel members. Version, dist-info
+  directory name and provenance size now come from the approval file instead of
+  constants repeated across the scripts.
+- `scripts/check_pages_site.py` authorizes only the reviewed v0.1.5 navigation
+  script (Git blob `94bb38ea…`, SHA-256 `e32e0a9f…`). Its only slash literal is
+  still `state.url.href.lastIndexOf('/')`, now on line 133. The test fixture is
+  the exact tagged blob.
+- `scripts/compare_gnatdoc_release.py` now checks the reviewed v0.1.0 → v0.1.5
+  transition. It fails if any other file or byte changes.
+
+No helper script was removed. v0.1.5 adds `qualify`, but that command needs a
+committed spec that pins the pristine native-site hashes and a source revision.
+That spec would have to be re-recorded whenever a documentation comment
+changes, so it cannot replace the per-commit checks in `enhance_docs.py`
+(dry-run immutability, byte-idempotence, fresh-copy identity, independent
+native comparison and site-wide link resolution). The source-integrity policy
+also rejects file deletions inside a documentation PR, and this PR does not
+change that policy.
+
+Search (`search`), compiler-verified example mappings, external symbol
+bookmarks and custom themes are new in v0.1.5. None is enabled here:
+`docs/gnatdoc-enhance.toml` is unchanged.
+
+### Output differences (independently compared)
+
+From byte-identical native input (`native-api.sha256`), 15 of 18 enhanced files
+are byte-identical with v0.1.0. `scripts/compare_gnatdoc_release.py` accepts
+only these three changes:
+
+| File | v0.1.0 SHA-256 | v0.1.5 SHA-256 | Reason |
+| --- | --- | --- | --- |
+| `api/gnatdoc-navigation.js` | `b3fb428b…68504cd` | `e32e0a9f…e102522` | Upstream: reveal a sidebar declaration after history/fragment restoration; also restore on `pageshow` |
+| `api/index.html` | `60ffd351…9cf4` | `dfa44664…1071` | Upstream: filter label "Search documentation" → "Filter navigation links" |
+| `api/presentation.json` | `396ac0b9…1896` | `721eff91…05b7` | `enhancer_version` and the two output digests above |
+
+The reviewed navigation diff introduces no URL literal, network access,
+storage or new destination. Navigation still goes only to destinations taken
+from generated native links (`approved`). Inventory, dry run, enhance and verify
+report the same counts as v0.1.0: 4 packages, 38 declaration snippets, 13 pages,
+18 files, 248 links, 47 local type links and 0 external.
+Screenshots of the portal home, a guide and the API index (desktop and 390px,
+light and dark) are pixel-identical except for the label text (`label-change.png`).
+
+See [DOC-012 evidence](evidence/features-doc-012/README.md).
+
+### Rollback to v0.1.0
+
+Revert this PR's commits with `git revert`. That restores the v0.1.0 approval,
+asset inventory, navigation authority, fixture, compare script and tests together,
+and the workflow then installs v0.1.0 again. Do not change only the approval
+file: the navigation hash in `check_pages_site.py` and the asset inventory must
+agree with the installed wheel, or `enhance_docs.py` and the Pages check fail
+closed.
+
+## DOC-011: official v0.1.0 (superseded by DOC-012)
 
 Features now installs the **published GitHub release wheel**, not a development
 checkout or a locally built substitute. This is a documentation-tool upgrade;

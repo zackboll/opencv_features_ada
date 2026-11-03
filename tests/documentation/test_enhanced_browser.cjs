@@ -113,6 +113,72 @@ async function bookmarks(browser) {
   await context.close();
 }
 
+// The frame's view of a declaration: present, inside the frame viewport, scrolled.
+async function frameDeclaration(page, id) {
+  const deadline = Date.now() + 10000;
+  let last = null;
+  while (Date.now() < deadline) {
+    try {
+      last = await frameOf(page).evaluate((anchor) => {
+        const h = document.getElementById(anchor);
+        if (document.readyState !== 'complete' || !h) return null;
+        const r = h.getBoundingClientRect();
+        return { text: h.textContent, top: r.top, height: innerHeight, scrollY };
+      }, id);
+    } catch (_) { last = null; }
+    if (last && last.top >= 0 && last.top < last.height) return last;
+    await page.waitForTimeout(50);
+  }
+  return last;
+}
+
+// v0.1.5 reveals a sidebar declaration after native history/fragment restoration.
+async function declarationNavigation(browser, anchors) {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(String(error)));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  const detector = anchors.declarations[Object.keys(anchors.declarations)
+    .find((k) => k.startsWith('OpenCV.Features.ORB.Detector|'))].anchor;
+  const shown = (view) => Boolean(view && view.text === 'Detector' && view.top >= 0 && view.top < view.height);
+  const query = (p) => [new URL(p.url()).searchParams.get('package'), new URL(p.url()).searchParams.get('declaration')];
+  await page.goto(url(`index.html?package=OpenCV.Features.ORB&declaration=${detector}`));
+  await page.waitForSelector('#package-navigation:not([hidden])');
+  check('navigation: filter label names what it filters',
+        (await page.textContent('label[for="package-search"]')) === 'Filter navigation links');
+  check('bookmark: ?declaration shows the Detector declaration in the frame',
+        shown(await frameDeclaration(page, detector)) &&
+        await page.$eval('a[aria-current="location"]', (a) => a.textContent) === 'OpenCV.Features.ORB.Detector',
+        page.url());
+  await page.click('#compilation-units + ul a:text-is("OpenCV.Features.Matching")');
+  await frameHeading(page, 'OpenCV.Features.Matching');
+  await page.goBack();
+  const back = await frameDeclaration(page, detector);
+  check('history: Back restores the declaration bookmark and reveals it',
+        shown(back) && JSON.stringify(query(page)) === JSON.stringify(['OpenCV.Features.ORB', detector]),
+        { back, url: page.url() });
+  await page.goForward();
+  check('history: Forward returns to the package after a declaration',
+        await frameHeading(page, 'OpenCV.Features.Matching') === 'OpenCV.Features.Matching' &&
+        JSON.stringify(query(page)) === JSON.stringify(['OpenCV.Features.Matching', null]), page.url());
+  await page.goBack();
+  await frameDeclaration(page, detector);
+  await page.reload();
+  await page.waitForSelector('#package-navigation:not([hidden])');
+  check('reload: a declaration bookmark is revealed again',
+        shown(await frameDeclaration(page, detector)), page.url());
+  await page.click('#compilation-units + ul a:text-is("OpenCV.Features")');
+  await frameHeading(page, 'OpenCV.Features');
+  await page.click('#tagged-types + ul a');
+  const clicked = await frameDeclaration(page, detector);
+  check('navigation: tagged-type link pushes a declaration bookmark and reveals it',
+        shown(clicked) && JSON.stringify(query(page)) === JSON.stringify(['OpenCV.Features.ORB', detector]),
+        { clicked, url: page.url() });
+  check('declaration navigation: no page or console errors', errors.length === 0, errors);
+  await context.close();
+}
+
 async function declarations(browser, scheme, anchors) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
   const page = await context.newPage();
@@ -289,6 +355,7 @@ async function mobilePortal(browser, scheme) {
       await mobilePortal(browser, scheme);
     }
     await bookmarks(browser);
+    await declarationNavigation(browser, anchors);
     await noJavaScript(browser, anchors);
   } finally {
     await browser.close();

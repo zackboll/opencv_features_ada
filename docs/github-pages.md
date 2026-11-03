@@ -1,12 +1,25 @@
-# GitHub Pages publication (DOC-009 / DOC-010 / DOC-011)
+# GitHub Pages publication (DOC-009 / DOC-010 / DOC-011 / DOC-012)
 
-## DOC-011 active enhancer dependency
+## DOC-012 active enhancer dependency
+
+DOC-012 replaces the active dependency with the official **v0.1.5** release
+wheel, source commit `0120bee2f2455e4c832d1d5ddae0a4cb03cb9477`, SHA-256
+`d712d330f213fc1909a66c47bc2c7e5e15d5ec687222bea3c4922f5243db4247`. See
+[installation identities and output differences](gnatdoc-enhancer-integration.md#active-dependency-official-v015-doc-012).
+The deployment architecture, permissions, environment and publication gate are
+unchanged. The Pages checker now authorizes only the reviewed v0.1.5 navigation
+script. Local qualification: 18 files, 13 titled pages, 248 references and 13
+routes resolve under the project prefix; the local archive is byte-identical.
+The previously published site stays deployed until a publication-ready push to
+main replaces it.
+
+## DOC-011 enhancer dependency (superseded)
 
 The active documentation dependency is the official **ada-gnatdoc-enhancer
 v0.1.0 GitHub release wheel**, source commit
 `4ee95e8c95b8c7f54397a07e3e1c507783c115aa`, verified against Features-owned
 SHA-256 `b0949aba6736515bf2ebe14fc7cc30c816a176257fc4524564285397b8aaf97d`.
-See [installation identities and procedure](gnatdoc-enhancer-integration.md#active-dependency-official-v010-doc-011)
+See [installation identities and procedure](gnatdoc-enhancer-integration.md#doc-011-official-v010-superseded-by-doc-012)
 and [DOC-011 qualification](evidence/features-doc-011/README.md).
 This supersedes only the active development-tool pin below; DOC-009/010 evidence
 remains historical. It does not change the Features source-release status.

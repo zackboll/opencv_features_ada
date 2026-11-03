@@ -37,8 +37,10 @@ PAGE = """<!DOCTYPE html>
 class ProfileTests(unittest.TestCase):
     def test_installer_rejects_every_unapproved_revision_before_installation(self):
         import install_gnatdoc_enhancer as installer
-        for revision in ("main", "latest", "0" * 40,
-                         "478d0bbff0be1b9141b5ad39f07a71f0386d86e9"):
+        # Includes the superseded v0.1.0 release commit.
+        for revision in ("main", "latest", "0" * 40, "v0.1.5",
+                         "478d0bbff0be1b9141b5ad39f07a71f0386d86e9",
+                         "4ee95e8c95b8c7f54397a07e3e1c507783c115aa"):
             with self.subTest(revision=revision), mock.patch.object(support, "install") as install:
                 self.assertEqual(installer.main(["--venv", "/unused",
                                                  "--revision", revision]), 1)

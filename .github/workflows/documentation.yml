@@ -70,7 +70,7 @@ jobs:
           diff -r _site "$RUNNER_TEMP/docs-second"
           cmp "$RUNNER_TEMP/gnatdoc-first.log" obj/docs/gnatdoc.log
           (cd _site/api && sha256sum *)
-      - name: Install the verified official enhancer v0.1.0 wheel (documentation-only)
+      - name: Install the verified official enhancer v0.1.5 wheel (documentation-only)
         run: |
           python3 scripts/install_gnatdoc_enhancer.py --venv "$RUNNER_TEMP/gnatdoc-enhancer" --with-guides
           cp "$RUNNER_TEMP/gnatdoc-enhancer/gnatdoc-enhancer-provenance.json" obj/docs/installed-enhancer.json

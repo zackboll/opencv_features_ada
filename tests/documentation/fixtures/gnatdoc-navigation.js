@@ -42,11 +42,12 @@
   let pending = null;
   const superseded = new Set();
   const observedDocuments = new WeakSet();
+  let selection = 0;
   function select(state) {
     for (const l of allLinks) l.removeAttribute('aria-current');
     state.item.link.setAttribute('aria-current','page');
     if (state.declaration) state.link.setAttribute('aria-current','location');
-    current=state;
+    current=state;selection++;
   }
   function canonicalUrl(state) {
     const u = new URL(location.href);
@@ -69,11 +70,40 @@
     try { return frame.contentWindow.location.href; }
     catch (_) { return null; }
   }
+  function reveal(state) {
+    if (!state.declaration || !approved.has(state.url.href)) return;
+    const selected=selection, doc=frame.contentDocument;
+    // Run after native history/fragment restoration, not on ordinary scrolling.
+    // A -> B -> A must also invalidate the first A's deferred callback.
+    requestAnimationFrame(() => {
+      if (selection!==selected || current!==state || pending || frameUrl()!==state.url.href) return;
+      try {
+        if (doc && frame.contentDocument===doc && doc.readyState==='complete' && doc.URL===state.url.href)
+          doc.getElementById(state.declaration)?.scrollIntoView({block:'start'});
+      } catch (_) { /* A foreign document never acquires destination authority. */ }
+    });
+  }
+  function observeDocument() {
+    try {
+      const doc=frame.contentDocument;
+      if (approved.has(frameUrl()) && doc && doc.readyState==='complete' && !observedDocuments.has(doc)) {
+        doc.addEventListener('click',ev => click(ev,true));observedDocuments.add(doc);
+        frame.contentWindow.addEventListener('hashchange',() => {
+          if (pending && frameUrl()===pending.url.href) {
+            const state=pending;pending=null;
+            if (current===state) reveal(state);
+          }
+        });
+      }
+    } catch (_) { /* Cross-origin navigation is never tracked. */ }
+  }
   function navigate(state) {
     if (pending && pending.url.href!==state.url.href) superseded.add(pending.url.href);
     superseded.delete(state.url.href);
     pending=state;
-    if (frameUrl()===state.url.href) { pending=null; return; }
+    if (frameUrl()===state.url.href) {
+      pending=null;observeDocument();reveal(state);return;
+    }
     // The outer entry owns history. assign()/src would add joint iframe entries.
     frame.contentWindow.location.replace(state.url.href);
   }
@@ -115,15 +145,8 @@
       superseded.delete(loaded);navigate(current);return;
     }
     pending=null;
-    try {
-      const doc=frame.contentDocument;
-      if (approved.has(frameUrl()) && doc && !observedDocuments.has(doc)) {
-        doc.addEventListener('click',ev => click(ev,true));observedDocuments.add(doc);
-        frame.contentWindow.addEventListener('hashchange',() => {
-          if (pending && frameUrl()===pending.url.href) pending=null;
-        });
-      }
-    } catch (_) { /* Cross-origin navigation is never tracked. */ }
+    observeDocument();
+    if (loaded===current.url.href) reveal(current);
   });
   sidebar.addEventListener('click',ev => click(ev));
   function filter() {
@@ -140,6 +163,7 @@
     search.value='';filter();search.focus();
   });
   window.addEventListener('popstate',restore);
+  window.addEventListener('pageshow',restore);
   const initial=targetFromUrl(), canonical=canonicalUrl(initial);
   if (canonical.href!==location.href)
     history.replaceState({package:initial.item.name, declaration:initial.declaration},'',canonical);
