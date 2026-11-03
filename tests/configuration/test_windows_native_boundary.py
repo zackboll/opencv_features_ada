@@ -862,6 +862,32 @@ class BoundaryPolicyTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 check_windows_boundary(text.replace('    runs-on:', f'    {option}\n    runs-on:'))
 
+    def test_diagnostics_upload_only_after_qualification_starts(self):
+        # CI-020: an earlier failure must not add a misleading "no files"
+        # error, but a started campaign without reports must still fail.
+        text = (ROOT / '.github/workflows/windows-post-merge.yml').read_text()
+        upload = text.index('name: Preserve Windows native-boundary diagnostics')
+        native = text.index('name: Qualify Windows production and fault native boundaries')
+        self.assertLess(native, upload)
+        started = ("if: ${{ always() && contains(fromJSON('[\"success\",\"failure\","
+                   "\"cancelled\"]'), steps.native-boundary.outcome) }}")
+        self.assertIn(started, text[upload:])
+        before, after = text[:upload], text[upload:]
+        for mutated in (
+                before + after.replace(started, 'if: always()', 1),
+                before + after.replace(started, 'if: false', 1),
+                before + after.replace(started, started.replace('native-boundary', 'other'), 1),
+                before + after.replace('if-no-files-found: error', 'if-no-files-found: ignore', 1),
+                before + after.replace('if-no-files-found: error', 'if-no-files-found: warn', 1),
+                before + after.replace('uses: actions/upload-artifact@v4',
+                                       'continue-on-error: true\n        '
+                                       'uses: actions/upload-artifact@v4', 1),
+                text.replace('        id: native-boundary\n', ''),
+                text.replace('id: native-boundary', 'id: other')):
+            with self.subTest(mutated=mutated[upload - 200:upload + 400]), \
+                    self.assertRaises(ValueError):
+                check_windows_boundary(mutated)
+
     def test_release_checkout_is_independent_and_pinned(self):
         script = (ROOT / 'scripts/qualify_windows_release.sh').read_text()
         for token in ('git clone --no-local --no-checkout',

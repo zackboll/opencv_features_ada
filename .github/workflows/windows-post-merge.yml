@@ -52,11 +52,14 @@ jobs:
           FEATURES_REAL_ALIRE_TEST: "1"
         run: alr -n exec -- python -m unittest discover -s tests/configuration -p test_alire_environment_real.py -v
       - name: Qualify Windows production and fault native boundaries
+        id: native-boundary
         run: sh scripts/run_windows_native_boundary.sh . obj/windows-native-boundary
       - name: Qualify immutable 0.1.0 release native boundaries
         run: sh scripts/qualify_windows_release.sh obj/windows-release-boundary
       - name: Preserve Windows native-boundary diagnostics
-        if: always()
+        # Upload whenever qualification started; a missing report is then an
+        # error. If an earlier step failed, nothing ran and nothing is uploaded.
+        if: ${{ always() && contains(fromJSON('["success","failure","cancelled"]'), steps.native-boundary.outcome) }}
         uses: actions/upload-artifact@v4
         with:
           name: windows-native-boundary-${{ github.sha }}

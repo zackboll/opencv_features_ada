@@ -1,5 +1,14 @@
 # Features binding coverage
 
+FEATURES-CI-020 adds four configuration regressions: **141 configuration tests**
+with the real-Alire opt-in enabled (**140 pass / one skip** without it).
+Three always-run tests pin the native representation of the real-Alire fixture's
+`cache.dir`/`msys2.install_dir`. A forward-slash Windows cache path made Alire
+2.1.1/Den reject the build sync. One test pins the Windows diagnostics upload so
+it runs only after native qualification starts and still fails without
+reports. The real-Alire test also asserts that the selected Core build is in the
+disposable cache. Production API/ABI, manifests and AUnit registrations are unchanged.
+
 FEATURES-CI-019 adds eight environment regressions: **137 configuration tests**
 with the real-Alire opt-in enabled (**136 pass / one skip** without it).
 The 50 Windows harness/policy fixtures now include inherited prefixes without

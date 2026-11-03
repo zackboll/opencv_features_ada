@@ -1,5 +1,80 @@
 # FEATURES-CI-016 — Windows native-boundary qualification
 
+## FEATURES-CI-020 — real-Alire fixture path representation
+
+Starting worktree was clean at main `ef1e26e6557bf089cbd9c82e7a6879964f96ad0e`,
+tree `1402655f104b5620e3ba39610eca6e0969389f99` (latest main; no newer run).
+Failed Windows main run
+<https://github.com/zackboll/opencv_features_ada/actions/runs/40433424002>
+(job 121956325164): 67/67 AUnit passed, then the CI-019 real-Alire regression
+failed in `alr build --stop-after=pre-build` with only Alire's generic
+`Could not sync build dir from C:/Users/RUNNER~1/.../cache\releases\...`.
+Native qualification never started; the `if: always()` upload then added a
+secondary "No files were found" error. Previous failure (CI-018):
+<https://github.com/zackboll/opencv_features_ada/actions/runs/40261253660>.
+
+### Root cause: fixture defect, not production configuration
+
+The fixture wrote `cache.dir` with `Path.as_posix()`. Alire 2.1.1 appends native
+components, so the vault path became mixed: `C:/Users/.../cache\releases\...`.
+Build sync is `Den.Filesystem.Copy` (Den pinned by Alire 2.1.1 at
+`32225955994267799495262f7cac479b6cd22fd3`; alr's Den is compiled with
+`-gnata`). Copying a file into an existing directory calls `Den.Name`, and on
+Windows Den splits only on `\`. The first part therefore became
+`C:/Users/.../cache\`, which is neither separator-free nor a root, violating the
+`Path_Parts` predicate and `Parts` postcondition. `Alire.Builds.Sync` catches
+every exception and reports only the generic sync error. Vault deployment
+copies each file to a not-yet-existing target and never calls `Name`; this
+matches the log, where deployment succeeded and sync failed.
+
+Evidence, without guessing:
+
+- Pinned Alire 2.1.1 (`alire-builds.adb`, `alire-cache.adb`) and Den sources
+  read directly. `cache.dir` is used verbatim; Den does not translate `/`.
+- Pinned Den `Parts`/`Name` compiled with `-gnata`, with Windows separator and
+  GNAT's Windows drive-letter absolute-path rule substituted (a simulation, not
+  Windows execution): the CI path raised `ASSERTION_ERROR: Dynamic_Predicate
+  failed`, with **and** without spaces; native `C:\...\cache\releases\...`
+  succeeded with **and** without spaces. Spaces are not the cause.
+- MSYS2/native PATH conversion, `file:` origin handling, index metadata and
+  inherited Alire exports are not involved: the `file:` deployment already
+  succeeded in CI, and sync reads only the cache-derived vault path.
+- `alr -d` prints the hidden exception and traceback (verified locally with an
+  induced Den copy failure); plain `alr` printed only the generic sync error.
+
+### Correction
+
+- The fixture emits `cache.dir` and `msys2.install_dir` with `str(path)` (native
+  representation, JSON/TOML-escaped). The disposable path keeps its spaces.
+  `msys2.install_dir` is changed for consistency; it was not the observed failure.
+- Fixture `alr` calls use `-d`, so a future failure prints the underlying
+  exception. Output is added only on failure.
+- The real test also asserts that the selected Core prefix lies under the
+  disposable cache's `builds` directory. All CI-019 assertions remain: build
+  hash, dependency hash, inherited prefixes, nested-environment rejection and
+  the nested child not running. Real Alire is still used, with no mocks or skips.
+- Three always-run tests pin the settings representation: a Windows path with
+  spaces stays native and separator-consistent, the forward-slash form is never
+  emitted, and POSIX/optional-MSYS2 output is unchanged.
+- The diagnostics upload runs only when native qualification started
+  (`steps.native-boundary.outcome` is success/failure/cancelled), with
+  `if-no-files-found: error`. A started campaign without reports still fails.
+  `check_windows_boundary.py` pins this condition, and the exact unconditional
+  qualification steps, now including `id: native-boundary`.
+
+Trigger routing, native-boundary/release scripts, markers, provenance gates,
+immutable release identity and production Ada/C++/ABI are unchanged.
+
+### Local validation (Linux; not Windows qualification)
+
+Alire 2.1.1 (official Linux binary), GNAT 13.3.0 (distribution), Python 3.13.18.
+**141/141 configuration tests** with `FEATURES_REAL_ALIRE_TEST=1` (140 pass / one
+skip without it); repository, profile, shell syntax and whitespace checks: PASS.
+No Windows runner is available before merge. The main-only Windows workflow
+must pass every stage before this incident is resolved: real-Alire regression,
+both native markers, immutable-release qualification, external shim and
+installed/relocated consumers.
+
 ## FEATURES-CI-019 — one execution environment
 
 ### Investigation recorded before implementation
